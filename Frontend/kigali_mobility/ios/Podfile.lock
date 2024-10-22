@@ -25,8 +25,6 @@ PODS:
   - GoogleUtilities/Privacy (8.0.2)
   - in_app_review (0.2.0):
     - Flutter
-  - lodash_flutter (0.0.1):
-    - Flutter
   - package_info_plus (0.4.5):
     - Flutter
   - path_provider_foundation (0.0.1):
@@ -48,7 +46,6 @@ DEPENDENCIES:
   - Flutter (from `Flutter`)
   - geolocator_apple (from `.symlinks/plugins/geolocator_apple/ios`)
   - in_app_review (from `.symlinks/plugins/in_app_review/ios`)
-  - lodash_flutter (from `.symlinks/plugins/lodash_flutter/ios`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - rive_common (from `.symlinks/plugins/rive_common/ios`)
@@ -74,8 +71,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/geolocator_apple/ios"
   in_app_review:
     :path: ".symlinks/plugins/in_app_review/ios"
-  lodash_flutter:
-    :path: ".symlinks/plugins/lodash_flutter/ios"
   package_info_plus:
     :path: ".symlinks/plugins/package_info_plus/ios"
   path_provider_foundation:
@@ -99,7 +94,6 @@ SPEC CHECKSUMS:
   geolocator_apple: 6cbaf322953988e009e5ecb481f07efece75c450
   GoogleUtilities: 26a3abef001b6533cf678d3eb38fd3f614b7872d
   in_app_review: 318597b3a06c22bb46dc454d56828c85f444f99d
-  lodash_flutter: 67703deebcb443e5f1974da2b42767572159a40f
   package_info_plus: c0502532a26c7662a62a356cebe2692ec5fe4ec4
   path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
   rive_common: cbbac3192af00d7341f19dae2f26298e9e37d99e
