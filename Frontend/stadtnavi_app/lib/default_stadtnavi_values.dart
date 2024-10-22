@@ -14,7 +14,6 @@ import 'package:stadtnavi_core/base/pages/home/cubits/payload_data_plan/setting_
 import 'package:stadtnavi_core/base/pages/home/home_page.dart';
 import 'package:stadtnavi_core/base/pages/home/widgets/trufi_map_route/trufi_map_route.dart';
 import 'package:stadtnavi_core/base/pages/parking_information_page/parking_information_cubit/parking_information_cubit.dart';
-import 'package:stadtnavi_core/base/pages/parking_information_page/parking_information_page.dart';
 import 'package:stadtnavi_core/base/pages/saved_places/saved_places.dart';
 import 'package:stadtnavi_core/base/translations/stadtnavi_base_localizations.dart';
 import 'package:stadtnavi_core/configuration/drawer/menu_items_stadtnavi.dart';
@@ -182,11 +181,6 @@ abstract class DefaultStadtnaviValues {
                     cityName: cityName,
                     urlRepository: urlRepository,
                     drawerBuilder: generateDrawer(AboutPage.route),
-                  ),
-                ),
-            ParkingInformationPage.route: (route) => StadtnaviNoAnimationPage(
-                  child: ParkingInformationPage(
-                    drawerBuilder: generateDrawer(ParkingInformationPage.route),
                   ),
                 ),
             if (extraRoutes != null) ...extraRoutes(generateDrawer),
