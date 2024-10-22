@@ -1,6 +1,6 @@
 {
-    "name": "mobility",
-    "short_name": "mobility",
+    "name": "kigali_mobility",
+    "short_name": "kigali_mobility",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
