@@ -1,21 +1,14 @@
-import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import 'package:hive/hive.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:mobility/branding_herrenberg.dart';
-import 'package:mobility/static_layer.dart';
 import 'package:stadtnavi_core/base/custom_layers/map_layers/map_leyers.dart';
-import 'package:stadtnavi_core/base/pages/home/widgets/maps/cache_map_tiles.dart';
 import 'package:trufi_core/base/blocs/theme/theme_cubit.dart';
 import 'package:trufi_core/base/models/enums/transport_mode.dart';
-import 'package:trufi_core/base/models/trufi_place.dart';
 import 'package:trufi_core/base/utils/certificates_letsencrypt_android.dart';
 import 'package:trufi_core/base/widgets/drawer/menu/social_media_item.dart';
-import 'package:trufi_core/base/blocs/map_tile_provider/map_tile_provider.dart';
 
 import 'package:stadtnavi_core/consts.dart';
 import 'package:stadtnavi_core/stadtnavi_core.dart';
@@ -50,7 +43,10 @@ void main() async {
         "focus.point.lat": "-1.96617",
         "focus.point.lon": "30.06409",
       },
-      layersContainer: customLayersKigali,
+      layersContainer: const [],
+      mapTileProviders: [
+        MapLayer(MapLayerIds.osmDefault),
+      ],
       urlSocialMedia: const UrlSocialMedia(
         urlFacebook: 'https://www.facebook.com/TrufiAssoc/',
         urlInstagram: 'https://www.instagram.com/trufiassociation/',
