@@ -1,4 +1,4 @@
-# mobility
+# kigali_mobility
 
 A new Flutter project.
 
