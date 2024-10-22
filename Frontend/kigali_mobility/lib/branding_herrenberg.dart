@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 final brandingKigaliMobility = ThemeData.from(
+  useMaterial3: false,
   colorScheme: ColorScheme.fromSwatch(
     primarySwatch: const MaterialColor(
       0xfffecc01,
