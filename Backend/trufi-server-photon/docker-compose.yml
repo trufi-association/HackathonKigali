@@ -1,0 +1,16 @@
+version: '3'
+services:
+  photon:
+    build:
+      context: .
+    volumes:
+    - ./photon_data:/app/photon_data
+    restart: unless-stopped
+    # ports:
+    #   - 2322:2322
+    # command: tail -F anything
+   
+   
+networks:
+  default:
+    name: trufi-server
