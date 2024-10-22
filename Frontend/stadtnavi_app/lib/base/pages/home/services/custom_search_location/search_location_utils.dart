@@ -1,5 +1,4 @@
 import 'dart:math';
-import 'package:lodash_flutter/lodash_flutter.dart';
 import 'package:equatable/equatable.dart';
 
 class SearchData extends Equatable {
@@ -196,10 +195,12 @@ List<Map<String, dynamic>> sortSearchResults(
     }
   }).toList();
 
-  return (LodashFlutter.sortedBy(resultsWithWeight, 'numSort')
-          as List<Map<String, dynamic>>)
-      .reversed
-      .toList();
+  resultsWithWeight.sort((a, b) => a['numSort'].compareTo(b['numSort']));
+
+// Reverse the list
+  List<Map<String, dynamic>> sortedReversed =
+      resultsWithWeight.reversed.toList();
+  return sortedReversed;
 }
 
 double getLayerRank(LayerType layer, dynamic source) {

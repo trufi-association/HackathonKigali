@@ -1,10 +1,9 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:kigali_mobility/branding_herrenberg.dart';
+import 'package:kigali_mobility/kigali_map_leyers.dart';
 import 'package:kigali_mobility/kigali_online_search_location.dart';
 
 import 'package:latlong2/latlong.dart';
-import 'package:stadtnavi_core/base/custom_layers/map_layers/map_leyers.dart';
 import 'package:trufi_core/base/blocs/theme/theme_cubit.dart';
 import 'package:trufi_core/base/models/enums/transport_mode.dart';
 import 'package:trufi_core/base/utils/certificates_letsencrypt_android.dart';
@@ -40,7 +39,7 @@ void main() async {
       onlineSearchLocation: const KigaliOnlineSearchLocation(),
       layersContainer: const [],
       mapTileProviders: [
-        MapLayer(MapLayerIds.osmDefault),
+        KigaliMapLayer(KigaliMapLayerIds.osmDefault),
       ],
       urlSocialMedia: const UrlSocialMedia(
         urlFacebook: 'https://www.facebook.com/TrufiAssoc/',

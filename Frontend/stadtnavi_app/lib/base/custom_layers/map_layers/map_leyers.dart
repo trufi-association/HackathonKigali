@@ -20,7 +20,6 @@ enum MapLayerIds {
   satellite,
   bike,
   terrain,
-  osmDefault,
 }
 
 extension LayerIdsToString on MapLayerIds {
@@ -30,7 +29,6 @@ extension LayerIdsToString on MapLayerIds {
       MapLayerIds.satellite: "Satellite",
       MapLayerIds.bike: "Bike",
       MapLayerIds.terrain: "Terrain",
-      MapLayerIds.osmDefault: "OSMDefaultMapTile",
     };
 
     return enumStrings[this]!;
@@ -42,7 +40,6 @@ extension LayerIdsToString on MapLayerIds {
       MapLayerIds.satellite: "Satellit",
       MapLayerIds.bike: "Fahrrad",
       MapLayerIds.terrain: "Fahrrad",
-      MapLayerIds.osmDefault: "OSM Default Map Tile",
     };
 
     return enumStrings[this]!;
@@ -54,7 +51,6 @@ extension LayerIdsToString on MapLayerIds {
       MapLayerIds.satellite: "Satellite",
       MapLayerIds.bike: "Bike",
       MapLayerIds.terrain: "Bike",
-      MapLayerIds.osmDefault: "OSM Default Map Tile",
     };
 
     return enumStrings[this]!;
@@ -65,7 +61,6 @@ Map<MapLayerIds, String> layerImage = {
   MapLayerIds.streets: "assets/images/maptype-streets.png",
   MapLayerIds.satellite: "assets/images/maptype-satellite.png",
   MapLayerIds.bike: "assets/images/maptype-bicycle.png",
-  MapLayerIds.osmDefault: "assets/images/OpenMapTiles.png",
 };
 
 class MapLayer extends MapTileProvider {
@@ -141,15 +136,6 @@ class MapLayer extends MapTileProvider {
             subdomains: const ["a", "b", "c"],
           ),
         ];
-    case MapLayerIds.osmDefault:
-      return [
-        TileLayer(
-          urlTemplate:
-              "https://kigali.trufi.dev/static-maps/trufi-liberty/{z}/{x}/{y}@2x.jpg",
-          userAgentPackageName: "Trufi-Kigali-Demo",
-          tileProvider: CustomTileProvider(context: context),
-        ),
-      ];
       default:
         return [];
     }

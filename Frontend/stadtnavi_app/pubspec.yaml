@@ -24,7 +24,6 @@ dependencies:
   firebase_core: ^3.3.0
   back_button_interceptor: ^7.0.3
   flutter_map_marker_cluster_2: ^1.0.4
-  lodash_flutter: ^0.0.3
   vector_tile: ^2.0.0
   rive: ^0.13.4
 
