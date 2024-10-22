@@ -65,7 +65,7 @@ Map<MapLayerIds, String> layerImage = {
   MapLayerIds.streets: "assets/images/maptype-streets.png",
   MapLayerIds.satellite: "assets/images/maptype-satellite.png",
   MapLayerIds.bike: "assets/images/maptype-bicycle.png",
-  MapLayerIds.terrain: "assets/images/maptype-terrain.png",
+  MapLayerIds.osmDefault: "assets/images/OpenMapTiles.png",
 };
 
 class MapLayer extends MapTileProvider {

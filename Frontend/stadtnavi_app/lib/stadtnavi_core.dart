@@ -14,6 +14,7 @@ import 'package:stadtnavi_core/stadtnavi_screen_helper.dart';
 import 'package:trufi_core/base/blocs/map_configuration/map_configuration_cubit.dart';
 import 'package:trufi_core/base/blocs/map_tile_provider/map_tile_provider.dart';
 import 'package:trufi_core/base/blocs/theme/theme_cubit.dart';
+import 'package:trufi_core/base/pages/saved_places/repository/search_location_repository.dart';
 import 'package:trufi_core/base/widgets/drawer/menu/menu_item.dart';
 import 'package:trufi_core/base/widgets/drawer/menu/social_media_item.dart';
 import 'package:trufi_core/trufi_core.dart';
@@ -29,6 +30,7 @@ class StadtnaviApp extends StatelessWidget {
   final String urlRepository;
   final String urlImpressum;
   final Uri reportDefectsUri;
+  final SearchLocationRepository? onlineSearchLocation;
   final Map<String, dynamic>? searchLocationQueryParameters;
   final LatLng center;
   final double? onlineZoom;
@@ -55,6 +57,7 @@ class StadtnaviApp extends StatelessWidget {
     required this.urlRepository,
     required this.urlImpressum,
     required this.reportDefectsUri,
+    this.onlineSearchLocation,
     this.searchLocationQueryParameters,
     required this.center,
     this.onlineZoom,
@@ -83,9 +86,10 @@ class StadtnaviApp extends StatelessWidget {
           markersConfiguration: const CustomMarkerConfiguration(),
           mapAttributionBuilder: stadtNaviAttributionBuilder,
         ),
-        searchLocationRepository: OnlineSearchLocation(
-          queryParameters: searchLocationQueryParameters,
-        ),
+        searchLocationRepository: onlineSearchLocation ??
+            OnlineSearchLocation(
+              queryParameters: searchLocationQueryParameters,
+            ),
         layersContainer: layersContainer,
         mapTileProviders: mapTileProviders ??
             [
