@@ -17,9 +17,9 @@ void main() async {
   await CertificatedLetsencryptAndroid.workAroundCertificated();
   await initHiveForFlutter();
   // Configure endpoints
-  // ApiConfig().openTripPlannerUrl = "";
-  // ApiConfig().searchPhotonEndpoint = "";
-  // ApiConfig().reverseGeodecodingPhotonEndpoint = "";
+  // ApiConfig().openTripPlannerUrl = "http://<local/remote-ip>/otp/index/graphql";
+  // ApiConfig().searchPhotonEndpoint = "http://<local/remote-ip>/photon/api/";
+  // ApiConfig().reverseGeodecodingPhotonEndpoint = "http://<local/remote-ip>/photon/reverse/";
   runApp(
     StadtnaviApp(
       appName: 'Kigali Mobility',

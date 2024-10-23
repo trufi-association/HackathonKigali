@@ -5,14 +5,14 @@ services:
       context: ./Dockerfiles/$otpversion
       dockerfile: Dockerfile
     volumes:
-    - ./data:/app/data
+      - ./data:/app/data
     restart: unless-stopped
-    ports:
-      - 8080:8080
+    # ports:
+    #   - 8080:8080
     # environment:
     #   - JAVA_MAX_MEMORY=-Xmx8G
     # command: tail -F anything
-    
+
 networks:
   default:
     name: trufi-server

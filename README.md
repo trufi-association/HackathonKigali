@@ -18,17 +18,28 @@ Once your environment is ready, clone the project repository by running the foll
 git clone https://github.com/trufi-association/HackathonKigali.git
 ```
 
-## Setting Up Local Services
 
-After cloning the repository, configure the required local services like Photon, and OTP. Follow the specific instructions for each service to set them up locally.
+## Optional: Running Backend Services Locally
 
-### Open Trip Planner(OTP) Service
+If you want to run the backend services (Photon and OTP) locally using Docker, you can use Docker Compose.
+### Run OTP
+[OTP Documentation](https://docs.opentripplanner.org/en/v2.4.0/)
+   ```bash
+   cd Backend/trufi-server-otp
+   docker compose compose up -d
+   ```
 
-Details Photon service
+### Run Photon
+   ```bash
+   cd Backend/trufi-server-photon
+   docker compose compose up -d
+   ```
+### Run NGINX
 
-### Photon Service
-
-Details Photon service
+   ```bash
+   cd Backend/
+   docker compose compose up -d
+   ```
 
 
 ## Running the Application
@@ -77,3 +88,4 @@ By default, the application is configured to use the **OTP-Kigali** servers. How
 3. Uncomment the lines and replace the URLs with your own local server endpoints.
 
 By doing this, your application will now interact with your local services for Photon and OTP instead of the default OTP-Kigali servers.
+
