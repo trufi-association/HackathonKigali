@@ -3,15 +3,14 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 import 'package:stadtnavi_core/base/pages/home/services/custom_search_location/location_model.dart';
+import 'package:stadtnavi_core/consts.dart';
 
 import 'package:trufi_core/base/models/trufi_place.dart';
 import 'package:trufi_core/base/pages/home/services/exception/fetch_online_exception.dart';
 import 'package:trufi_core/base/pages/saved_places/repository/search_location_repository.dart';
 
-
 class KigaliOnlineSearchLocation implements SearchLocationRepository {
-  static const String searchEndpoint =
-      'https://kigali.trufi.dev/photon/api/';
+  static const String searchEndpoint = 'https://kigali.trufi.dev/photon/api/';
 
   final Map<String, dynamic>? queryParameters;
 
@@ -27,12 +26,9 @@ class KigaliOnlineSearchLocation implements SearchLocationRepository {
   }) async {
     final extraQueryParameters = queryParameters ?? {};
     final Uri request = Uri.parse(
-      searchEndpoint,
-    ).replace(queryParameters: {
-      "q": query,
-      "lang": lang,
-      ...extraQueryParameters
-    });
+      ApiConfig().searchPhotonEndpoint,
+    ).replace(
+        queryParameters: {"q": query, "lang": lang, ...extraQueryParameters});
     final response = await _fetchRequest(request);
     if (response.statusCode != 200) {
       throw "Not found locations";
@@ -60,7 +56,7 @@ class KigaliOnlineSearchLocation implements SearchLocationRepository {
   Future<LocationDetail> reverseGeodecoding(LatLng location) async {
     final response = await http.get(
       Uri.parse(
-        "https://kigali.trufi.dev/photon/reverse/?lat=${location.latitude}&lon=${location.longitude}",
+        "${ApiConfig().reverseGeodecodingPhotonEndpoint}?lat=${location.latitude}&lon=${location.longitude}",
       ),
       headers: {},
     );

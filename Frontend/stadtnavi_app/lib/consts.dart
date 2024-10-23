@@ -19,7 +19,10 @@ class ApiConfig {
     }
   }
 
-  String get openTripPlannerUrl =>
-      "https://$baseDomain/otp/index/graphql";
-  String get faresURL => "https://$baseDomain/fares";
+  String openTripPlannerUrl = "https://kigali.trufi.dev/otp/index/graphql";
+  String searchPhotonEndpoint = "https://kigali.trufi.dev/photon/api/";
+  String reverseGeodecodingPhotonEndpoint =
+      "https://kigali.trufi.dev/photon/reverse/";
+  String mapEndpoint = "https://kigali.trufi.dev/static-maps/trufi-liberty/";
+  String faresURL = "https://kigali.trufi.dev/fares";
 }
