@@ -89,3 +89,6 @@ By default, the application is configured to use the **OTP-Kigali** servers. How
 
 By doing this, your application will now interact with your local services for Photon and OTP instead of the default OTP-Kigali servers.
 
+## Logs from Cochabamba-Bolivia
+
+(Cochabamba-Bolivia-logs)[https://drive.google.com/drive/folders/1wjXc4zviwOaw7gVwGlQyeM3eXeUiigT2?usp=sharing]
