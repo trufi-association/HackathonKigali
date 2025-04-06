@@ -1,0 +1,2 @@
+feed_publisher_name,feed_id,feed_publisher_url,feed_lang,feed_start_date,feed_end_date,feed_version,default_lang,feed_contact_email,feed_contact_url
+RURA,RURA1,http://www.rura.rw,en,20241101,20251231,0.9,en,hello@enrouteq.com,https://www.enrouteq.com/

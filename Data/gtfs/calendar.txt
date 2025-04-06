@@ -1,0 +1,3 @@
+service_id,monday,tuesday,wednesday,thursday,friday,saturday,sunday,start_date,end_date
+mo-su,1,1,1,1,1,1,1,20241101,20251231
+wd,1,1,1,1,1,0,0,20241101,20241231
