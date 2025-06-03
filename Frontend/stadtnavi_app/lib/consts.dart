@@ -19,7 +19,7 @@ class ApiConfig {
     }
   }
 
-  String openTripPlannerUrl = "https://kigali.trufi.dev/otp/index/graphql";
+  String openTripPlannerUrl = "https://otp.kigali.trufi.dev/otp/transmodel/v3";
   String searchPhotonEndpoint = "https://kigali.trufi.dev/photon/api/";
   String reverseGeodecodingPhotonEndpoint =
       "https://kigali.trufi.dev/photon/reverse/";

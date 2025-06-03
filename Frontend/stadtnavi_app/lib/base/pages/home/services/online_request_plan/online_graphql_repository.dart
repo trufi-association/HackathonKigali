@@ -3,17 +3,17 @@ import 'package:stadtnavi_core/base/models/othermodel/enums/mode.dart';
 import 'package:stadtnavi_core/base/models/othermodel/plan.dart';
 import 'package:stadtnavi_core/base/models/plan_entity.dart';
 import 'package:stadtnavi_core/base/pages/home/cubits/payload_data_plan/setting_fetch_cubit.dart';
-import 'package:stadtnavi_core/base/pages/home/services/online_request_plan/graphql_plan_repository.dart';
+import 'package:stadtnavi_core/base/pages/home/services/online_request_plan/otp_2_7/graphql_plan_data_source.dart';
 import 'package:trufi_core/base/models/trufi_place.dart';
 import '../../../../models/othermodel/modes_transport.dart';
 
 class OnlineGraphQLRepository {
   final String graphQLEndPoint;
-  final GraphQLPlanRepository _graphQLPlanRepository;
+  final GraphQLPlanDataSource _graphQLPlanRepository;
 
   OnlineGraphQLRepository({
     required this.graphQLEndPoint,
-  }) : _graphQLPlanRepository = GraphQLPlanRepository(graphQLEndPoint);
+  }) : _graphQLPlanRepository = GraphQLPlanDataSource(graphQLEndPoint);
 
   Future<PlanEntity> fetchAdvancedPlan({
     required TrufiLocation from,
@@ -21,7 +21,7 @@ class OnlineGraphQLRepository {
     required SettingFetchState advancedOptions,
     String? localeName,
   }) async {
-    Plan planData = await _graphQLPlanRepository.fetchPlanAdvanced(
+    PlanEntity planData = await _graphQLPlanRepository.fetchPlanAdvanced(
       fromLocation: from,
       toLocation: to,
       advancedOptions: advancedOptions,
@@ -45,7 +45,7 @@ class OnlineGraphQLRepository {
         defaultFecth: true,
       );
     }
-    PlanEntity planEntity = planData.toPlan();
+    PlanEntity planEntity = planData.copyWith();
     if (!planEntity.isOnlyWalk) {
       planEntity = planData
           .copyWith(
@@ -55,8 +55,7 @@ class OnlineGraphQLRepository {
                       .every((leg) => leg.mode == Mode.walk),
                 )
                 .toList(),
-          )
-          .toPlan();
+          );
     }
 
     return planEntity.copyWith(
@@ -74,7 +73,7 @@ class OnlineGraphQLRepository {
     required SettingFetchState advancedOptions,
     String? localeName,
   }) async {
-    Plan planData = await _graphQLPlanRepository.fetchPlanAdvanced(
+    PlanEntity planData = await _graphQLPlanRepository.fetchPlanAdvanced(
       fromLocation: from,
       toLocation: to,
       advancedOptions: advancedOptions,
@@ -82,7 +81,7 @@ class OnlineGraphQLRepository {
       numItineraries: 5,
     );
     final mainFetchIsEmpty = planData.itineraries?.isEmpty ?? true;
-    PlanEntity planEntity = planData.toPlan();
+    PlanEntity planEntity = planData.copyWith();
 
     return planEntity.copyWith(
       planInfoBox: planEntity.isOnlyWalk
