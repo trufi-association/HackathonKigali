@@ -41,6 +41,7 @@ class GraphQLPlanDataSource extends IPlanRepository {
     int numItineraries = 10,
     String? locale,
     bool defaultFecth = false,
+    bool useDefaultModes = false,
   }) async {
     final transportsMode =
         defaultFecth ? defaultTransportModes : advancedOptions.transportModes;

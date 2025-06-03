@@ -2769,7 +2769,8 @@ class TripPattern {
       walkDistance: streetDistance ?? 0,
       walkTime: Duration(seconds: walkTime ?? 0),
       // TODO review this value for stadtnavi funcionality
-      arrivedAtDestinationWithRentedBicycle: false,
+      arrivedAtDestinationWithRentedBicycle: false, 
+      emissionsPerPerson: null,
     );
   }
 }

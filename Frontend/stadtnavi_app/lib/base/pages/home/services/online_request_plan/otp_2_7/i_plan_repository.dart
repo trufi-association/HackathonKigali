@@ -13,6 +13,7 @@ abstract class IPlanRepository {
     int numItineraries,
     String? locale,
     bool defaultFecth,
+    bool useDefaultModes = false,
   });
 
   /// Fetches summary modes including walk, bike, car, and park-ride options.
