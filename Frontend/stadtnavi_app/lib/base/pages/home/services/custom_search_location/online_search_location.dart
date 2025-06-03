@@ -12,7 +12,7 @@ import 'location_model.dart';
 
 class OnlineSearchLocation implements SearchLocationRepository {
   static const String searchEndpoint =
-      'https://photon.stadtnavi.eu/pelias/v1/search';
+      'https://photon-eu.stadtnavi.eu/pelias/v1/search';
 
   final Map<String, dynamic>? queryParameters;
 
@@ -73,10 +73,13 @@ class OnlineSearchLocation implements SearchLocationRepository {
   }
 
   @override
-  Future<LocationDetail> reverseGeodecoding(LatLng location) async {
+  Future<LocationDetail> reverseGeodecoding(
+    LatLng location, {
+    String? lang = "en",
+  }) async {
     final response = await http.get(
       Uri.parse(
-        "https://photon.stadtnavi.eu/pelias/v1/reverse?point.lat=${location.latitude}&point.lon=${location.longitude}&boundary.circle.radius=0.1&lang=en&size=1&layers=address&zones=1",
+        "https://photon-eu.stadtnavi.eu/pelias/v1/reverse?point.lat=${location.latitude}&point.lon=${location.longitude}&boundary.circle.radius=0.1&lang=$lang&size=1&layers=address&zones=1",
       ),
       headers: {},
     );
@@ -84,21 +87,21 @@ class OnlineSearchLocation implements SearchLocationRepository {
     final features = body["features"] as List;
     final feature = features.first;
     final properties = feature["properties"];
-    final String? street = properties["street"]?.toString();
-    final String? houseNumbre = properties["housenumber"]?.toString();
-    final String? postalcode = properties["postalcode"]?.toString();
-    final String? locality = properties["locality"]?.toString();
+    final String? street = properties["street"]?.toString() ?? "";
+    final String? houseNumbre = properties["housenumber"]?.toString() ?? "";
+    final String? postalcode = properties["postalcode"]?.toString() ?? "";
+    final String? locality = properties["locality"]?.toString() ?? "";
     String streetHouse = "";
-    if (street != null) {
-      if (houseNumbre != null) {
+    if (street != '') {
+      if (houseNumbre != '') {
         streetHouse = "$street $houseNumbre,";
       } else {
         streetHouse = "$street,";
       }
     }
     return LocationDetail(
-      properties?["name"]?.toString() ?? 'Not name',
-      "$streetHouse $postalcode $locality",
+      properties?["name"]?.toString().trim() ?? 'Not name',
+      "$streetHouse $postalcode $locality".trim(),
       location,
     );
   }

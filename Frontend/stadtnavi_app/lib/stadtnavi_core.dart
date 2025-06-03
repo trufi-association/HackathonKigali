@@ -6,6 +6,8 @@ import 'package:stadtnavi_core/base/custom_layers/custom_layer.dart';
 import 'package:stadtnavi_core/base/custom_layers/map_layers/map_leyers.dart';
 import 'package:stadtnavi_core/base/pages/home/services/custom_search_location/online_search_location.dart';
 import 'package:stadtnavi_core/configuration/attribution_map.dart';
+import 'package:stadtnavi_core/configuration/config_default/config_default.dart';
+import 'package:stadtnavi_core/configuration/config_default/config_default/city_bike_utils.dart';
 import 'package:stadtnavi_core/configuration/custom_async_executor.dart';
 import 'package:stadtnavi_core/configuration/custom_marker_configuration.dart';
 import 'package:stadtnavi_core/default_stadtnavi_values.dart';
@@ -34,6 +36,7 @@ class StadtnaviApp extends StatelessWidget {
   final Map<String, dynamic>? searchLocationQueryParameters;
   final LatLng center;
   final double? onlineZoom;
+  final String? co2EmmissionUrl;
   final List<CustomLayerContainer> layersContainer;
   final UrlSocialMedia urlSocialMedia;
   final TrufiBaseTheme? trufiBaseTheme;
@@ -44,6 +47,7 @@ class StadtnaviApp extends StatelessWidget {
   final RouterBuilder? extraRoutes;
   final List<BlocProvider>? extraBlocs;
   final WidgetBuilder? extraFloatingMapButtons;
+  final List<String> alertsFeedIds;
 
   final AppLifecycleReactorHandler? appLifecycleReactorHandler;
   const StadtnaviApp({
@@ -61,6 +65,7 @@ class StadtnaviApp extends StatelessWidget {
     this.searchLocationQueryParameters,
     required this.center,
     this.onlineZoom,
+    this.co2EmmissionUrl,
     required this.layersContainer,
     required this.urlSocialMedia,
     this.trufiBaseTheme,
@@ -70,10 +75,12 @@ class StadtnaviApp extends StatelessWidget {
     this.extraBlocs,
     this.extraFloatingMapButtons,
     this.appLifecycleReactorHandler,
+    this.alertsFeedIds = const [],
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    CityBikeUtils.assertSharingIsInitialized(ConfigDefault.value);
     return TrufiApp(
       appNameTitle: appNameTitle,
       trufiBaseTheme: trufiBaseTheme,
@@ -82,9 +89,11 @@ class StadtnaviApp extends StatelessWidget {
         otpGraphqlEndpoint: otpGraphqlEndpoint,
         mapConfiguration: MapConfiguration(
           center: center,
+          onlineMaxZoom: 20,
           onlineZoom: onlineZoom ?? 13,
           markersConfiguration: const CustomMarkerConfiguration(),
           mapAttributionBuilder: stadtNaviAttributionBuilder,
+          co2EmmissionUrl: co2EmmissionUrl,
         ),
         searchLocationRepository: onlineSearchLocation ??
             OnlineSearchLocation(
@@ -97,6 +106,7 @@ class StadtnaviApp extends StatelessWidget {
               MapLayer(MapLayerIds.satellite),
               MapLayer(MapLayerIds.bike),
             ],
+        alertsFeedIds: alertsFeedIds,
         extraBlocs: extraBlocs,
       ),
       trufiRouter: TrufiRouter(
@@ -123,5 +133,14 @@ class StadtnaviApp extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+extension IterableExtensions<T> on Iterable<T> {
+  T? firstWhereOrNull(bool Function(T) test) {
+    for (var element in this) {
+      if (test(element)) return element;
+    }
+    return null;
   }
 }

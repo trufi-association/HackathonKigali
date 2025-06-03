@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:stadtnavi_core/base/custom_layers/pbf_layer/parking/parking_feature_model.dart';
 import 'package:stadtnavi_core/base/custom_layers/pbf_layer/parking/parking_icons.dart';
-import 'package:stadtnavi_core/base/custom_layers/pbf_layer/parking/simple_opening_hours.dart';
+import 'package:stadtnavi_core/base/custom_layers/pbf_layer/widgets/opening_time_table.dart';
 import 'package:stadtnavi_core/base/pages/home/widgets/trufi_map_route/custom_location_selector.dart';
 import 'package:stadtnavi_core/base/custom_layers/services/layers_repository.dart';
-import 'package:stadtnavi_core/base/translations/stadtnavi_base_localizations.dart';
 import 'package:trufi_core/base/models/trufi_place.dart';
 import 'package:trufi_core/base/translations/trufi_base_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -97,7 +96,7 @@ class _ParkingStateUpdaterState extends State<ParkingStateUpdater> {
       fetchError = null;
       loading = true;
     });
-    await LayersRepository.fetchPark(widget.parkingFeature.id ?? '')
+    await LayersRepository.fetchPark(widget.parkingFeature.id)
         .then((value) {
       setState(() {
         ParkingFeature tempData = widget.parkingFeature;
@@ -140,30 +139,10 @@ class ParkingMarkerModal extends StatelessWidget {
   Widget build(BuildContext context) {
     final localization = TrufiBaseLocalization.of(context);
     final localeName = localization.localeName;
-    String? spaces;
-    if (parkingFeature.carPlacesCapacity != null) {
-      if (parkingFeature.availabilityCarPlacesCapacity != null &&
-          parkingFeature.availabilityCarPlacesCapacity! <=
-              parkingFeature.carPlacesCapacity!) {
-        spaces = localeName == 'en'
-            ? "${parkingFeature.availabilityCarPlacesCapacity} of ${parkingFeature.carPlacesCapacity} parking spaces available"
-            : "${parkingFeature.availabilityCarPlacesCapacity} von ${parkingFeature.carPlacesCapacity} Stellplätzen verfügbar";
-      } else {
-        spaces =
-            "${parkingFeature.carPlacesCapacity} ${localeName == 'en' ? 'parking spaces' : 'Stellplätze'}";
-      }
-
-      if (parkingFeature.state == "CLOSED") {
-        spaces += " (${localeName == 'en' ? 'closed' : 'Geschlossen'})";
-      }
-    }
-    String? disabledSpaces;
-    if (parkingFeature.totalDisabled != null &&
-        parkingFeature.freeDisabled != null) {
-      disabledSpaces = localeName == 'en'
-          ? "${parkingFeature.freeDisabled} of ${parkingFeature.totalDisabled} wheelchair-accessible parking spaces available"
-          : "${parkingFeature.freeDisabled} von ${parkingFeature.totalDisabled} rollstuhlgerechten Parkplätzen vorhanden";
-    }
+    String? carCapacity = _getCarCapacity(parkingFeature,localeName);
+    String? closed = _getClosed(parkingFeature.state,localeName);
+    String carStatus = "$carCapacity $closed".trim();
+    String? wheelchairCapacity = getWheelchairCapacity(parkingFeature,localeName);
     final isOpenParking = parkingFeature.sOpeningHours?.isOpenNow() ?? false;
     return ListView(
       children: [
@@ -191,20 +170,27 @@ class ParkingMarkerModal extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (spaces != null)
+              if (carStatus != '')
                 Text(
-                  spaces,
+                  carStatus,
                   style: const TextStyle(
                     color: Colors.black,
                   ),
                 ),
-              if (disabledSpaces != null)
+              if (wheelchairCapacity != null)
                 Text(
-                  disabledSpaces,
+                  wheelchairCapacity,
                   style: const TextStyle(
                     color: Colors.black,
                   ),
                 ),
+              // if (disabledSpaces != null)
+              //   Text(
+              //     disabledSpaces,
+              //     style: const TextStyle(
+              //       color: Colors.black,
+              //     ),
+              //   ),
               if (parkingFeature.note != null && parkingFeature.note != "")
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -260,111 +246,47 @@ class ParkingMarkerModal extends StatelessWidget {
       ],
     );
   }
-}
 
-class OpeningTimeTable extends StatefulWidget {
-  final SimpleOpeningHours openingHours;
-  final bool isOpenParking;
-  final String? currentOpeningTime;
-  const OpeningTimeTable({
-    super.key,
-    required this.openingHours,
-    required this.isOpenParking,
-    this.currentOpeningTime,
-  });
+  String? _getCarCapacity(ParkingFeature parkingFeature, String localeName) {
+    final free = parkingFeature.availabilityCarPlacesCapacity;
+    final total = parkingFeature.carPlacesCapacity;
 
-  @override
-  State<OpeningTimeTable> createState() => _OpeningTimeTableState();
-}
+    if (free != null || free == 0) {
+      return localeName == 'en'
+          ? "$free of $total parking spaces available"
+          : "$free von $total Stellplätzen verfügbar";
+    } else if (total != null && total!=0) {
+      return localeName == 'en'
+          ? "$total parking spaces"
+          : "$total Stellplätze";
+    }
+    return '';
+  }
 
-class _OpeningTimeTableState extends State<OpeningTimeTable> {
-  @override
-  Widget build(BuildContext context) {
-    final localizationST = StadtnaviBaseLocalization.of(context);
-    final theme = Theme.of(context);
-    final isAlwaysOpen = widget.openingHours.inp == '24/7';
-    final weekday = DateTime.now().weekday;
-    return Column(
-      children: [
-        ExpansionTile(
-          textColor: Colors.black,
-          collapsedIconColor: Colors.black,
-          iconColor: Colors.red,
-          tilePadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
-          childrenPadding:
-              const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-          title: Row(
-            children: [
-              const Icon(
-                Icons.access_time,
-                size: 20,
-                color: Colors.grey,
-              ),
-              const SizedBox(
-                width: 8,
-              ),
-              Text(
-                "${localizationST.commonNow} ",
-                style: theme.textTheme.bodyMedium,
-              ),
-              widget.isOpenParking
-                  ? Text(
-                      "${localizationST.commonOpen} : ${widget.currentOpeningTime}",
-                      style: theme.textTheme.bodyMedium,
-                    )
-                  : Text(
-                      localizationST.commonClosed,
-                      style: theme.textTheme.bodyMedium
-                          ?.copyWith(fontWeight: FontWeight.bold),
-                    ),
-            ],
-          ),
-          children: [
-            isAlwaysOpen
-                ? Text(
-                    localizationST.commonOpenAlways,
-                  )
-                : Column(
-                    children: widget.openingHours.openingHours.entries.map(
-                      (day) {
-                        bool isBold = widget.openingHours.openingHours.keys
-                                .toList()[weekday - 1] ==
-                            day.key;
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                SimpleOpeningHours.getDayName(
-                                    day.key, localizationST),
-                                style: TextStyle(
-                                  fontWeight: isBold ? FontWeight.bold : null,
-                                ),
-                              ),
-                              Column(
-                                children: day.value.isNotEmpty
-                                    ? day.value
-                                        .map((e) => Text(
-                                              e,
-                                              style: TextStyle(
-                                                fontWeight: isBold
-                                                    ? FontWeight.bold
-                                                    : null,
-                                              ),
-                                            ))
-                                        .toList()
-                                    : [Text(localizationST.commonClosed)],
-                              )
-                            ],
-                          ),
-                        );
-                      },
-                    ).toList(),
-                  ),
-          ],
-        ),
-      ],
-    );
+  String? _getClosed(String? state, String localeName) {
+    if (state == 'TEMPORARILY_CLOSED' || state == 'CLOSED') {
+      return localeName == 'en' ? '(closed)' : '(Geschlossen)';
+    }
+    return '';
+  }
+
+  String? getWheelchairCapacity(
+    ParkingFeature parkingFeature,
+    String localeName,
+  ) {
+    final free = parkingFeature.freeDisabled;
+    final total = parkingFeature.totalDisabled;
+
+    if (free != null && total != null) {
+      return localeName == 'en'
+          ? "$free of $total wheelchair-accessible parking spaces available"
+          : "$free von $total barrierefreien Stellplätzen verfügbar";
+    } else if (total != null && total!=0) {
+      return localeName == 'en'
+          ? "$total wheelchair-accessible parking spaces"
+          : "$total barrierefreie Stellplätze";
+    }
+
+    return null;
   }
 }

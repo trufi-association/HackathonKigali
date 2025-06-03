@@ -194,13 +194,10 @@ List<Map<String, dynamic>> sortSearchResults(
         return {...e, "numSort": confidence};
     }
   }).toList();
-
-  resultsWithWeight.sort((a, b) => a['numSort'].compareTo(b['numSort']));
-
-// Reverse the list
-  List<Map<String, dynamic>> sortedReversed =
-      resultsWithWeight.reversed.toList();
-  return sortedReversed;
+  resultsWithWeight.sort(
+    (a, b) => (a['numSort'] as num).compareTo(b['numSort'] as num),
+  );
+  return resultsWithWeight.reversed.toList();
 }
 
 double getLayerRank(LayerType layer, dynamic source) {

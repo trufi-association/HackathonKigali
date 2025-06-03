@@ -51,15 +51,17 @@ class MapModesCubit extends Cubit<MapModesState> {
     required TrufiLocation from,
     required TrufiLocation to,
     required SettingFetchState advancedOptions,
+    required String localeName,
   }) async {
     emit(state.copyWithNullable(
-      isFetchingModes: true,
+      isFetchingModes: false,
       modesTransport: const Optional.value(null),
     ));
     final modesTransportEntity = await _fetchPlanModesState(
       from: from,
       to: to,
       advancedOptions: advancedOptions,
+      localeName: localeName,
     ).catchError((error) {
       emit(state.copyWith(isFetchingModes: false));
       throw error;
@@ -96,10 +98,17 @@ class MapModesCubit extends Cubit<MapModesState> {
     );
   }
 
+  Future<void> updateIsFetchingModes(bool isFetchingModes) async {
+    emit(state.copyWith(
+      isFetchingModes: isFetchingModes,
+    ));
+  }
+
   Future<MapModesState> fetchPlanModeRidePark({
     required TrufiLocation from,
     required TrufiLocation to,
     required SettingFetchState advancedOptions,
+    required String localeName,
   }) async {
     final tempAdvencedOptions = advancedOptions.copyWith(
         isFreeParkToParkRide: true, isFreeParkToCarPark: true);
@@ -107,6 +116,7 @@ class MapModesCubit extends Cubit<MapModesState> {
       from: from,
       to: to,
       advancedOptions: tempAdvencedOptions,
+      localeName: localeName,
     ).catchError((error) async {
       throw error;
     });
@@ -132,12 +142,17 @@ class MapModesCubit extends Cubit<MapModesState> {
     required TrufiLocation from,
     required TrufiLocation to,
     required SettingFetchState advancedOptions,
+    required String localeName,
   }) async {
     await currentFetchPlanModesOperation?.cancel();
     currentFetchPlanModesOperation = CancelableOperation.fromFuture(
       () {
         return _requestManager.fetchTransportModePlan(
-            from: from, to: to, advancedOptions: advancedOptions);
+          from: from,
+          to: to,
+          advancedOptions: advancedOptions,
+          localeName: localeName,
+        );
       }(),
     );
     final ModesTransportEntity? plan =

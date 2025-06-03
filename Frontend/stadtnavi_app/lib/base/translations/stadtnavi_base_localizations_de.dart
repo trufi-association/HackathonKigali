@@ -227,7 +227,7 @@ class StadtnaviBaseLocalizationDe extends StadtnaviBaseLocalization {
   String get bicycleParking => 'Fahrradabstellplatz';
 
   @override
-  String get instructionVehicleRackRailway => 'Zahnradbahn';
+  String get instructionVehicleRackRailway => 'Seilbahn/ Zahnradbahn';
 
   @override
   String get commonTrack => 'Gleis';
@@ -260,6 +260,115 @@ class StadtnaviBaseLocalizationDe extends StadtnaviBaseLocalization {
   String get weekdayPH => 'Gesetzlicher Feiertag';
 
   @override
+  String legStepsStartInstructions(Object absoluteDirection, Object streetName) {
+    return 'Starten auf $streetName in Richtung $absoluteDirection';
+  }
+
+  @override
+  String relativeDirectionDepart(Object streetName) {
+    return 'Starten auf $streetName';
+  }
+
+  @override
+  String relativeDirectionHardLeft(Object streetName) {
+    return 'Scharf links abbiegen auf $streetName';
+  }
+
+  @override
+  String relativeDirectionLeft(Object streetName) {
+    return 'Links abbiegen auf $streetName';
+  }
+
+  @override
+  String relativeDirectionSlightlyLeft(Object streetName) {
+    return 'Leicht links halten auf $streetName';
+  }
+
+  @override
+  String relativeDirectionContinue(Object streetName) {
+    return 'Geradeaus weiter auf $streetName';
+  }
+
+  @override
+  String relativeDirectionSlightlyRight(Object streetName) {
+    return 'Leicht rechts halten auf $streetName';
+  }
+
+  @override
+  String relativeDirectionRight(Object streetName) {
+    return 'Rechts abbiegen auf $streetName';
+  }
+
+  @override
+  String relativeDirectionHardRight(Object streetName) {
+    return 'Scharf rechts abbiegen auf $streetName';
+  }
+
+  @override
+  String relativeDirectionCircleClockwise(Object exitNumber, Object streetName) {
+    return 'In den Kreisverkehr links einbiegen und die $exitNumber. Ausfahrt im Uhrzeigersinn nehmen auf $streetName';
+  }
+
+  @override
+  String relativeDirectionCircleCounterclockwise(Object exitNumber, Object streetName) {
+    return 'In den Kreisverkehr einbiegen und die $exitNumber. Ausfahrt nehmen auf $streetName';
+  }
+
+  @override
+  String relativeDirectionElevator(Object streetName) {
+    return 'Nehmen Sie den Aufzug zu $streetName';
+  }
+
+  @override
+  String relativeDirectionUturnLeft(Object streetName) {
+    return 'Wenden Sie nach links auf $streetName';
+  }
+
+  @override
+  String relativeDirectionUturnRight(Object streetName) {
+    return 'Wenden Sie nach rechts auf $streetName';
+  }
+
+  @override
+  String relativeDirectionEnterStation(Object streetName) {
+    return 'Betreten Sie die Station bei $streetName';
+  }
+
+  @override
+  String relativeDirectionExitStation(Object streetName) {
+    return 'Verlassen Sie die Station in Richtung $streetName';
+  }
+
+  @override
+  String relativeDirectionFollowSigns(Object streetName) {
+    return 'Folgen Sie den Schildern zu $streetName';
+  }
+
+  @override
+  String get absoluteDirectionNorth => 'Norden';
+
+  @override
+  String get absoluteDirectionNortheast => 'Nordosten';
+
+  @override
+  String get absoluteDirectionEast => 'Osten';
+
+  @override
+  String get absoluteDirectionSoutheast => 'Südosten';
+
+  @override
+  String get absoluteDirectionSouth => 'Süden';
+
+  @override
+  String get absoluteDirectionSouthwest => 'Südwesten';
+
+  @override
+  String get absoluteDirectionWest => 'Westen';
+
+  @override
+  String get absoluteDirectionNorthwest => 'Nordwesten';
+
+  @override
   String get commonNow => 'Jetzt';
 
   @override
@@ -270,4 +379,247 @@ class StadtnaviBaseLocalizationDe extends StadtnaviBaseLocalization {
 
   @override
   String get commonOpenAlways => 'Durchgängig geöffnet';
+
+  @override
+  String get commonShowMore => 'Mehr zeigen';
+
+  @override
+  String get commonShowLess => 'Weniger anzeigen';
+
+  @override
+  String get commonMoreInfo => 'Mehr Infos';
+
+  @override
+  String get journeyCo2Emissions => 'CO₂-Emissionen der Reise';
+
+  @override
+  String get journeyCo2EmissionsSr => 'Kohlenstoffdioxid-Emissionen der Reise';
+
+  @override
+  String get itineraryCo2Link => 'So berechnen wir die Emissionen ›';
+
+  @override
+  String get commonRealTime => 'Echtzeit';
+
+  @override
+  String get commonStart => 'Starten';
+
+  @override
+  String get navigationTurnByTurnNavigation => 'Schritt-für-Schritt Navigation';
+
+  @override
+  String get navigationTurnByTurnNavigationWarning => 'Sie sind zu weit von der Route abgewichen. Bitte kehren Sie auf den Weg zurück.';
+
+  @override
+  String get carInstructionDrive => 'Fahren';
+
+  @override
+  String get departureListUpdateSrInstructions => 'Die Abfahrts- und Ankunfstafeln zeigen Informationen in Echtzeit an.';
+
+  @override
+  String departurePageSr(Object destination, Object shortName, Object time) {
+    return 'Informationen zu Fahrt $shortName $destination $time';
+  }
+
+  @override
+  String departureTimeSr(Object realTime, Object time, Object when) {
+    return '$when Uhr $time. $realTime';
+  }
+
+  @override
+  String get disruptionsTabSrDisruptions => 'Mindestens eine bekannte Störung';
+
+  @override
+  String get disruptionsTabSrNoDisruptions => 'Keine bekannten Störungen';
+
+  @override
+  String itineraryCo2Description(Object carCo2Value, Object co2value) {
+    return '$co2value g CO₂ Emissionen werden durch diese Reise verursacht. Ein Auto würde $carCo2Value g CO₂ auf derselben Reise ausstoßen.\'';
+  }
+
+  @override
+  String itineraryCo2DescriptionSr(Object carCo2Value, Object co2value) {
+    return '$co2value g Kohlenstoffdioxid Emissionen werden durch diese Reise verursacht. Ein Auto würde $carCo2Value g Kohlenstoffdioxid auf derselben Reise ausstoßen.';
+  }
+
+  @override
+  String itineraryCo2DescriptionSimple(Object co2value) {
+    return '$co2value g CO₂ Emissionen werden durch diese Reise verursacht.';
+  }
+
+  @override
+  String itineraryCo2DescriptionSimpleSr(Object co2value) {
+    return '$co2value g Kohlenstoffdioxid Emissionen werden durch diese Reise verursacht.';
+  }
+
+  @override
+  String get itineraryCo2TitleSr => 'Kohlenstoffdioxid-Emissionen der Reise';
+
+  @override
+  String get searchFieldsSrInstructions => 'Die Verbindungssuche wird automatisch ausgelöst, wenn sie Start und Ziel eingegeben oder die Suchparameter verändert haben.';
+
+  @override
+  String get stopListUpdateSrInstructions => 'Abfahrtszeiten für jede Haltestelle werden in Echtzeit angezeigt.';
+
+  @override
+  String swipeSrNewTabOpened(Object number) {
+    return 'Tab $number geöffnet.';
+  }
+
+  @override
+  String get tripCo2EmissionsSr => 'Kohlenstoffdioxid-Emissionen der Reise';
+
+  @override
+  String departureTimeInMinutes(Object minutes) {
+    return '$minutes m';
+  }
+
+  @override
+  String get itineraryDetailsRouteHasInfoAlert => 'Route enthält Warnungen.';
+
+  @override
+  String get itineraryDetailsRouteHasSevereAlert => 'Route enthält Störungen.';
+
+  @override
+  String get itineraryDetailsRouteHasUnknownAlert => 'Route enthält Störungen.';
+
+  @override
+  String get itineraryDetailsRouteHasWarningAlert => 'Route enthält Störungen.';
+
+  @override
+  String get poiTagWheelchair => 'Rollstuhlgerecht';
+
+  @override
+  String get poiTagOutdoor => 'Sitzplätze im Freien';
+
+  @override
+  String get poiTagDogs => 'Hunde erlaubt';
+
+  @override
+  String get poiTagWifi => 'WLAN';
+
+  @override
+  String poiTagOperator(Object operator) {
+    return 'Betreiber: $operator';
+  }
+
+  @override
+  String poiTagBrand(Object brand) {
+    return 'Marke: $brand';
+  }
+
+  @override
+  String bicycleWalkFromTransitNoDuration(Object transportMode) {
+    return 'Steigen Sie mit dem Fahrrad aus dem $transportMode aus';
+  }
+
+  @override
+  String bicycleWalkToTransitNoDuration(Object transportMode) {
+    return 'Schieben Sie ihr Fahrrad zum/zur $transportMode';
+  }
+
+  @override
+  String get instructionVehicleLightRail => 'Zug';
+
+  @override
+  String get instructionVehicleMetro => 'U-Bahn';
+
+  @override
+  String get pickRentalMode => 'Sharing-Angebote';
+
+  @override
+  String get sharingOperatorsCarHeader => 'Car-Sharing';
+
+  @override
+  String get sharingOperatorsCargoBicycleHeader => 'Leih-Lastenräder';
+
+  @override
+  String get sharingOperatorsBicycleHeader => 'Leihräder';
+
+  @override
+  String get sharingOperatorsScooterHeader => 'Leih-Scooter';
+
+  @override
+  String get sharingOperatorsMopedHeader => 'Leih-Mopeds';
+
+  @override
+  String get bicycleParkingFilter => 'Bevorzugte Abstellart';
+
+  @override
+  String get bicycleParkingFilterAll => 'Alle Abstellanlagen';
+
+  @override
+  String get bicycleParkingFilterFreeOnly => 'Nur kostenlose Anlagen';
+
+  @override
+  String get bicycleParkingFilterSecurePreferred => 'Sichere bevorzugt';
+
+  @override
+  String get disruptionInfoNoAlerts => 'Keine Störungsmeldungen.';
+
+  @override
+  String get taxiAvailability => 'Taxis verfügbar';
+
+  @override
+  String get bicycleAvailability => 'Fahrräder verfügbar';
+
+  @override
+  String get carAvailability => 'Carsharing-Fahrzeuge verfügbar';
+
+  @override
+  String get cargoBicycleAvailability => 'Lastenräder verfügbar';
+
+  @override
+  String get parkAndRideAvailability => 'Plätze verfügbar';
+
+  @override
+  String get scooterAvailability => 'E-Scooter ausleihbar';
+
+  @override
+  String get scooterStationNoId => 'E-Scooter';
+
+  @override
+  String get bicycleStationNoId => 'Leihrad-Station';
+
+  @override
+  String get cargoBicycleStationNoId => 'Lastenrad-Station';
+
+  @override
+  String get carStationNoId => 'Carsharing-Station';
+
+  @override
+  String get taxiStationNoId => 'Taxistand';
+
+  @override
+  String get regioradStartUsing => 'Leihrad buchen';
+
+  @override
+  String get stadtradStartUsing => 'Leihrad buchen';
+
+  @override
+  String get scooterStartUsing => 'Buchen Sie einen E-Scooter';
+
+  @override
+  String get scooterStartUsingInfo => 'Mehr Informationen bei';
+
+  @override
+  String get bicycleStartUsing => 'Beginne Leihrad-Nutzung';
+
+  @override
+  String get bicycleStartUsingInfo => 'Mehr Informationen bei';
+
+  @override
+  String get cargoBicycleStartUsing => 'Buchen Sie ein Lastenrad';
+
+  @override
+  String get cargoBicycleStartUsingInfo => 'Mehr Informationen bei';
+
+  @override
+  String get carStartUsing => 'Buchen Sie ein Carsharing-Fahrzeug';
+
+  @override
+  String get carStartUsingInfo => 'Mehr Informationen bei';
+
+  @override
+  String get chooseOnMap => 'Wähle auf der Karte';
 }

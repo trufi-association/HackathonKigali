@@ -2,7 +2,7 @@ import 'package:gql/language.dart';
 import 'package:graphql/client.dart';
 import 'package:http/http.dart' as http;
 import 'dart:math';
-import 'package:trufi_core/base/utils/graphql_client/graphql_client.dart';
+import 'package:stadtnavi_core/configuration/graphql_client.dart';
 import 'package:vector_tile/vector_tile.dart';
 
 import 'package:stadtnavi_core/base/custom_layers/pbf_layer/parking/parking_feature_model.dart';
@@ -31,7 +31,7 @@ class ParkingInformationServices {
     ];
     var map2 = <String, ParkingFeature>{};
     for (ParkingFeature parking in listAll) {
-      map2[parking.id!] = parking;
+      map2[parking.id] = parking;
     }
     return fetchParkingsByIds(map2.values.toList());
   }
@@ -55,7 +55,7 @@ class ParkingInformationServices {
     final uri = Uri(
       scheme: "https",
       host: ApiConfig().baseDomain,
-      path: "/routing/v1/router/vectorTiles/parking/$z/$x/$y.pbf",
+      path: "/otp/routers/default/vectorTiles/parking/$z/$x/$y.pbf",
     );
     final response = await http.get(uri);
     if (response.statusCode != 200) {
@@ -94,7 +94,7 @@ class ParkingInformationServices {
     final WatchQueryOptions listPatterns = WatchQueryOptions(
       document: parseString(pattern_query.parkingByIds),
       variables: <String, dynamic>{
-        'parkIds': listParking.map((e) => e.id ?? '').toList(),
+        'parkIds': listParking.map((e) => e.id).toList(),
       },
       fetchResults: true,
       fetchPolicy: FetchPolicy.networkOnly,

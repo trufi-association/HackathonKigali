@@ -1,32 +1,108 @@
-import 'package:stadtnavi_core/base/custom_layers/live_bus/live_bus_layer.dart';
-import 'package:stadtnavi_core/base/custom_layers/pbf_layer/bicycle_network/bicycle_network_layer.dart';
-import 'package:stadtnavi_core/base/custom_layers/pbf_layer/cifs/cifs_layer.dart';
-import 'package:stadtnavi_core/base/custom_layers/pbf_layer/charging/charging_layer.dart';
-import 'package:stadtnavi_core/base/custom_layers/pbf_layer/citybikes/citybikes_layer.dart';
-import 'package:stadtnavi_core/base/custom_layers/pbf_layer/parking/parkings_layer.dart';
-import 'package:stadtnavi_core/base/custom_layers/pbf_layer/parking_zones/parkings_zones_layer.dart';
-import 'package:stadtnavi_core/base/custom_layers/pbf_layer/stops/stops_enum.dart';
-import 'package:stadtnavi_core/base/custom_layers/pbf_layer/stops/stops_layer.dart';
-import 'package:stadtnavi_core/base/custom_layers/pbf_layer/weather/weather_layer.dart';
+import 'package:stadtnavi_core/base/custom_layers/pbf_layer/bike_parks/bike_park_feature_model.dart';
+import 'package:stadtnavi_core/base/custom_layers/pbf_layer/car_sharing/carsharing_feature_model.dart';
+import 'package:stadtnavi_core/base/custom_layers/pbf_layer/charging/charging_feature_model.dart';
+import 'package:stadtnavi_core/base/custom_layers/pbf_layer/cifs/cifs_feature_model.dart';
+import 'package:stadtnavi_core/base/custom_layers/pbf_layer/citybikes/citybike_feature_model.dart';
+import 'package:stadtnavi_core/base/custom_layers/pbf_layer/parking/parking_feature_model.dart';
+import 'package:stadtnavi_core/base/custom_layers/pbf_layer/pois/poi_feature_model.dart';
+import 'package:stadtnavi_core/base/custom_layers/pbf_layer/scooter/scooter_feature_model.dart';
+import 'package:stadtnavi_core/base/custom_layers/pbf_layer/stops/stop_feature_model.dart';
+import 'package:stadtnavi_core/base/custom_layers/pbf_layer/weather/weather_feature_model.dart';
 
-import 'pbf_layer/bike_parks/bike_parks_layer.dart';
+class MapMarkersRepositoryContainer {
+  static final SortedList<PoiFeature> poiFeatures = SortedList(
+    compare: (a, b) => a.position.latitude.compareTo(b.position.latitude),
+    getId: (pointFeature) => pointFeature.osmId,
+  );
+  static SortedList<CityBikeFeature> cityBikeFeature = SortedList(
+    compare: (a, b) => a.position.latitude.compareTo(b.position.latitude),
+    getId: (pointFeature) => pointFeature.id,
+  );
+  static SortedList<StopFeature> stopFeature = SortedList(
+    compare: (a, b) => a.position.latitude.compareTo(b.position.latitude),
+    getId: (pointFeature) => pointFeature.gtfsId,
+  );
+  static SortedList<BikeParkFeature> bikeParkFeature = SortedList(
+    compare: (a, b) => a.position.latitude.compareTo(b.position.latitude),
+    getId: (pointFeature) => pointFeature.id,
+  );
+  static SortedList<ParkingFeature> parkingFeature = SortedList(
+    compare: (a, b) => a.position.latitude.compareTo(b.position.latitude),
+    getId: (pointFeature) => pointFeature.id,
+  );
+  static SortedList<WeatherFeature> weatherFeature = SortedList(
+    compare: (a, b) => a.position.latitude.compareTo(b.position.latitude),
+    getId: (pointFeature) => pointFeature.address,
+  );
+  static SortedList<RoadworksFeature> roadworksFeature = SortedList(
+    compare: (a, b) => a.id.compareTo(b.id),
+    getId: (pointFeature) => pointFeature.id,
+  );
+  static SortedList<ChargingFeature> chargingFeature = SortedList(
+    compare: (a, b) => a.position.latitude.compareTo(b.position.latitude),
+    getId: (pointFeature) => pointFeature.id,
+  );
+  static SortedList<CarSharingFeature> carSharingFeature = SortedList(
+    compare: (a, b) => a.position.latitude.compareTo(b.position.latitude),
+    getId: (pointFeature) => pointFeature.id,
+  );
+  static SortedList<ScooterFeature> scooterFeature = SortedList(
+    compare: (a, b) => a.position.latitude.compareTo(b.position.latitude),
+    getId: (pointFeature) => pointFeature.id,
+  );
+  
+}
 
-class StaticTileLayers {
-  static Map<StopsLayerIds, StopsLayer> stopsLayers = {
-    StopsLayerIds.bus: StopsLayer(StopsLayerIds.bus, '4'),
-    StopsLayerIds.rail: StopsLayer(StopsLayerIds.rail, '4'),
-    StopsLayerIds.carpool: StopsLayer(StopsLayerIds.carpool, '4'),
-    StopsLayerIds.subway: StopsLayer(StopsLayerIds.subway, '4'),
-  };
-  static ParkingLayer parkingLayer = ParkingLayer("Parking", '4');
-  static ParkingZonesLayer parkingZonesLayer =
-      ParkingZonesLayer("Parking Zones", '1');
-  static CityBikesLayer citybikeLayer = CityBikesLayer("Sharing", '5');
-  static BikeParkLayer bikeParkLayer = BikeParkLayer("Bike Parking Space", '4');
-  static BicycleNetworkLayer bicycleNetworkLayer =
-      BicycleNetworkLayer("Bicycle Network Space", '2');
-  static CifsLayer cifsLayer = CifsLayer("Roadworks", '3');
-  static LiveBusLayer liveBusLayer = LiveBusLayer("LiveBusBeta", '3');
-  static WeatherLayer weatherLayer = WeatherLayer("Road Weather", '3');
-  static ChargingLayer chargingLayer = ChargingLayer("Charging", '4');
+class SortedList<T> {
+  final Map<String, T> _map = {};
+  final List<T> _sortedList = [];
+  final int Function(T, T) compare;
+  final String Function(T) getId;
+
+  SortedList({required this.compare, required this.getId});
+
+  void add(T item, {bool replace = false}) {
+    String id = getId(item);
+
+    if (_map.containsKey(id)) {
+      if (replace) {
+        _removeById(id);
+      } else {
+        return;
+      }
+    }
+
+    _map[id] = item;
+    _insertSorted(item);
+  }
+
+  void _insertSorted(T item) {
+    int index = _sortedList.indexWhere((element) => compare(item, element) < 0);
+    if (index == -1) {
+      _sortedList.add(item);
+    } else {
+      _sortedList.insert(index, item);
+    }
+  }
+
+  void remove(String id) {
+    if (_map.containsKey(id)) {
+      _removeById(id);
+    }
+  }
+
+  void _removeById(String id) {
+    T? item = _map.remove(id);
+    if (item != null) {
+      _sortedList.remove(item);
+    }
+  }
+
+  List<T> get items => List.unmodifiable(_sortedList);
+  bool contains(String id) => _map.containsKey(id);
+  int get length => _sortedList.length;
+  void clear() {
+    _map.clear();
+    _sortedList.clear();
+  }
 }

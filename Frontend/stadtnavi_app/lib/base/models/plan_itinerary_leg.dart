@@ -11,10 +11,12 @@ class PlanItineraryLeg extends Equatable {
     required this.distance,
     required this.duration,
     this.agency,
+    this.realtimeState,
     this.toPlace,
     this.fromPlace,
     required this.startTime,
     required this.endTime,
+    this.steps,
     this.intermediatePlaces,
     this.intermediatePlace,
     required this.transitLeg,
@@ -37,10 +39,12 @@ class PlanItineraryLeg extends Equatable {
   static const _route = "route";
   static const _routeLongName = "routeLongName";
   static const _agency = "agency";
+  static const _realtimeState = "realtimeState";
   static const _toPlace = "to";
   static const _fromPlace = "from";
   static const _startTime = "startTime";
   static const _endTime = "endTime";
+  static const _steps = "steps";
   static const _intermediatePlaces = "intermediatePlaces";
   static const _intermediatePlace = "intermediatePlace";
   static const _transitLeg = "transitLeg";
@@ -58,6 +62,7 @@ class PlanItineraryLeg extends Equatable {
   final double distance;
   final Duration duration;
   final AgencyEntity? agency;
+  final RealtimeState? realtimeState;
   final PlaceEntity? toPlace;
   final PlaceEntity? fromPlace;
   final DateTime startTime;
@@ -68,6 +73,7 @@ class PlanItineraryLeg extends Equatable {
   final bool? interlineWithPreviousLeg;
   final PickupBookingInfo? pickupBookingInfo;
   final BookingInfo? dropOffBookingInfo;
+  final List<StepEntity>? steps;
   final List<PlaceEntity>? intermediatePlaces;
   final Trip? trip;
 
@@ -95,6 +101,7 @@ class PlanItineraryLeg extends Equatable {
       agency: json[_agency] != null
           ? AgencyEntity.fromMap(json[_agency] as Map<String, dynamic>)
           : null,
+      realtimeState: getRealtimeStateByString(json[_realtimeState].toString()),
       toPlace: json[_toPlace] != null
           ? PlaceEntity.fromMap(json[_toPlace] as Map<String, dynamic>)
           : null,
@@ -105,6 +112,11 @@ class PlanItineraryLeg extends Equatable {
           int.tryParse(json[_startTime].toString()) ?? 0),
       endTime: DateTime.fromMillisecondsSinceEpoch(
           int.tryParse(json[_endTime].toString()) ?? 0),
+      steps: json[_steps] != null
+          ? List<StepEntity>.from((json[_steps] as List<dynamic>).map(
+              (x) => StepEntity.fromJson(x as Map<String, dynamic>),
+            ))
+          : null,
       intermediatePlaces: json[_intermediatePlaces] != null
           ? List<PlaceEntity>.from(
               (json[_intermediatePlaces] as List<dynamic>).map(
@@ -140,10 +152,14 @@ class PlanItineraryLeg extends Equatable {
       _distance: distance,
       _duration: duration.inSeconds,
       _agency: agency?.toMap(),
+      _realtimeState: realtimeState?.name,
       _toPlace: toPlace?.toMap(),
       _fromPlace: fromPlace?.toMap(),
       _startTime: startTime.millisecondsSinceEpoch,
       _endTime: endTime.millisecondsSinceEpoch,
+      _steps: steps != null
+          ? List<dynamic>.from(steps!.map((x) => x.toMap()))
+          : null,
       _intermediatePlaces: intermediatePlaces != null
           ? List<dynamic>.from(intermediatePlaces!.map((x) => x.toMap()))
           : null,
@@ -165,6 +181,7 @@ class PlanItineraryLeg extends Equatable {
     String? routeLongName,
     double? distance,
     Duration? duration,
+    RealtimeState? realtimeState,
     PlaceEntity? toPlace,
     PlaceEntity? fromPlace,
     DateTime? startTime,
@@ -173,6 +190,7 @@ class PlanItineraryLeg extends Equatable {
     bool? intermediatePlace,
     bool? transitLeg,
     bool? interlineWithPreviousLeg,
+    List<StepEntity>? steps,
     List<PlaceEntity>? intermediatePlaces,
     PickupBookingInfo? pickupBookingInfo,
     BookingInfo? dropOffBookingInfo,
@@ -187,6 +205,7 @@ class PlanItineraryLeg extends Equatable {
       routeLongName: routeLongName ?? this.routeLongName,
       distance: distance ?? this.distance,
       duration: duration ?? this.duration,
+      realtimeState: realtimeState ?? this.realtimeState,
       toPlace: toPlace ?? this.toPlace,
       fromPlace: fromPlace ?? this.fromPlace,
       startTime: startTime ?? this.startTime,
@@ -196,6 +215,7 @@ class PlanItineraryLeg extends Equatable {
       transitLeg: transitLeg ?? this.transitLeg,
       interlineWithPreviousLeg:
           interlineWithPreviousLeg ?? this.interlineWithPreviousLeg,
+      steps: steps ?? this.steps,
       intermediatePlaces: intermediatePlaces ?? this.intermediatePlaces,
       pickupBookingInfo: pickupBookingInfo ?? this.pickupBookingInfo,
       dropOffBookingInfo: dropOffBookingInfo ?? this.dropOffBookingInfo,
@@ -279,7 +299,9 @@ class PlanItineraryLeg extends Equatable {
         interlineWithPreviousLeg,
         pickupBookingInfo,
         dropOffBookingInfo,
+        steps,
         intermediatePlaces,
         // trip,
+        realtimeState,
       ];
 }

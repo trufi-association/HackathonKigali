@@ -53,7 +53,10 @@ class KigaliOnlineSearchLocation implements SearchLocationRepository {
   }
 
   @override
-  Future<LocationDetail> reverseGeodecoding(LatLng location) async {
+  Future<LocationDetail> reverseGeodecoding(
+    LatLng location, {
+    String? lang,
+  }) async {
     final response = await http.get(
       Uri.parse(
         "${ApiConfig().reverseGeodecodingPhotonEndpoint}?lat=${location.latitude}&lon=${location.longitude}",
