@@ -1,7 +1,11 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart' as latlng;
 import 'package:trufi_core/map.dart';
 import 'package:trufi_core/map_controller.dart';
+import 'package:trufi_core/map_stage.dart';
 
 void main() {
   runApp(const MyApp());
@@ -32,8 +36,23 @@ class _HomeScreenState extends State<HomeScreen> {
     initialCamera: TrufiCameraPosition(
       position: latlng.LatLng(-1.949516, 30.069619),
       zoom: 10,
-      bearing: 0,
     ),
+  );
+  final TrufiMapStateController stateController = TrufiMapStateController(
+    initialMarkers: [
+      Marker(
+        width: 40,
+        height: 40,
+        point: latlng.LatLng(-1.949516, 30.069619),
+        child: const Icon(Icons.location_on, color: Colors.red),
+      ),
+      Marker(
+        width: 40,
+        height: 40,
+        point: latlng.LatLng(-1.948000, 30.065000),
+        child: const Icon(Icons.location_on, color: Colors.green),
+      ),
+    ],
   );
 
   @override
@@ -41,7 +60,10 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          TrufiMap(mapController: mapController),
+          TrufiMap(
+            mapController: mapController,
+            stateController: stateController,
+          ),
           SafeArea(
             child: Container(
               margin: const EdgeInsets.symmetric(horizontal: 5),
@@ -70,6 +92,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ],
               ),
+            ),
+          ),
+          Positioned(
+            top: 50,
+            right: 16,
+            child: FloatingActionButton(
+              backgroundColor: Colors.blueAccent,
+              onPressed: _addRandomMarker,
+              child: const Icon(Icons.add_location),
             ),
           ),
 
@@ -140,6 +171,27 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     );
+  }
+
+  void _addRandomMarker() {
+    final center = mapController.initialCamera.position;
+    final random = Random();
+
+    // Genera un pequeño desplazamiento aleatorio
+    final dx = (random.nextDouble() - 0.5) * 0.1;
+    final dy = (random.nextDouble() - 0.5) * 0.1;
+
+    final newLat = center.latitude + dx;
+    final newLng = center.longitude + dy;
+
+    final newMarker = Marker(
+      width: 40,
+      height: 40,
+      point: latlng.LatLng(newLat, newLng),
+      child: const Icon(Icons.location_on, color: Colors.red, size: 40),
+    );
+
+    stateController.addMarker(newMarker);
   }
 
   void _showMenuOptions(BuildContext context) {
