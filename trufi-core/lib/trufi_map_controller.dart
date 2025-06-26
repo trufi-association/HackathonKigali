@@ -42,8 +42,10 @@ class TrufiMapController {
 
   final ValueNotifier<TrufiCameraPosition> cameraPositionNotifier;
   final ValueNotifier<Map<String, TrufiLayer>> layersNotifier;
+
   List<TrufiLayer> get visibleLayers =>
       layersNotifier.value.values.where((l) => l.visible).toList();
+
   bool setCameraPosition(TrufiCameraPosition position) {
     if (position == cameraPositionNotifier.value) return false;
     cameraPositionNotifier.value = position;
@@ -59,11 +61,16 @@ class TrufiMapController {
     return setCameraPosition(next);
   }
 
+  void mutateLayers() {
+    final layers = Map<String, TrufiLayer>.from(layersNotifier.value);
+    layersNotifier.value = layers;
+  }
+
   bool addLayer(TrufiLayer layer) {
     final layers = Map<String, TrufiLayer>.from(layersNotifier.value);
     if (layers.containsKey(layer.id)) return false;
     layers[layer.id] = layer;
-    layersNotifier.value = layers;
+    mutateLayers();
     return true;
   }
 
@@ -71,7 +78,7 @@ class TrufiMapController {
     final layers = Map<String, TrufiLayer>.from(layersNotifier.value);
     if (!layers.containsKey(layerId)) return false;
     layers.remove(layerId);
-    layersNotifier.value = layers;
+    mutateLayers();
     return true;
   }
 
@@ -79,25 +86,8 @@ class TrufiMapController {
     final layers = Map<String, TrufiLayer>.from(layersNotifier.value);
     final layer = layers[layerId];
     if (layer == null || layer.visible == visible) return false;
-    layers[layerId] = TrufiLayer(
-      id: layer.id,
-      visible: visible,
-      entries: layer.entries,
-    );
-    layersNotifier.value = layers;
-    return true;
-  }
-
-  bool addMarkerToLayer(String layerId, TrufiMarker marker) {
-    final layers = Map<String, TrufiLayer>.from(layersNotifier.value);
-    final layer = layers[layerId];
-    if (layer == null) return false;
-    layers[layerId] = TrufiLayer(
-      id: layer.id,
-      visible: layer.visible,
-      entries: [...layer.entries, marker],
-    );
-    layersNotifier.value = layers;
+    layer.visible = visible;
+    mutateLayers();
     return true;
   }
 }
@@ -120,14 +110,50 @@ class TrufiMarker {
   final bool visible;
 }
 
-class TrufiLayer {
-  TrufiLayer({
-    required this.id,
-    this.visible = true,
-    List<TrufiMarker>? entries,
-  }) : entries = entries ?? <TrufiMarker>[];
+abstract class TrufiLayer {
+  TrufiLayer(this.controller, {required this.id, this.visible = true});
 
-  final String id;
-  final bool visible;
-  final List<TrufiMarker> entries;
+  final TrufiMapController controller;
+  String id;
+  bool visible;
+  List<TrufiMarker> get entries;
+  void mutateLayers() => controller.mutateLayers();
+}
+
+class RoutingMapComponent extends TrufiLayer {
+  static const String layerId = 'routing-map-component';
+
+  RoutingMapComponent(super.controller) : super(id: layerId);
+
+  TrufiLocation? origin;
+  TrufiLocation? destination;
+  // List<Plan>
+
+  void addOrigin(TrufiLocation origin) {
+    this.origin = origin;
+    if (destination != null) {
+      // fetch plan
+    }
+    mutateLayers();
+  }
+
+  void addDestination(TrufiLocation destination) {
+    this.destination = destination;
+    if (origin != null) {
+      // fetch plan
+    }
+    mutateLayers();
+  }
+
+  @override
+  List<TrufiMarker> get entries => [
+    // if (origin != null) origin.toMarker
+  ];
+}
+// cambiar por el modelo chido o seguir usando este 
+class TrufiLocation {
+  final String description;
+  final latlng.LatLng position;
+
+  TrufiLocation({required this.description, required this.position});
 }

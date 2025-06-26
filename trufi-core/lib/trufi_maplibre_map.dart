@@ -11,9 +11,11 @@ class TrufiMapLibreMap extends StatefulWidget {
   const TrufiMapLibreMap({
     super.key,
     required this.controller,
+    required this.routingMapComponent,
     required this.styleString,
   });
   final TrufiMapController controller;
+  final RoutingMapComponent routingMapComponent;
   final String styleString;
 
   @override

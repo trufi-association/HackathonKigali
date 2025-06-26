@@ -39,6 +39,12 @@ class _HomeScreenState extends State<HomeScreen> {
       bearing: 0,
     ),
   );
+  late RoutingMapComponent routingMapComponent;
+  @override
+  void initState() {
+    routingMapComponent = RoutingMapComponent(mapController);
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
           if (showMapLibre)
             TrufiMapLibreMap(
               controller: mapController,
+              routingMapComponent:routingMapComponent,
               styleString:
                   'https://tileserver.kigali.trufi.dev/styles/test-style/style.json',
             )
@@ -57,74 +64,30 @@ class _HomeScreenState extends State<HomeScreen> {
               tileUrl: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
             ),
           SafeArea(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 5),
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.7),
-                    borderRadius: BorderRadius.circular(24),
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 5),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.7),
+                borderRadius: BorderRadius.circular(24),
+              ),
+              height: 48,
+              child: Row(
+                children: [
+                  const Icon(Icons.search, color: Colors.white),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: const Text(
+                      'Search here',
+                      style: TextStyle(color: Colors.white70, fontSize: 16),
+                    ),
                   ),
-                  height: 48,
-                  child: Row(
-                    children: [
-                      const Icon(Icons.search, color: Colors.white),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: const Text(
-                          'Search here',
-                          style: TextStyle(color: Colors.white70, fontSize: 16),
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.menu, color: Colors.white),
-                        onPressed: () => _showMenuOptions(context),
-                      ),
-                    ],
+                  IconButton(
+                    icon: const Icon(Icons.menu, color: Colors.white),
+                    onPressed: () => _showMenuOptions(context),
                   ),
-                ),
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 5,vertical: 5),
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.7),
-                  ),
-                  height: 48,
-                  child: Row(
-                    children: [
-                      GestureDetector(
-                        onTap: () => setState(() => showMapLibre = !showMapLibre),
-                        child: Row(
-                          children: const [
-                            Icon(Icons.swap_horiz, color: Colors.white),
-                            SizedBox(width: 4),
-                            Text(
-                              "Swap Map",
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      GestureDetector(
-                        onTap: () => _addRandomMarker(mapController),
-                        child: Row(
-                          children: const [
-                            Icon(Icons.add_location_alt, color: Colors.white),
-                            SizedBox(width: 4),
-                            Text(
-                              "Add Marker",
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           SafeArea(
@@ -183,29 +146,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     );
-  }
-
-  void _addRandomMarker(TrufiMapController controller) {
-    final cam = controller.cameraPositionNotifier.value;
-    final rand = Random();
-    final lat = cam.target.latitude + (rand.nextDouble() - 0.5) * 0.1;
-    final lng = cam.target.longitude + (rand.nextDouble() - 0.5) * 0.1;
-
-    final id = DateTime.now().millisecondsSinceEpoch.toString();
-    final layer = TrufiLayer(
-      id: 'random_layer_$lat',
-      entries: [
-        TrufiMarker(
-          id: id,
-          position: latlng.LatLng(lat, lng),
-          size: const Size(36, 36),
-          rotation: 0,
-          widget: const Icon(Icons.place, color: Colors.red, size: 36),
-        ),
-      ],
-    );
-
-    controller.addLayer(layer);
   }
 
   void _showMenuOptions(BuildContext context) {
