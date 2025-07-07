@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -11,12 +12,13 @@ class TrufiMapLibreMap extends StatefulWidget {
   const TrufiMapLibreMap({
     super.key,
     required this.controller,
-    required this.routingMapComponent,
     required this.styleString,
+    required this.onMapClick,
   });
+
   final TrufiMapController controller;
-  final RoutingMapComponent routingMapComponent;
   final String styleString;
+  final void Function(Point<double>, LatLng) onMapClick;
 
   @override
   State<TrufiMapLibreMap> createState() => _TrufiMapLibreMapState();
@@ -26,12 +28,13 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
   MapLibreMapController? _mapCtl;
   bool _mapReady = false;
   bool _suppressSync = false;
-  final Set<String> _renderedMarkerIds = <String>{};
+
+  // Stores the hash of each rendered marker by its ID
+  final Map<String, int> _renderedMarkerHashes = <String, int>{};
 
   @override
   void initState() {
     super.initState();
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       widget.controller.cameraPositionNotifier.addListener(_cameraListener);
       widget.controller.layersNotifier.addListener(_layersListener);
@@ -82,56 +85,88 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
     if (ctl == null) return;
 
     final newMarkerIds = <String>{};
-    final markersToAdd = <({TrufiMarker marker, Uint8List imageBytes})>[];
+    final markersToUpdate = <TrufiMarker>[];
 
+    // Collect visible markers and detect which ones need to be updated
     for (final layer in visibleLayers) {
       for (final marker in layer.entries.where((m) => m.visible)) {
         newMarkerIds.add(marker.id);
-        if (!_renderedMarkerIds.contains(marker.id)) {
-          final bytes = await _widgetToBytes(marker);
-          markersToAdd.add((marker: marker, imageBytes: bytes));
+        final currentHash = marker.hashCode;
+        final wasRendered = _renderedMarkerHashes.containsKey(marker.id);
+        final hashUnchanged = wasRendered && _renderedMarkerHashes[marker.id] == currentHash;
+
+        if (hashUnchanged) {
+          debugPrint("✔️ Marker '${marker.id}' reused (unchanged).");
+          continue; // Skip unchanged markers
         }
+
+        markersToUpdate.add(marker);
+        _renderedMarkerHashes[marker.id] = currentHash;
       }
     }
 
-    // Remove old markers
-    final idsToRemove = _renderedMarkerIds.difference(newMarkerIds);
+    // Remove markers that are no longer visible
+    final idsToRemove = _renderedMarkerHashes.keys.toSet().difference(newMarkerIds);
     for (final id in idsToRemove) {
       try {
-        await ctl.removeSymbols(ctl.symbols?.where((s) => s.data?["id"] == id).toList() ?? []);
-      } catch (_) {}
+        await _removeMarkerById(id);
+        debugPrint("❌ Marker '$id' removed (no longer visible).");
+      } catch (_) {
+        // Ignore failures silently
+      }
+      _renderedMarkerHashes.remove(id);
     }
 
-    for (final entry in markersToAdd) {
-      final marker = entry.marker;
-      final bytes = entry.imageBytes;
-      final id = 'marker_${marker.id}';
+    // Add or update markers
+    for (final marker in markersToUpdate) {
+      final bytes = await _widgetToBytes(marker);
+      final imageId = 'marker_${marker.id}';
 
-      await ctl.addImage(id, bytes);
+      // Replace any existing symbol before adding the new one
+      try {
+        await _removeMarkerById(marker.id);
+        debugPrint("♻️ Symbol '${marker.id}' replaced.");
+      } catch (_) {
+        // Ignore failures silently
+      }
+
+      await ctl.addImage(imageId, bytes);
       await ctl.addSymbol(
         SymbolOptions(
           geometry: LatLng(marker.position.latitude, marker.position.longitude),
-          iconImage: id,
-          iconSize: marker.size.width / 30.0,
+          iconImage: imageId,
+          // iconSize: marker.size.width ,
           iconRotate: marker.rotation,
         ),
         {'id': marker.id},
       );
+
+      debugPrint("🟢 Marker '${marker.id}' added or updated.");
     }
-
-    _renderedMarkerIds
-      ..clear()
-      ..addAll(newMarkerIds);
   }
 
-  Future<Uint8List> _widgetToBytes(TrufiMarker marker) {
-    final sizedWidget = SizedBox(
-      width: marker.size.width,
-      height: marker.size.height,
-      child: marker.widget,
-    );
-    return ImageTool.widgetToPng(sizedWidget);
+  // Removes any existing symbol with the given marker ID
+  Future<void> _removeMarkerById(String id) async {
+    final ctl = _mapCtl;
+    if (ctl == null) return;
+    final toRemove = ctl.symbols?.where((s) => s.data?["id"] == id).toList() ?? [];
+    if (toRemove.isNotEmpty) {
+      await ctl.removeSymbols(toRemove);
+    }
   }
+
+Future<Uint8List> _widgetToBytes(TrufiMarker marker) {
+  final testContext = MediaQuery(
+    data:  MediaQueryData(size: marker.size), // tamaño arbitrario
+    child: Material(
+      type: MaterialType.transparency,
+      child: Center(child: marker.widget),
+    ),
+  );
+
+  return ImageTool.widgetToPng(testContext);
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -145,24 +180,18 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
       onMapCreated: (ctl) async {
         _mapCtl = ctl;
         _mapReady = true;
-        await _syncLayers(
-          widget.controller.visibleLayers,
-        );
+        await _syncLayers(widget.controller.visibleLayers);
       },
       onCameraIdle: _handleCameraIdle,
-      onMapClick: (_, coord) {
-        widget.controller.updateCamera(
-          target: latlng.LatLng(coord.latitude, coord.longitude),
-        );
-      },
+      onMapClick: widget.onMapClick,
     );
   }
 
   CameraPosition _toCameraPosition(TrufiCameraPosition cam) => CameraPosition(
-    target: LatLng(cam.target.latitude, cam.target.longitude),
-    zoom: toMapLibreZoom(cam.zoom),
-    bearing: toMapLibreBearing(cam.bearing),
-  );
+        target: LatLng(cam.target.latitude, cam.target.longitude),
+        zoom: toMapLibreZoom(cam.zoom),
+        bearing: toMapLibreBearing(cam.bearing),
+      );
 
   double toMapLibreZoom(double leafletZoom) => leafletZoom - 1.0;
   double toLeafletZoom(double mapLibreZoom) => mapLibreZoom + 1.0;

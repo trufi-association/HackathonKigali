@@ -70,7 +70,7 @@ class TrufiMapController {
     final layers = Map<String, TrufiLayer>.from(layersNotifier.value);
     if (layers.containsKey(layer.id)) return false;
     layers[layer.id] = layer;
-    mutateLayers();
+    layersNotifier.value = layers;
     return true;
   }
 
@@ -78,7 +78,7 @@ class TrufiMapController {
     final layers = Map<String, TrufiLayer>.from(layersNotifier.value);
     if (!layers.containsKey(layerId)) return false;
     layers.remove(layerId);
-    mutateLayers();
+    layersNotifier.value = layers;
     return true;
   }
 
@@ -87,7 +87,7 @@ class TrufiMapController {
     final layer = layers[layerId];
     if (layer == null || layer.visible == visible) return false;
     layer.visible = visible;
-    mutateLayers();
+    layersNotifier.value = layers;
     return true;
   }
 }
@@ -108,6 +108,21 @@ class TrufiMarker {
   final Size size;
   final double rotation;
   final bool visible;
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        other is TrufiMarker &&
+            id == other.id &&
+            position == other.position &&
+            size == other.size &&
+            rotation == other.rotation &&
+            visible == other.visible &&
+            widget.runtimeType == other.widget.runtimeType;
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, position, size, rotation, visible, widget.runtimeType);
 }
 
 abstract class TrufiLayer {
@@ -125,21 +140,33 @@ class RoutingMapComponent extends TrufiLayer {
 
   RoutingMapComponent(super.controller) : super(id: layerId);
 
-  TrufiLocation? origin;
-  TrufiLocation? destination;
+  TrufiLocation? _origin;
+  TrufiLocation? get origin => _origin;
+  TrufiLocation? _destination;
+  TrufiLocation? get destination => _destination;
   // List<Plan>
 
-  void addOrigin(TrufiLocation origin) {
-    this.origin = origin;
-    if (destination != null) {
+  void addOrigin(latlng.LatLng position, String description) {
+    _origin = TrufiLocation(
+      id: TrufiLocation.origin,
+      position: position,
+      description,
+      widget: Container(height: 100, width: 100, color: Colors.red),
+    );
+    if (_destination != null) {
       // fetch plan
     }
     mutateLayers();
   }
 
-  void addDestination(TrufiLocation destination) {
-    this.destination = destination;
-    if (origin != null) {
+  void addDestination(latlng.LatLng position, String description) {
+    _destination = TrufiLocation(
+      id: TrufiLocation.destination,
+      position: position,
+      description,
+      widget: Container(height: 100, width: 100, color: Colors.red),
+    );
+    if (_origin != null) {
       // fetch plan
     }
     mutateLayers();
@@ -147,13 +174,20 @@ class RoutingMapComponent extends TrufiLayer {
 
   @override
   List<TrufiMarker> get entries => [
-    // if (origin != null) origin.toMarker
+    if (origin != null) origin!,
+    if (destination != null) destination!,
   ];
 }
-// cambiar por el modelo chido o seguir usando este 
-class TrufiLocation {
-  final String description;
-  final latlng.LatLng position;
 
-  TrufiLocation({required this.description, required this.position});
+class TrufiLocation extends TrufiMarker {
+  static const String origin = 'origin_location';
+  static const String destination = 'destination_location';
+  final String description;
+
+  TrufiLocation(
+    this.description, {
+    required super.id,
+    required super.position,
+    required super.widget,
+  });
 }

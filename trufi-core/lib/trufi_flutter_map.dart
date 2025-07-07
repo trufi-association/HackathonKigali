@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:trufi_core/trufi_map_controller.dart';
 
 class TrufiFlutterMap extends StatefulWidget {
@@ -7,10 +8,12 @@ class TrufiFlutterMap extends StatefulWidget {
     super.key,
     required this.controller,
     required this.tileUrl,
+    required this.onMapClick,
   });
 
   final TrufiMapController controller;
   final String tileUrl;
+  final void Function(LatLng) onMapClick;
 
   @override
   State<TrufiFlutterMap> createState() => _TrufiFlutterMapState();
@@ -78,7 +81,7 @@ class _TrufiFlutterMapState extends State<TrufiFlutterMap> {
           _mapCtl.moveAndRotate(camera.target, camera.zoom, camera.bearing);
         },
         onPositionChanged: _onPositionChanged,
-        onTap: (_, pos) => widget.controller.updateCamera(target: pos),
+        onTap: (_, position) => widget.onMapClick(position),
       ),
       children: [
         TileLayer(urlTemplate: widget.tileUrl),

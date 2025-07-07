@@ -43,6 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     routingMapComponent = RoutingMapComponent(mapController);
+    mapController.addLayer(routingMapComponent);
     super.initState();
   }
 
@@ -54,14 +55,29 @@ class _HomeScreenState extends State<HomeScreen> {
           if (showMapLibre)
             TrufiMapLibreMap(
               controller: mapController,
-              routingMapComponent:routingMapComponent,
+              // routingMapComponent:routingMapComponent,
               styleString:
                   'https://tileserver.kigali.trufi.dev/styles/test-style/style.json',
+              onMapClick: (_, coord) {
+                routingMapComponent.addDestination(
+                  latlng.LatLng(coord.latitude, coord.longitude),
+                  "description",
+                );
+                //  mapController.updateCamera(
+                //     target: latlng.LatLng(coord.latitude, coord.longitude),
+                //   );
+              },
             )
           else
             TrufiFlutterMap(
               controller: mapController,
               tileUrl: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+              onMapClick: (position) {
+                routingMapComponent.addDestination(position, "description");
+                //  mapController.updateCamera(
+                //     target: latlng.LatLng(coord.latitude, coord.longitude),
+                //   );
+              },
             ),
           SafeArea(
             child: Container(
@@ -96,51 +112,53 @@ class _HomeScreenState extends State<HomeScreen> {
               initialChildSize: 0.15,
               minChildSize: 0.15,
               maxChildSize: 1,
-              builder: (context, scrollController) => Container(
-                decoration: BoxDecoration(
-                  color: Colors.black,
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(5),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      blurRadius: 10,
-                    ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    Center(
-                      child: Container(
-                        width: 40,
-                        height: 5,
-                        margin: const EdgeInsets.only(top: 8, bottom: 8),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[400],
-                          borderRadius: BorderRadius.circular(10),
-                        ),
+              builder:
+                  (context, scrollController) => Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black,
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(5),
                       ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 10,
+                        ),
+                      ],
                     ),
-                    Expanded(
-                      child: ListView.builder(
-                        controller: scrollController,
-                        itemCount: 50,
-                        padding: EdgeInsets.zero,
-                        itemBuilder: (_, i) => Padding(
-                          padding: const EdgeInsets.all(2),
-                          child: _buildRouteOption(
-                            "50",
-                            "Avenida Carlos Medinaceli y Avenida Jaime Mendoza",
-                            "8 min",
-                            "2.0 km",
+                    child: Column(
+                      children: [
+                        Center(
+                          child: Container(
+                            width: 40,
+                            height: 5,
+                            margin: const EdgeInsets.only(top: 8, bottom: 8),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[400],
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                           ),
                         ),
-                      ),
+                        Expanded(
+                          child: ListView.builder(
+                            controller: scrollController,
+                            itemCount: 50,
+                            padding: EdgeInsets.zero,
+                            itemBuilder:
+                                (_, i) => Padding(
+                                  padding: const EdgeInsets.all(2),
+                                  child: _buildRouteOption(
+                                    "50",
+                                    "Avenida Carlos Medinaceli y Avenida Jaime Mendoza",
+                                    "8 min",
+                                    "2.0 km",
+                                  ),
+                                ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
+                  ),
             ),
           ),
         ],
