@@ -145,13 +145,25 @@ class RoutingMapComponent extends TrufiLayer {
   TrufiLocation? _destination;
   TrufiLocation? get destination => _destination;
   // List<Plan>
+  void cleanOriginAndDestination() {
+    _origin = null;
+    _destination = null;
+    mutateLayers();
+  }
 
   void addOrigin(latlng.LatLng position, String description) {
     _origin = TrufiLocation(
       id: TrufiLocation.origin,
       position: position,
       description,
-      widget: Container(height: 100, width: 100, color: Colors.red),
+      widget: Container(
+        color: Colors.orange,
+        child: CircleAvatar(
+          backgroundColor: Colors.white,
+          radius: 16,
+          child: Icon(Icons.flag, color: Colors.blue, size: 15),
+        ),
+      ),
     );
     if (_destination != null) {
       // fetch plan
@@ -164,7 +176,14 @@ class RoutingMapComponent extends TrufiLayer {
       id: TrufiLocation.destination,
       position: position,
       description,
-      widget: Container(height: 100, width: 100, color: Colors.red),
+      widget: Container(
+        color: Colors.blue,
+        child: CircleAvatar(
+          backgroundColor: Colors.white,
+          radius: 16,
+          child: Icon(Icons.flag, color: Colors.green, size: 15),
+        ),
+      ),
     );
     if (_origin != null) {
       // fetch plan

@@ -76,6 +76,7 @@ class _TrufiFlutterMapState extends State<TrufiFlutterMap> {
       options: MapOptions(
         initialCenter: camera.target,
         initialZoom: camera.zoom,
+        backgroundColor: Colors.transparent,
         onMapReady: () {
           setState(() => _mapReady = true);
           _mapCtl.moveAndRotate(camera.target, camera.zoom, camera.bearing);
@@ -84,7 +85,7 @@ class _TrufiFlutterMapState extends State<TrufiFlutterMap> {
         onTap: (_, position) => widget.onMapClick(position),
       ),
       children: [
-        TileLayer(urlTemplate: widget.tileUrl),
+        Opacity(opacity: .3,child: TileLayer(urlTemplate: widget.tileUrl)),
         for (final layer in visibleLayers)
           MarkerLayer(
             markers: [

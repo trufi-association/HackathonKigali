@@ -52,28 +52,46 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          if (showMapLibre)
-            TrufiMapLibreMap(
-              controller: mapController,
-              // routingMapComponent:routingMapComponent,
-              styleString:
-                  'https://tileserver.kigali.trufi.dev/styles/test-style/style.json',
-              onMapClick: (_, coord) {
+          // if (showMapLibre)
+          TrufiMapLibreMap(
+            controller: mapController,
+            // routingMapComponent:routingMapComponent,
+            styleString:
+                'https://tileserver.kigali.trufi.dev/styles/test-style/style.json',
+            onMapClick: (_, coord) {
+              if (routingMapComponent.origin == null) {
+                routingMapComponent.addOrigin(
+                  latlng.LatLng(coord.latitude, coord.longitude),
+                  "description",
+                );
+              } else if (routingMapComponent.destination == null) {
                 routingMapComponent.addDestination(
                   latlng.LatLng(coord.latitude, coord.longitude),
                   "description",
                 );
-                //  mapController.updateCamera(
-                //     target: latlng.LatLng(coord.latitude, coord.longitude),
-                //   );
-              },
-            )
-          else
+              } else {
+                routingMapComponent.cleanOriginAndDestination();
+              }
+              //  mapController.updateCamera(
+              //     target: latlng.LatLng(coord.latitude, coord.longitude),
+              //   );
+            },
+          ),
+
+          // else
+          if (showMapLibre)
             TrufiFlutterMap(
               controller: mapController,
-              tileUrl: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+              tileUrl:
+                  'https://tileserver.kigali.trufi.dev/styles/test-style/{z}/{x}/{y}.png',
               onMapClick: (position) {
-                routingMapComponent.addDestination(position, "description");
+                if (routingMapComponent.origin == null) {
+                  routingMapComponent.addOrigin(position, "description");
+                } else if (routingMapComponent.destination == null) {
+                  routingMapComponent.addDestination(position, "description");
+                } else {
+                  routingMapComponent.cleanOriginAndDestination();
+                }
                 //  mapController.updateCamera(
                 //     target: latlng.LatLng(coord.latitude, coord.longitude),
                 //   );
@@ -112,55 +130,63 @@ class _HomeScreenState extends State<HomeScreen> {
               initialChildSize: 0.15,
               minChildSize: 0.15,
               maxChildSize: 1,
-              builder:
-                  (context, scrollController) => Container(
-                    decoration: BoxDecoration(
-                      color: Colors.black,
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(5),
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
-                          blurRadius: 10,
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      children: [
-                        Center(
-                          child: Container(
-                            width: 40,
-                            height: 5,
-                            margin: const EdgeInsets.only(top: 8, bottom: 8),
-                            decoration: BoxDecoration(
-                              color: Colors.grey[400],
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: ListView.builder(
-                            controller: scrollController,
-                            itemCount: 50,
-                            padding: EdgeInsets.zero,
-                            itemBuilder:
-                                (_, i) => Padding(
-                                  padding: const EdgeInsets.all(2),
-                                  child: _buildRouteOption(
-                                    "50",
-                                    "Avenida Carlos Medinaceli y Avenida Jaime Mendoza",
-                                    "8 min",
-                                    "2.0 km",
-                                  ),
-                                ),
-                          ),
-                        ),
-                      ],
-                    ),
+              builder: (context, scrollController) => Container(
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(5),
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 10,
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 5,
+                        margin: const EdgeInsets.only(top: 8, bottom: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[400],
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: ListView.builder(
+                        controller: scrollController,
+                        itemCount: 50,
+                        padding: EdgeInsets.zero,
+                        itemBuilder: (_, i) => Padding(
+                          padding: const EdgeInsets.all(2),
+                          child: _buildRouteOption(
+                            "50",
+                            "Avenida Carlos Medinaceli y Avenida Jaime Mendoza",
+                            "8 min",
+                            "2.0 km",
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                showMapLibre = !showMapLibre;
+              });
+            },
+            child: Container(height: 100, width: 100, color: Colors.red),
+          ),
+          if (routingMapComponent.origin != null)
+            Center(child: routingMapComponent.origin!.widget),
         ],
       ),
     );

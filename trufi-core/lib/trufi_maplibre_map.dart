@@ -80,70 +80,87 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
     );
   }
 
-  Future<void> _syncLayers(List<TrufiLayer> visibleLayers) async {
-    final ctl = _mapCtl;
-    if (ctl == null) return;
+Future<void> _syncLayers(List<TrufiLayer> visibleLayers) async {
+  final ctl = _mapCtl;
+  if (ctl == null) return;
 
-    final newMarkerIds = <String>{};
-    final markersToUpdate = <TrufiMarker>[];
+  const sourceId = 'trufi_markers_source';
+  const layerId = 'trufi_markers_layer';
 
-    // Collect visible markers and detect which ones need to be updated
-    for (final layer in visibleLayers) {
-      for (final marker in layer.entries.where((m) => m.visible)) {
-        newMarkerIds.add(marker.id);
-        final currentHash = marker.hashCode;
-        final wasRendered = _renderedMarkerHashes.containsKey(marker.id);
-        final hashUnchanged = wasRendered && _renderedMarkerHashes[marker.id] == currentHash;
+  final features = <Map<String, dynamic>>[];
 
-        if (hashUnchanged) {
-          debugPrint("✔️ Marker '${marker.id}' reused (unchanged).");
-          continue; // Skip unchanged markers
-        }
+  for (final layer in visibleLayers) {
+    for (final marker in layer.entries.where((m) => m.visible)) {
+      final markerHash = marker.hashCode;
+      final wasRendered = _renderedMarkerHashes.containsKey(marker.id);
+      final hashUnchanged = wasRendered && _renderedMarkerHashes[marker.id] == markerHash;
 
-        markersToUpdate.add(marker);
-        _renderedMarkerHashes[marker.id] = currentHash;
+      if (hashUnchanged) {
+        debugPrint("✔️ Marker '${marker.id}' reused (unchanged).");
+        continue;
       }
-    }
 
-    // Remove markers that are no longer visible
-    final idsToRemove = _renderedMarkerHashes.keys.toSet().difference(newMarkerIds);
-    for (final id in idsToRemove) {
-      try {
-        await _removeMarkerById(id);
-        debugPrint("❌ Marker '$id' removed (no longer visible).");
-      } catch (_) {
-        // Ignore failures silently
-      }
-      _renderedMarkerHashes.remove(id);
-    }
+      _renderedMarkerHashes[marker.id] = markerHash;
 
-    // Add or update markers
-    for (final marker in markersToUpdate) {
       final bytes = await _widgetToBytes(marker);
-      final imageId = 'marker_${marker.id}';
+      final imageId = 'marker_${marker.id}_${markerHash}'; // usa hash para evitar conflicto
 
-      // Replace any existing symbol before adding the new one
-      try {
-        await _removeMarkerById(marker.id);
-        debugPrint("♻️ Symbol '${marker.id}' replaced.");
-      } catch (_) {
-        // Ignore failures silently
-      }
+      await ctl.addImage(imageId, bytes); // sobrescribe si ya existe
 
-      await ctl.addImage(imageId, bytes);
-      await ctl.addSymbol(
-        SymbolOptions(
-          geometry: LatLng(marker.position.latitude, marker.position.longitude),
-          iconImage: imageId,
-          // iconSize: marker.size.width ,
-          iconRotate: marker.rotation,
-        ),
-        {'id': marker.id},
-      );
-
-      debugPrint("🟢 Marker '${marker.id}' added or updated.");
+      features.add({
+        'type': 'Feature',
+        'geometry': {
+          'type': 'Point',
+          'coordinates': [marker.position.longitude, marker.position.latitude],
+        },
+        'properties': {
+          'icon': imageId,
+          'id': marker.id,
+        },
+      });
     }
   }
+
+  // eliminar IDs antiguos
+  final visibleIds = visibleLayers
+      .expand((layer) => layer.entries)
+      .where((m) => m.visible)
+      .map((m) => m.id)
+      .toSet();
+
+  final toRemove = _renderedMarkerHashes.keys.toSet().difference(visibleIds);
+  for (final id in toRemove) {
+    _renderedMarkerHashes.remove(id);
+  }
+
+  final geojson = {
+    'type': 'FeatureCollection',
+    'features': features,
+  };
+
+  try {
+    await ctl.setGeoJsonSource(sourceId, geojson);
+  } catch (_) {
+    // si falla, asumimos que no existe aún y la creamos
+    await ctl.addSource(
+      sourceId,
+      GeojsonSourceProperties(data: geojson),
+    );
+
+    await ctl.addLayer(
+      sourceId,
+      layerId,
+      const SymbolLayerProperties(
+        iconImage: '{icon}',
+        iconSize: 3.0,
+        iconAllowOverlap: true,
+        iconIgnorePlacement: true,
+      ),
+    );
+  }
+}
+
+
 
   // Removes any existing symbol with the given marker ID
   Future<void> _removeMarkerById(String id) async {
