@@ -7,9 +7,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/widgets.dart';
 
-abstract class ImageTool{
-
- static Future<Uint8List> svgToPng(String svgString) async {
+abstract class ImageTool {
+  static Future<Uint8List> svgToPng(String svgString) async {
     final pictureInfo = await vg.loadPicture(SvgStringLoader(svgString), null);
     final ui.Image image = await pictureInfo.picture.toImage(100, 100);
     final ByteData? data = await image.toByteData(
@@ -18,7 +17,11 @@ abstract class ImageTool{
     return data!.buffer.asUint8List();
   }
 
- static Future<Uint8List> widgetToPng(Widget widget) async {
+  static Future<Uint8List> widgetToPng(
+    Widget widget, {
+    double devicePixelRatio = 1.0,
+    required Size size,
+  }) async {
     final repaintBoundary = RenderRepaintBoundary();
 
     final renderView = RenderView(
@@ -40,7 +43,10 @@ abstract class ImageTool{
 
     final renderWidget = Directionality(
       textDirection: TextDirection.ltr,
-      child: widget,
+      child: MediaQuery(
+        data: MediaQueryData(size: size, devicePixelRatio: devicePixelRatio),
+        child: widget,
+      ),
     );
 
     final renderElement = RenderObjectToWidgetAdapter<RenderBox>(
@@ -55,7 +61,7 @@ abstract class ImageTool{
     pipelineOwner.flushCompositingBits();
     pipelineOwner.flushPaint();
 
-    final image = await repaintBoundary.toImage();
+    final image = await repaintBoundary.toImage(pixelRatio: devicePixelRatio);
     final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
 
     return byteData!.buffer.asUint8List();

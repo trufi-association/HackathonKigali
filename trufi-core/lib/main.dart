@@ -3,8 +3,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart' as latlng;
 import 'package:trufi_core/trufi_flutter_map.dart';
-import 'package:trufi_core/trufi_maplibre_map.dart';
 import 'package:trufi_core/trufi_map_controller.dart';
+// import 'package:trufi_core/trufi_maplibre_map_symbol.dart';
+import 'package:trufi_core/trufi_maplibre_map_geojson.dart';
 
 void main() {
   runApp(MyApp());
@@ -48,7 +49,16 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) { final mediaQuery = MediaQuery.of(context);
+
+    print('MediaQueryData:');
+    print('Size: ${mediaQuery.size}');
+    print('Device Pixel Ratio: ${mediaQuery.devicePixelRatio}');
+    print('Text Scale Factor: ${mediaQuery.textScaleFactor}');
+    print('Padding: ${mediaQuery.padding}');
+    print('ViewInsets: ${mediaQuery.viewInsets}');
+    print('Platform Brightness: ${mediaQuery.platformBrightness}');
+    print('Orientation: ${mediaQuery.orientation}');
     return Scaffold(
       body: Stack(
         children: [
@@ -85,6 +95,9 @@ class _HomeScreenState extends State<HomeScreen> {
               tileUrl:
                   'https://tileserver.kigali.trufi.dev/styles/test-style/{z}/{x}/{y}.png',
               onMapClick: (position) {
+                setState(() {
+                  
+                });
                 if (routingMapComponent.origin == null) {
                   routingMapComponent.addOrigin(position, "description");
                 } else if (routingMapComponent.destination == null) {
