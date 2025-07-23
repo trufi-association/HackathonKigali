@@ -140,8 +140,6 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
             'width': line.lineWidth,
             'layerLevel': line.layerLevel,
             'dotted': line.activeDots,
-            'lineDasharray': [1.0, 2.0],
-            'dateewrerewr': 'DotMarker',
           },
         });
       }
