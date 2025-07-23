@@ -1,24 +1,26 @@
 import 'dart:async';
-import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 import 'package:latlong2/latlong.dart' as latlng;
 import 'package:trufi_core/image_tool.dart';
+import 'package:trufi_core/models/enums/custom_icons.dart';
 import 'package:trufi_core/trufi_map_controller.dart';
 
 class TrufiMapLibreMap extends StatefulWidget {
   const TrufiMapLibreMap({
     super.key,
     required this.controller,
+    required this.trufiLayer,
     required this.styleString,
     required this.onMapClick,
   });
 
   final TrufiMapController controller;
+  final TrufiLayer trufiLayer;
   final String styleString;
-  final void Function(Point<double>, LatLng) onMapClick;
+  final OnMapClickCallback? onMapClick;
 
   @override
   State<TrufiMapLibreMap> createState() => _TrufiMapLibreMapState();
@@ -35,7 +37,7 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       widget.controller.cameraPositionNotifier.addListener(_cameraListener);
       widget.controller.layersNotifier.addListener(_layersListener);
     });
@@ -81,6 +83,7 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
   }
 
   Future<void> _syncLayers(List<TrufiLayer> visibleLayers) async {
+    print("Paint-----");
     final ctl = _mapCtl;
     if (ctl == null) return;
 
@@ -89,6 +92,7 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
       final layerId = 'layer_$sourceId';
 
       final features = <Map<String, dynamic>>[];
+      final lineFeatures = <Map<String, dynamic>>[];
 
       for (final marker in layer.entries.where((m) => m.visible)) {
         final markerHash = marker.hashCode;
@@ -113,17 +117,79 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
               marker.position.latitude,
             ],
           },
-          'properties': {'icon': imageId, 'id': marker.id},
+          'properties': {
+            'icon': imageId,
+            'id': marker.id,
+            if (marker.alignment == 'top')
+              'offset': [0.0, -marker.size.height / 2],
+          },
         });
       }
 
-      final geojson = {'type': 'FeatureCollection', 'features': []};
+      for (final line in layer.lines.where((l) => l.visible)) {
+        final coordinates = line.position
+            .map((e) => [e.longitude, e.latitude])
+            .toList();
+
+        lineFeatures.add({
+          'type': 'Feature',
+          'geometry': {'type': 'LineString', 'coordinates': coordinates},
+          'properties': {
+            'id': line.id,
+            'color': decodeFillColor(line.color),
+            'width': line.lineWidth,
+            'layerLevel': line.layerLevel,
+            'dotted': line.activeDots,
+            'lineDasharray': [1.0, 2.0],
+            'dateewrerewr': 'DotMarker',
+          },
+        });
+      }
+
+      final geojson = {
+        'type': 'FeatureCollection',
+        'features': [...features, ...lineFeatures],
+      };
 
       final existingSources = await ctl.getSourceIds();
       final sourceExists = existingSources.contains(sourceId);
-
       if (!sourceExists) {
         await ctl.addGeoJsonSource(sourceId, geojson);
+        
+        await ctl.addLineLayer(
+          sourceId,
+          'line_${layerId}_round',
+          LineLayerProperties(
+            lineColor: ['get', 'color'],
+            lineWidth: ['get', 'width'],
+            lineSortKey: ['get', 'layerLevel'],
+            lineDasharray: [0.5, 1.5],
+            lineJoin: 'round',
+            lineCap: 'round',
+          ),
+          filter: [
+            '==',
+            ['get', 'dotted'],
+            true,
+          ],
+        );
+        await ctl.addLineLayer(
+          sourceId,
+          'line_$layerId',
+          LineLayerProperties(
+            lineColor: ['get', 'color'],
+            lineWidth: ['get', 'width'],
+            lineSortKey: ['get', 'layerLevel'],
+            lineJoin: 'round',
+            lineCap: 'round',
+          ),
+          filter: [
+            '==',
+            ['get', 'dotted'],
+            false,
+          ],
+          enableInteraction: false,
+        );
         await ctl.addSymbolLayer(
           sourceId,
           layerId,
@@ -131,7 +197,9 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
             iconImage: ['get', 'icon'],
             iconSize: 1.0,
             iconAllowOverlap: true,
+            iconOffset: ['get', 'offset'],
           ),
+          enableInteraction: false,
         );
       } else {
         await ctl.setGeoJsonSource(sourceId, geojson);
@@ -174,7 +242,10 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
         await _syncLayers(widget.controller.visibleLayers);
       },
       onCameraIdle: _handleCameraIdle,
-      onMapClick: widget.onMapClick,
+      onMapClick: (points, latlng) {
+        print("main onMapClick");
+        widget.onMapClick?.call(points, latlng);
+      },
     );
   }
 

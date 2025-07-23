@@ -1,13 +1,15 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart' as latlng;
+import 'package:trufi_core/hive_init.dart';
+import 'package:trufi_core/pages/home/home_page.dart';
+import 'package:trufi_core/pages/home/widgets/routing_map/routing_map_controller.dart';
 import 'package:trufi_core/trufi_flutter_map.dart';
 import 'package:trufi_core/trufi_map_controller.dart';
 import 'package:trufi_core/trufi_maplibre_map_symbol.dart';
-// import 'package:trufi_core/trufi_maplibre_map_geojson.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await initHiveForFlutter();
   runApp(MyApp());
 }
 
@@ -19,7 +21,7 @@ class MyApp extends StatelessWidget {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Custom Draggable Sheet',
-      home: HomeScreen(),
+      home: HomePage(),
     );
   }
 }
@@ -70,15 +72,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 'https://tileserver.kigali.trufi.dev/styles/test-style/style.json',
             onMapClick: (_, coord) {
               if (routingMapComponent.origin == null) {
-                routingMapComponent.addOrigin(
-                  latlng.LatLng(coord.latitude, coord.longitude),
-                  "description",
-                );
+                // routingMapComponent.addOrigin(
+                //   latlng.LatLng(coord.latitude, coord.longitude),
+                //   "description",
+                // );
               } else if (routingMapComponent.destination == null) {
-                routingMapComponent.addDestination(
-                  latlng.LatLng(coord.latitude, coord.longitude),
-                  "description",
-                );
+                // routingMapComponent.addDestination(
+                //   latlng.LatLng(coord.latitude, coord.longitude),
+                //   "description",
+                // );
               } else {
                 routingMapComponent.cleanOriginAndDestination();
               }
@@ -99,9 +101,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   
                 });
                 if (routingMapComponent.origin == null) {
-                  routingMapComponent.addOrigin(position, "description");
+                  // routingMapComponent.addOrigin(position, "description");
                 } else if (routingMapComponent.destination == null) {
-                  routingMapComponent.addDestination(position, "description");
+                  // routingMapComponent.addDestination(position, "description");
                 } else {
                   routingMapComponent.cleanOriginAndDestination();
                 }
@@ -198,8 +200,8 @@ class _HomeScreenState extends State<HomeScreen> {
             },
             child: Container(height: 100, width: 100, color: Colors.red),
           ),
-          if (routingMapComponent.origin != null)
-            Center(child: routingMapComponent.origin!.widget),
+          // if (routingMapComponent.origin != null)
+          //   Center(child: routingMapComponent.origin!.widget),
         ],
       ),
     );
