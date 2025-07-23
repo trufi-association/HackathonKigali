@@ -1272,6 +1272,7 @@ class Leg {
       points: pointsOnLink?.points ?? '',
       mode: mode?.toOtpString() ?? '',
       route: line?.toRouteEntity(),
+      shortName: line?.publicCode,
       startTime: DateTime.tryParse(expectedStartTime ?? '') ?? DateTime(1000),
       endTime: DateTime.tryParse(expectedEndTime ?? '') ?? DateTime(1000),
       distance: distance ?? 0,

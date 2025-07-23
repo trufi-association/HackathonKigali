@@ -85,6 +85,39 @@ class RoutingMapComponent extends TrufiLayer {
         widget: ToMarker(),
         alignment: "top",
       ),
+
+    ...(plan?.itineraries != null && plan!.itineraries!.isNotEmpty)
+        ? plan!.itineraries!
+              .map(
+                ((itinerary) => itinerary.legs
+                    .where((leg) => leg.transportMode != TransportMode.walk)
+                    .map(
+                      (leg) => TrufiMarker(
+                        id: Uuid().v4(),
+                        position:
+                            leg.accumulatedPoints[(leg
+                                        .accumulatedPoints
+                                        .length /
+                                    2)
+                                .floor()],
+                        widget: Container(
+                          width: 60,
+                          height: 30,
+                          color: selectedItinerary == itinerary
+                              ? const Color(0xffd81b60)
+                              : Colors.grey,
+                          alignment: Alignment.center,
+                          child: Text(leg.shortName ?? 'no name'),
+                        ),
+                        alignment: "top",
+                        size: Size(60, 30),
+                        layerLevel: selectedItinerary == itinerary ? 2 : 1,
+                      ),
+                    )),
+              )
+              .expand((e) => e)
+              .toList()
+        : <TrufiMarker>[],
   ];
 
   @override
@@ -92,18 +125,18 @@ class RoutingMapComponent extends TrufiLayer {
       (plan?.itineraries != null && plan!.itineraries!.isNotEmpty)
       ? plan!.itineraries!
             .map(
-              ((item) => item.legs.map(
-                (e) => TrufiLine(
+              ((itinerary) => itinerary.legs.map(
+                (leg) => TrufiLine(
                   id: Uuid().v4(),
-                  position: e.accumulatedPoints,
-                  activeDots: e.transportMode == TransportMode.walk,
-                  color: selectedItinerary == item
-                      ? e.transportMode == TransportMode.walk
+                  position: leg.accumulatedPoints,
+                  activeDots: leg.transportMode == TransportMode.walk,
+                  color: selectedItinerary == itinerary
+                      ? leg.transportMode == TransportMode.walk
                             ? Colors.black
                             : const Color(0xffd81b60)
                       : Colors.grey.withAlpha(128),
-                  layerLevel: selectedItinerary == item ? 2 : 1,
-                  lineWidth: selectedItinerary == item ? 5 : 3,
+                  layerLevel: selectedItinerary == itinerary ? 2 : 1,
+                  lineWidth: selectedItinerary == itinerary ? 5 : 3,
                 ),
               )),
             )

@@ -122,6 +122,7 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
             'id': marker.id,
             if (marker.alignment == 'top')
               'offset': [0.0, -marker.size.height / 2],
+            'layerLevel': marker.layerLevel,
           },
         });
       }
@@ -153,7 +154,7 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
       final sourceExists = existingSources.contains(sourceId);
       if (!sourceExists) {
         await ctl.addGeoJsonSource(sourceId, geojson);
-        
+
         await ctl.addLineLayer(
           sourceId,
           'line_${layerId}_round',
@@ -196,6 +197,7 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
             iconSize: 1.0,
             iconAllowOverlap: true,
             iconOffset: ['get', 'offset'],
+            symbolSortKey: ['get', 'layerLevel'],
           ),
           enableInteraction: false,
         );

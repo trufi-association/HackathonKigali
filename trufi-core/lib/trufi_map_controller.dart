@@ -97,6 +97,7 @@ class TrufiMarker {
     required this.id,
     required this.position,
     required this.widget,
+    this.layerLevel = 1,
     this.size = const Size(30, 30),
     this.rotation = 0,
     this.visible = true,
@@ -106,6 +107,7 @@ class TrufiMarker {
   final String id;
   final latlng.LatLng position;
   final Widget widget;
+  final int layerLevel;
   final Size size;
   final double rotation;
   final bool visible;
