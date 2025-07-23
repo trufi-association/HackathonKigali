@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart' as latlng;
 import 'package:trufi_core/trufi_flutter_map.dart';
 import 'package:trufi_core/trufi_map_controller.dart';
-// import 'package:trufi_core/trufi_maplibre_map_symbol.dart';
-import 'package:trufi_core/trufi_maplibre_map_geojson.dart';
+import 'package:trufi_core/trufi_maplibre_map_symbol.dart';
+// import 'package:trufi_core/trufi_maplibre_map_geojson.dart';
 
 void main() {
   runApp(MyApp());

@@ -41,13 +41,19 @@ abstract class ImageTool {
     pipelineOwner.rootNode = renderView;
     renderView.prepareInitialFrame();
 
-    final renderWidget = Directionality(
-      textDirection: TextDirection.ltr,
-      child: MediaQuery(
-        data: MediaQueryData(size: size, devicePixelRatio: devicePixelRatio),
-        child: widget,
+  final renderWidget = Directionality(
+    textDirection: TextDirection.ltr,
+    child: MediaQuery(
+      data: MediaQueryData(size: size, devicePixelRatio: devicePixelRatio),
+      child: Center(
+        child: SizedBox(
+          width: size.width,
+          height: size.height,
+          child: widget,
+        ),
       ),
-    );
+    ),
+  );
 
     final renderElement = RenderObjectToWidgetAdapter<RenderBox>(
       container: repaintBoundary,
