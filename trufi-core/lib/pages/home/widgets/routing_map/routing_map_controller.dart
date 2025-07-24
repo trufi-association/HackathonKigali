@@ -65,7 +65,6 @@ class RoutingMapComponent extends TrufiLayer {
     final nextIndex = (currentIndex + 1) % itineraries.length;
 
     selectedItinerary = itineraries[nextIndex];
-    Future.delayed(Duration(seconds: 1));
     mutateLayers();
   }
 
@@ -93,7 +92,7 @@ class RoutingMapComponent extends TrufiLayer {
                     .where((leg) => leg.transportMode != TransportMode.walk)
                     .map(
                       (leg) => TrufiMarker(
-                        id: Uuid().v4(),
+                        id: "${leg.shortName}${selectedItinerary == itinerary}",
                         position:
                             leg.accumulatedPoints[(leg
                                         .accumulatedPoints
@@ -109,7 +108,6 @@ class RoutingMapComponent extends TrufiLayer {
                           alignment: Alignment.center,
                           child: Text(leg.shortName ?? 'no name'),
                         ),
-                        alignment: "top",
                         size: Size(60, 30),
                         layerLevel: selectedItinerary == itinerary ? 2 : 1,
                       ),
