@@ -100,13 +100,42 @@ class RoutingMapComponent extends TrufiLayer {
                                     2)
                                 .floor()],
                         widget: Container(
-                          width: 60,
-                          height: 30,
-                          color: selectedItinerary == itinerary
-                              ? const Color(0xffd81b60)
-                              : Colors.grey,
-                          alignment: Alignment.center,
-                          child: Text(leg.shortName ?? 'no name'),
+                          padding: const EdgeInsets.all(4.0),
+                          decoration: BoxDecoration(
+                            color: selectedItinerary == itinerary
+                                ? const Color(0xffd81b60)
+                                : Colors.grey,
+                            borderRadius: const BorderRadius.all(
+                              Radius.circular(4.0),
+                            ),
+                          ),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Row(
+                              children: [
+                                SizedBox(
+                                  height: 28,
+                                  width: 28,
+                                  child: leg.transportMode.getImage(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 4,
+                                  ),
+                                  child: Text(
+                                    leg.route?.shortName ?? 'no name',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                         size: Size(60, 30),
                         layerLevel: selectedItinerary == itinerary ? 2 : 1,
