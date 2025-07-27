@@ -1,4 +1,4 @@
-import 'package:trufi_core/models/othermodel/enums/mode.dart';
+import 'package:trufi_core/models/enums/mode.dart';
 import 'package:trufi_core/models/plan_entity.dart';
 import 'package:trufi_core/pages/home/service/routing_service/otp_2_7/graphql_plan_data_source.dart';
 import 'package:trufi_core/trufi_map_controller.dart';

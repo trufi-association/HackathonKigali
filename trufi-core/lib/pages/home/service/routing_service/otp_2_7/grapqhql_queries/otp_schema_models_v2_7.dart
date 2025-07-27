@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:trufi_core/models/enums/transport_mode.dart';
-import 'package:trufi_core/models/othermodel/enums/place/vertex_type.dart';
+import 'package:trufi_core/models/enums/vertex_type.dart';
 import 'package:trufi_core/models/plan_entity.dart';
 import 'package:trufi_core/models/trufi_map_utils.dart';
 

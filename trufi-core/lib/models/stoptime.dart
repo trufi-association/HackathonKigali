@@ -1,6 +1,6 @@
 import 'package:trufi_core/models/plan_entity.dart';
-import 'othermodel/enums/leg/pickup_dropoff_type.dart';
-import 'othermodel/enums/leg/realtime_state.dart';
+import 'pickup_dropoff_type.dart';
+import 'enums/realtime_state.dart';
 import 'trip.dart';
 
 class Stoptime {

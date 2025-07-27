@@ -1,8 +1,8 @@
 import 'package:trufi_core/models/plan_entity.dart';
 
 import 'alert.dart';
-import 'othermodel/enums/bikes_allowed.dart';
-import 'othermodel/enums/stop/wheelchair_boarding.dart';
+import 'enums/bikes_allowed.dart';
+import 'enums/wheelchair_boarding.dart';
 import 'geometry.dart';
 import 'pattern.dart';
 import 'stoptime.dart';

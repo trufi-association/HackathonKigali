@@ -1,7 +1,7 @@
 import 'package:trufi_core/models/plan_entity.dart';
-import 'othermodel/enums/alert_cause_type.dart';
-import 'othermodel/enums/alert_effect_type.dart';
-import 'othermodel/enums/alert_severity_level_type.dart';
+import 'enums/alert_cause_type.dart';
+import 'enums/alert_effect_type.dart';
+import 'enums/alert_severity_level_type.dart';
 import 'pattern.dart';
 import 'translated_string.dart';
 import 'trip.dart';

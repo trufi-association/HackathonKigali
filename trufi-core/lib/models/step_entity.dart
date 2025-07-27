@@ -1,5 +1,5 @@
-import 'package:trufi_core/models/enums/enums_plan/absolute_direction.dart';
-import 'package:trufi_core/models/enums/enums_plan/relative_direction.dart';
+import 'package:trufi_core/models/enums/absolute_direction.dart';
+import 'package:trufi_core/models/enums/relative_direction.dart';
 import 'package:trufi_core/models/elevation_profile_component.dart';
 
 class StepEntity {
