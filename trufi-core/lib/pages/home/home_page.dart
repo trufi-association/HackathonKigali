@@ -7,6 +7,7 @@ import 'package:trufi_core/pages/home/widgets/routing_map/routing_map_controller
 import 'package:trufi_core/trufi_map_controller.dart';
 import 'package:latlong2/latlong.dart' as latlng;
 import 'package:trufi_core/trufi_maplibre_map_geojson.dart';
+import 'package:trufi_core/widgets/utils.dart';
 
 class HomePage extends StatefulWidget {
   static const String route = "/Home";
@@ -179,7 +180,10 @@ class _HomePageState extends State<HomePage> {
                 );
               } else {
                 widgets.add(
-                  _busChip(leg.route?.shortName ?? "?", color: Colors.teal),
+                  _busChip(
+                    leg.route?.shortName ?? "?",
+                    color: hexToColor(leg.route?.color ?? ''),
+                  ),
                 );
               }
               widgets.add(_arrowIcon());

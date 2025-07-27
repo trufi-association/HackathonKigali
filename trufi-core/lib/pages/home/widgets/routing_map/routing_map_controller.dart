@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:trufi_core/widgets/utils.dart';
 import 'package:uuid/uuid.dart';
 import 'package:flutter/material.dart';
 import 'package:trufi_core/consts.dart';
@@ -103,7 +104,7 @@ class RoutingMapComponent extends TrufiLayer {
                           padding: const EdgeInsets.all(4.0),
                           decoration: BoxDecoration(
                             color: selectedItinerary == itinerary
-                                ? const Color(0xffd81b60)
+                                ? hexToColor(leg.route?.color ?? 'd81b60')
                                 : Colors.grey,
                             borderRadius: const BorderRadius.all(
                               Radius.circular(4.0),
@@ -160,7 +161,7 @@ class RoutingMapComponent extends TrufiLayer {
                   color: selectedItinerary == itinerary
                       ? leg.transportMode == TransportMode.walk
                             ? Colors.black
-                            : const Color(0xffd81b60)
+                            : hexToColor(leg.route?.color ?? 'd81b60')
                       : Colors.grey.withAlpha(128),
                   layerLevel: selectedItinerary == itinerary ? 2 : 1,
                   lineWidth: selectedItinerary == itinerary ? 5 : 3,
