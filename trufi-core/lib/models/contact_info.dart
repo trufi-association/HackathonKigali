@@ -3,21 +3,21 @@ class ContactInfo {
   final String? infoUrl;
   final String? bookingUrl;
 
-  const ContactInfo({
-    this.phoneNumber,
-    this.infoUrl,
-    this.bookingUrl,
-  });
+  const ContactInfo({this.phoneNumber, this.infoUrl, this.bookingUrl});
 
-  factory ContactInfo.fromMap(Map<String, dynamic> map) => ContactInfo(
-        phoneNumber: map['phoneNumber'] as String?,
-        infoUrl: map['infoUrl'] as String?,
-        bookingUrl: map['bookingUrl'] as String?,
-      );
+  static const String _phoneNumber = 'phoneNumber';
+  static const String _infoUrl = 'infoUrl';
+  static const String _bookingUrl = 'bookingUrl';
 
-  Map<String, dynamic> toMap() => {
-        'phoneNumber': phoneNumber,
-        'infoUrl': infoUrl,
-        'bookingUrl': bookingUrl,
-      };
+  factory ContactInfo.fromJson(Map<String, dynamic> map) => ContactInfo(
+    phoneNumber: map[_phoneNumber],
+    infoUrl: map[_infoUrl],
+    bookingUrl: map[_bookingUrl],
+  );
+
+  Map<String, dynamic> toJson() => {
+    _phoneNumber: phoneNumber,
+    _infoUrl: infoUrl,
+    _bookingUrl: bookingUrl,
+  };
 }

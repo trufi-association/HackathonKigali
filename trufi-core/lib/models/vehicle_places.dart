@@ -9,16 +9,20 @@ class VehiclePlaces {
     this.wheelchairAccessibleCarSpaces,
   });
 
+  static const String _bicycleSpaces = 'bicycleSpaces';
+  static const String _carSpaces = 'carSpaces';
+  static const String _wheelchairAccessibleCarSpaces =
+      'wheelchairAccessibleCarSpaces';
+
   factory VehiclePlaces.fromMap(Map<String, dynamic> json) => VehiclePlaces(
-        bicycleSpaces: int.tryParse(json['bicycleSpaces'].toString()),
-        carSpaces: int.tryParse(json['carSpaces'].toString()),
-        wheelchairAccessibleCarSpaces:
-            int.tryParse(json['wheelchairAccessibleCarSpaces'].toString()),
-      );
+    bicycleSpaces: json[_bicycleSpaces],
+    carSpaces: json[_carSpaces],
+    wheelchairAccessibleCarSpaces: json[_wheelchairAccessibleCarSpaces],
+  );
 
   Map<String, dynamic> toMap() => {
-        'bicycleSpaces': bicycleSpaces,
-        'carSpaces': carSpaces,
-        'wheelchairAccessibleCarSpaces': wheelchairAccessibleCarSpaces,
-      };
+    _bicycleSpaces: bicycleSpaces,
+    _carSpaces: carSpaces,
+    _wheelchairAccessibleCarSpaces: wheelchairAccessibleCarSpaces,
+  };
 }

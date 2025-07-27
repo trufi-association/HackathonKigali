@@ -36,69 +36,103 @@ class PatternOtp {
     this.alerts,
   });
 
+  static const String _id = 'id';
+  static const String _route = 'route';
+  static const String _directionId = 'directionId';
+  static const String _name = 'name';
+  static const String _code = 'code';
+  static const String _headsign = 'headsign';
+  static const String _trips = 'trips';
+  static const String _tripsForDate = 'tripsForDate';
+  static const String _stops = 'stops';
+  static const String _geometry = 'geometry';
+  static const String _patternGeometry = 'patternGeometry';
+  static const String _semanticHash = 'semanticHash';
+  static const String _alerts = 'alerts';
+
   factory PatternOtp.fromJson(Map<String, dynamic> json) => PatternOtp(
-        id: json['id'].toString(),
-        route: json['route'] != null
-            ? RouteEntity.fromJson(json['route'] as Map<String, dynamic>)
+    id: json[_id],
+    route:
+        json[_route] != null
+            ? RouteEntity.fromJson(json[_route] as Map<String, dynamic>)
             : null,
-        directionId: int.tryParse(json['directionId'].toString()) ?? 0,
-        name: json['name'].toString(),
-        code: json['code'].toString(),
-        headsign: json['headsign'] as String?,
-        trips: json['trips'] != null
-            ? List<Trip>.from((json["trips"] as List<dynamic>).map(
+    directionId: json[_directionId],
+    name: json[_name],
+    code: json[_code],
+    headsign: json[_headsign],
+    trips:
+        json[_trips] != null
+            ? List<Trip>.from(
+              (json[_trips] as List<dynamic>).map(
                 (x) => Trip.fromJson(x as Map<String, dynamic>),
-              ))
+              ),
+            )
             : null,
-        tripsForDate: json['tripsForDate'] != null
-            ? List<Trip>.from((json["tripsForDate"] as List<dynamic>).map(
+    tripsForDate:
+        json[_tripsForDate] != null
+            ? List<Trip>.from(
+              (json[_tripsForDate] as List<dynamic>).map(
                 (x) => Trip.fromJson(x as Map<String, dynamic>),
-              ))
+              ),
+            )
             : null,
-        stops: json['stops'] != null
-            ? List<StopEntity>.from((json["stops"] as List<dynamic>).map(
-                (x) => StopEntity.fromMap(x as Map<String, dynamic>),
-              ))
+    stops:
+        json[_stops] != null
+            ? List<StopEntity>.from(
+              (json[_stops] as List<dynamic>).map(
+                (x) => StopEntity.fromJson(x as Map<String, dynamic>),
+              ),
+            )
             : null,
-        geometry: json['geometry'] != null
-            ? List<Coordinates>.from((json["geometry"] as List<dynamic>).map(
+    geometry:
+        json[_geometry] != null
+            ? List<Coordinates>.from(
+              (json[_geometry] as List<dynamic>).map(
                 (x) => Coordinates.fromJson(x as Map<String, dynamic>),
-              ))
+              ),
+            )
             : null,
-        patternGeometry: json['patternGeometry'] != null
-            ? Geometry.fromJson(json['patternGeometry'] as Map<String, dynamic>)
+    patternGeometry:
+        json[_patternGeometry] != null
+            ? Geometry.fromJson(json[_patternGeometry] as Map<String, dynamic>)
             : null,
-        semanticHash: json['semanticHash'].toString(),
-        alerts: json['alerts'] != null
-            ? List<Alert>.from((json["alerts"] as List<dynamic>).map(
+    semanticHash: json[_semanticHash],
+    alerts:
+        json[_alerts] != null
+            ? List<Alert>.from(
+              (json[_alerts] as List<dynamic>).map(
                 (x) => Alert.fromJson(x as Map<String, dynamic>),
-              ))
+              ),
+            )
             : null,
-      );
+  );
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'route': route?.toJson(),
-        'directionId': directionId,
-        'name': name,
-        'code': code,
-        'headsign': headsign,
-        'trips': trips != null
+    _id: id,
+    _route: route?.toJson(),
+    _directionId: directionId,
+    _name: name,
+    _code: code,
+    _headsign: headsign,
+    _trips:
+        trips != null
             ? List<dynamic>.from(trips!.map((x) => x.toJson()))
             : null,
-        'tripsForDate': tripsForDate != null
+    _tripsForDate:
+        tripsForDate != null
             ? List<dynamic>.from(tripsForDate!.map((x) => x.toJson()))
             : null,
-        'stops': stops != null
-            ? List<dynamic>.from(stops!.map((x) => x.toMap()))
-            : null,
-        'geometry': geometry != null
+    _stops:
+        stops != null ? List<dynamic>.from(stops!.map((x) => x.toJson())) : null,
+    _geometry:
+        geometry != null
             ? List<dynamic>.from(geometry!.map((x) => x.toJson()))
             : null,
-        'patternGeometry': patternGeometry?.toJson(),
-        'semanticHash': semanticHash,
-        'alerts': alerts != null
+    _patternGeometry: patternGeometry?.toJson(),
+    _semanticHash: semanticHash,
+    _alerts:
+        alerts != null
             ? List<dynamic>.from(alerts!.map((x) => x.toJson()))
             : null,
-      };
+  };
 }

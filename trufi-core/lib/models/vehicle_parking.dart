@@ -29,42 +29,56 @@ class VehicleParking {
     this.openingHours,
   });
 
+  static const String _name = 'name';
+  static const String _lat = 'lat';
+  static const String _lon = 'lon';
+  static const String _capacity = 'capacity';
+  static const String _availability = 'availability';
+  static const String _imageUrl = 'imageUrl';
+  static const String _tags = 'tags';
+  static const String _anyCarPlaces = 'anyCarPlaces';
+  static const String _vehicleParkingId = 'vehicleParkingId';
+  static const String _detailsUrl = 'detailsUrl';
+  static const String _note = 'note';
+  static const String _openingHours = 'openingHours';
+  static const String _osm = 'osm';
+
   factory VehicleParking.fromMap(Map<String, dynamic> json) => VehicleParking(
-        name: json['name'] as String?,
-        lat: double.tryParse(json['lat'].toString()),
-        lon: double.tryParse(json['lon'].toString()),
-        capacity: json['capacity'] != null
-            ? VehiclePlaces.fromMap(json['capacity'] as Map<String, dynamic>)
+    name: json[_name],
+    lat: json[_lat],
+    lon: json[_lon],
+    capacity:
+        json[_capacity] != null
+            ? VehiclePlaces.fromMap(json[_capacity] as Map<String, dynamic>)
             : null,
-        availability: json['availability'] != null
-            ? VehiclePlaces.fromMap(
-                json['availability'] as Map<String, dynamic>)
+    availability:
+        json[_availability] != null
+            ? VehiclePlaces.fromMap(json[_availability] as Map<String, dynamic>)
             : null,
-        imageUrl: json['imageUrl'] as String?,
-        tags: json['tags'] != null
-            ? (json['tags'] as List<dynamic>).cast<String>()
+    imageUrl: json[_imageUrl],
+    tags:
+        json[_tags] != null
+            ? (json[_tags] as List<dynamic>).cast<String>()
             : null,
-        anyCarPlaces: json['anyCarPlaces'] as bool?,
-        vehicleParkingId: json['vehicleParkingId'] as String?,
-        detailsUrl: json['detailsUrl'] as String?,
-        note: json['note'] as String?,
-        openingHours: json['openingHours']?['osm'] as String?,
-      );
+    anyCarPlaces: json[_anyCarPlaces],
+    vehicleParkingId: json[_vehicleParkingId],
+    detailsUrl: json[_detailsUrl],
+    note: json[_note],
+    openingHours: json[_openingHours]?[_osm],
+  );
 
   Map<String, dynamic> toMap() => {
-        'name': name,
-        'lat': lat,
-        'lon': lon,
-        'capacity': capacity?.toMap(),
-        'availability': availability?.toMap(),
-        'imageUrl': imageUrl,
-        'tags': tags,
-        'anyCarPlaces': anyCarPlaces,
-        'vehicleParkingId': vehicleParkingId,
-        'detailsUrl': detailsUrl,
-        'note': note,
-        'openingHours': {
-          'osm': openingHours
-        },
-      };
+    _name: name,
+    _lat: lat,
+    _lon: lon,
+    _capacity: capacity?.toMap(),
+    _availability: availability?.toMap(),
+    _imageUrl: imageUrl,
+    _tags: tags,
+    _anyCarPlaces: anyCarPlaces,
+    _vehicleParkingId: vehicleParkingId,
+    _detailsUrl: detailsUrl,
+    _note: note,
+    _openingHours: {_osm: openingHours},
+  };
 }

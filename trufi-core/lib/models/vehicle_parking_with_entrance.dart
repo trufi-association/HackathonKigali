@@ -11,19 +11,25 @@ class VehicleParkingWithEntrance {
     this.realtime,
   });
 
+  static const String _vehicleParking = 'vehicleParking';
+  static const String _closesSoon = 'closesSoon';
+  static const String _realtime = 'realtime';
+
   factory VehicleParkingWithEntrance.fromMap(Map<String, dynamic> json) =>
       VehicleParkingWithEntrance(
-        vehicleParking: json['vehicleParking'] != null
-            ? VehicleParking.fromMap(
-                json['vehicleParking'] as Map<String, dynamic>)
-            : null,
-        closesSoon: json['closesSoon'] as bool?,
-        realtime: json['realtime'] as bool?,
+        vehicleParking:
+            json[_vehicleParking] != null
+                ? VehicleParking.fromMap(
+                  json[_vehicleParking] as Map<String, dynamic>,
+                )
+                : null,
+        closesSoon: json[_closesSoon],
+        realtime: json[_realtime],
       );
 
   Map<String, dynamic> toMap() => {
-        'vehicleParking': vehicleParking?.toMap(),
-        'closesSoon': closesSoon,
-        'realtime': realtime,
-      };
+    _vehicleParking: vehicleParking?.toMap(),
+    _closesSoon: closesSoon,
+    _realtime: realtime,
+  };
 }

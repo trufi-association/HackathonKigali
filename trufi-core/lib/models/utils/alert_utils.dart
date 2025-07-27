@@ -61,7 +61,8 @@ abstract class AlertUtils {
   }
 
   static AlertSeverityLevelType? getMaximumAlertSeverityLevel(
-      List<Alert>? alerts) {
+    List<Alert>? alerts,
+  ) {
     if (alerts == null || alerts.isEmpty) {
       return null;
     }
@@ -77,29 +78,33 @@ abstract class AlertUtils {
     return levels.containsKey(AlertSeverityLevelType.severe)
         ? AlertSeverityLevelType.severe
         : levels.containsKey(AlertSeverityLevelType.warning)
-            ? AlertSeverityLevelType.warning
-            : levels.containsKey(AlertSeverityLevelType.info)
-                ? AlertSeverityLevelType.info
-                : levels.containsKey(AlertSeverityLevelType.unknownseverity)
-                    ? AlertSeverityLevelType.unknownseverity
-                    : null;
+        ? AlertSeverityLevelType.warning
+        : levels.containsKey(AlertSeverityLevelType.info)
+        ? AlertSeverityLevelType.info
+        : levels.containsKey(AlertSeverityLevelType.unknownseverity)
+        ? AlertSeverityLevelType.unknownseverity
+        : null;
   }
 
   static AlertSeverityLevelType? getActiveAlertSeverityLevel(
-      List<Alert>? alerts, double? referenceUnixTime) {
+    List<Alert>? alerts,
+    double? referenceUnixTime,
+  ) {
     if (alerts == null || alerts.isEmpty) {
       return null;
     }
 
-    final filteredAlerts = alerts
-        .where((alert) => isAlertValid(alert, referenceUnixTime))
-        .toList();
+    final filteredAlerts =
+        alerts
+            .where((alert) => isAlertValid(alert, referenceUnixTime))
+            .toList();
 
     return getMaximumAlertSeverityLevel(filteredAlerts);
   }
 
   static AlertSeverityLevelType? getActiveLegAlertSeverityLevel(
-      PlanItineraryLeg? leg) {
+    PlanItineraryLeg? leg,
+  ) {
     if (leg == null) {
       return null;
     }
@@ -115,7 +120,9 @@ abstract class AlertUtils {
     ];
 
     return getActiveAlertSeverityLevel(
-        serviceAlerts, (leg.startTime.millisecondsSinceEpoch / 1000));
+      serviceAlerts,
+      (leg.startTime.millisecondsSinceEpoch / 1000),
+    );
   }
 
   static bool legHasCancelation(PlanItineraryLeg? leg) {
@@ -123,34 +130,6 @@ abstract class AlertUtils {
       return false;
     }
     return leg.realtimeState == RealtimeState.canceled;
-  }
-
-  static List<Alert> getActiveLegAlerts(
-    PlanItineraryLeg? leg,
-    double legStartTime,
-  ) {
-    if (leg == null) {
-      return [];
-    }
-    final routeAlerts = leg.route?.alerts?.map(
-      (e) => e.copyWith(sourceAlert: 'route-alert'),
-    );
-    final fromStopAlerts = leg.fromPlace?.stopEntity?.alerts?.map(
-      (e) => e.copyWith(sourceAlert: 'from-stop-alert'),
-    );
-    final toStopAlerts = leg.toPlace?.stopEntity?.alerts?.map(
-      (e) => e.copyWith(sourceAlert: 'to-stop-alert'),
-    );
-
-    final List<Alert> serviceAlerts = [
-      ...routeAlerts ?? [],
-      ...fromStopAlerts ?? [],
-      ...toStopAlerts ?? [],
-    ];
-
-    return serviceAlerts
-        .where((alert) => isAlertValid(alert, legStartTime))
-        .toList();
   }
 
   static int alertSeverityCompare(Alert a, Alert b) {
@@ -161,7 +140,8 @@ abstract class AlertUtils {
       AlertSeverityLevelType.severe,
     ];
 
-    int severityLevelDifference = severityLevels.indexOf(b.alertSeverityLevel) -
+    int severityLevelDifference =
+        severityLevels.indexOf(b.alertSeverityLevel) -
         severityLevels.indexOf(a.alertSeverityLevel);
 
     return severityLevelDifference;

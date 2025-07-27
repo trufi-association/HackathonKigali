@@ -4,13 +4,11 @@ class Coordinates {
 
   const Coordinates({this.lat, this.lon});
 
-  factory Coordinates.fromJson(Map<String, dynamic> json) => Coordinates(
-        lat: double.tryParse(json['lat'].toString()) ?? 0,
-        lon: double.tryParse(json['lon'].toString()) ?? 0,
-      );
+  static const String _lat = 'lat';
+  static const String _lon = 'lon';
 
-  Map<String, dynamic> toJson() => {
-        'lat': lat,
-        'lon': lon,
-      };
+  factory Coordinates.fromJson(Map<String, dynamic> json) =>
+      Coordinates(lat: json[_lat], lon: json[_lon]);
+
+  Map<String, dynamic> toJson() => {_lat: lat, _lon: lon};
 }

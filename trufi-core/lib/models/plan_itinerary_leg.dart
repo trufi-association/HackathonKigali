@@ -26,32 +26,34 @@ class PlanItineraryLeg {
     this.accumulatedPoints = const [],
     this.trip,
   }) {
-    transportMode =
-        getTransportMode(mode: mode, specificTransport: routeLongName);
+    transportMode = getTransportMode(
+      mode: mode,
+      specificTransport: routeLongName,
+    );
   }
 
-  static const _distance = "distance";
-  static const _duration = "duration";
-  static const _legGeometry = "legGeometry";
-  static const _points = "points";
-  static const _mode = "mode";
-  static const _route = "route";
-  static const _routeLongName = "routeLongName";
-  static const _agency = "agency";
-  static const _realtimeState = "realtimeState";
-  static const _toPlace = "to";
-  static const _fromPlace = "from";
-  static const _startTime = "startTime";
-  static const _endTime = "endTime";
-  static const _steps = "steps";
-  static const _intermediatePlaces = "intermediatePlaces";
-  static const _intermediatePlace = "intermediatePlace";
-  static const _transitLeg = "transitLeg";
-  static const _rentedBike = "rentedBike";
-  static const _interlineWithPreviousLeg = "interlineWithPreviousLeg";
-  static const _pickupBookingInfo = "pickupBookingInfo";
-  static const _dropOffBookingInfo = "dropOffBookingInfo";
-  static const _trip = "trip";
+  static const String _points = 'points';
+  static const String _mode = 'mode';
+  static const String _route = 'route';
+  static const String _routeLongName = 'routeLongName';
+  static const String _distance = 'distance';
+  static const String _duration = 'duration';
+  static const String _legGeometry = "legGeometry";
+  static const String _agency = 'agency';
+  static const String _realtimeState = 'realtimeState';
+  static const String _toPlace = 'toPlace';
+  static const String _fromPlace = 'fromPlace';
+  static const String _startTime = 'startTime';
+  static const String _endTime = 'endTime';
+  static const String _transitLeg = 'transitLeg';
+  static const String _intermediatePlace = 'intermediatePlace';
+  static const String _rentedBike = 'rentedBike';
+  static const String _interlineWithPreviousLeg = 'interlineWithPreviousLeg';
+  static const String _pickupBookingInfo = 'pickupBookingInfo';
+  static const String _dropOffBookingInfo = 'dropOffBookingInfo';
+  static const String _steps = 'steps';
+  static const String _intermediatePlaces = 'intermediatePlaces';
+  static const String _trip = 'trip';
 
   final String points;
   final String mode;
@@ -81,64 +83,77 @@ class PlanItineraryLeg {
 
   factory PlanItineraryLeg.fromJson(Map<String, dynamic> json) {
     return PlanItineraryLeg(
-      points: json[_legGeometry][_points] as String,
-      mode: json[_mode] as String,
-      route: json[_route] != null
-          ? ((json[_route] is Map<String, dynamic>)
-              ? RouteEntity.fromJson(json[_route] as Map<String, dynamic>)
-              : null)
-          : null,
-      shortName: json[_route] != null
-          ? ((json[_route] is String) && json[_route] != ''
-              ? json[_route] as String
-              : null)
-          : null,
-      routeLongName: json[_routeLongName] as String,
-      distance: json[_distance] as double,
-      duration: Duration(
-          seconds: (double.tryParse(json[_duration].toString()) ?? 0).toInt()),
-      agency: json[_agency] != null
-          ? AgencyEntity.fromMap(json[_agency] as Map<String, dynamic>)
-          : null,
-      realtimeState: getRealtimeStateByString(json[_realtimeState].toString()),
-      toPlace: json[_toPlace] != null
-          ? PlaceEntity.fromMap(json[_toPlace] as Map<String, dynamic>)
-          : null,
-      fromPlace: json[_fromPlace] != null
-          ? PlaceEntity.fromMap(json[_fromPlace] as Map<String, dynamic>)
-          : null,
-      startTime: DateTime.fromMillisecondsSinceEpoch(
-          int.tryParse(json[_startTime].toString()) ?? 0),
-      endTime: DateTime.fromMillisecondsSinceEpoch(
-          int.tryParse(json[_endTime].toString()) ?? 0),
-      steps: json[_steps] != null
-          ? List<StepEntity>.from((json[_steps] as List<dynamic>).map(
-              (x) => StepEntity.fromJson(x as Map<String, dynamic>),
-            ))
-          : null,
-      intermediatePlaces: json[_intermediatePlaces] != null
-          ? List<PlaceEntity>.from(
-              (json[_intermediatePlaces] as List<dynamic>).map(
-                (x) => PlaceEntity.fromMap(x as Map<String, dynamic>),
-              ),
-            )
-          : null,
-      pickupBookingInfo: json[_pickupBookingInfo] != null
-          ? PickupBookingInfo.fromMap(
-              json[_pickupBookingInfo] as Map<String, dynamic>)
-          : null,
-      dropOffBookingInfo: json[_dropOffBookingInfo] != null
-          ? BookingInfo.fromMap(
-              json[_dropOffBookingInfo] as Map<String, dynamic>)
-          : null,
-      transitLeg: json[_transitLeg] as bool,
-      intermediatePlace: json[_intermediatePlace] as bool?,
-      rentedBike: json[_rentedBike] as bool?,
-      interlineWithPreviousLeg: json[_interlineWithPreviousLeg] as bool?,
-      accumulatedPoints: decodePolyline(json[_legGeometry][_points] as String?),
-      trip: json[_trip] != null
-          ? Trip.fromJson(json[_trip] as Map<String, dynamic>)
-          : null,
+      points: json[_legGeometry][_points],
+      mode: json[_mode],
+      route:
+          json[_route] != null
+              ? ((json[_route] is Map<String, dynamic>)
+                  ? RouteEntity.fromJson(json[_route] as Map<String, dynamic>)
+                  : null)
+              : null,
+      shortName:
+          json[_route] != null
+              ? ((json[_route] is String) && json[_route] != ''
+                  ? json[_route]
+                  : null)
+              : null,
+      routeLongName: json[_routeLongName],
+      distance: json[_distance],
+      duration: Duration(seconds: json[_duration]),
+      agency:
+          json[_agency] != null
+              ? AgencyEntity.fromJson(json[_agency] as Map<String, dynamic>)
+              : null,
+      realtimeState: getRealtimeStateByString(json[_realtimeState]),
+      toPlace:
+          json[_toPlace] != null
+              ? PlaceEntity.fromJson(json[_toPlace] as Map<String, dynamic>)
+              : null,
+      fromPlace:
+          json[_fromPlace] != null
+              ? PlaceEntity.fromJson(json[_fromPlace] as Map<String, dynamic>)
+              : null,
+      startTime: DateTime.fromMillisecondsSinceEpoch(json[_startTime]),
+      endTime: DateTime.fromMillisecondsSinceEpoch(json[_endTime]),
+      steps:
+          json[_steps] != null
+              ? List<StepEntity>.from(
+                (json[_steps] as List<dynamic>).map(
+                  (x) => StepEntity.fromJson(x as Map<String, dynamic>),
+                ),
+              )
+              : null,
+      intermediatePlaces:
+          json[_intermediatePlaces] != null
+              ? List<PlaceEntity>.from(
+                (json[_intermediatePlaces] as List<dynamic>).map(
+                  (x) => PlaceEntity.fromJson(x as Map<String, dynamic>),
+                ),
+              )
+              : null,
+      pickupBookingInfo:
+          json[_pickupBookingInfo] != null
+              ? PickupBookingInfo.fromJson(
+                json[_pickupBookingInfo] as Map<String, dynamic>,
+              )
+              : null,
+      dropOffBookingInfo:
+          json[_dropOffBookingInfo] != null
+              ? BookingInfo.fromJson(
+                json[_dropOffBookingInfo] as Map<String, dynamic>,
+              )
+              : null,
+      transitLeg: json[_transitLeg],
+      intermediatePlace: json[_intermediatePlace],
+      rentedBike: json[_rentedBike],
+      interlineWithPreviousLeg: json[_interlineWithPreviousLeg],
+      accumulatedPoints: TrufiMapUtils.decodePolyline(
+        json[_legGeometry][_points],
+      ),
+      trip:
+          json[_trip] != null
+              ? Trip.fromJson(json[_trip] as Map<String, dynamic>)
+              : null,
     );
   }
 
@@ -150,76 +165,27 @@ class PlanItineraryLeg {
       _routeLongName: routeLongName,
       _distance: distance,
       _duration: duration.inSeconds,
-      _agency: agency?.toMap(),
+      _agency: agency?.toJson(),
       _realtimeState: realtimeState?.name,
-      _toPlace: toPlace?.toMap(),
-      _fromPlace: fromPlace?.toMap(),
+      _toPlace: toPlace?.toJson(),
+      _fromPlace: fromPlace?.toJson(),
       _startTime: startTime.millisecondsSinceEpoch,
       _endTime: endTime.millisecondsSinceEpoch,
-      _steps: steps != null
-          ? List<dynamic>.from(steps!.map((x) => x.toMap()))
-          : null,
-      _intermediatePlaces: intermediatePlaces != null
-          ? List<dynamic>.from(intermediatePlaces!.map((x) => x.toMap()))
-          : null,
-      _pickupBookingInfo: pickupBookingInfo?.toMap(),
-      _dropOffBookingInfo: dropOffBookingInfo?.toMap(),
+      _steps:
+          steps != null
+              ? List<dynamic>.from(steps!.map((x) => x.toMap()))
+              : null,
+      _intermediatePlaces:
+          intermediatePlaces != null
+              ? List<dynamic>.from(intermediatePlaces!.map((x) => x.toJson()))
+              : null,
+      _pickupBookingInfo: pickupBookingInfo?.toJson(),
+      _dropOffBookingInfo: dropOffBookingInfo?.toJson(),
       _intermediatePlace: intermediatePlace,
       _transitLeg: transitLeg,
       _rentedBike: rentedBike,
       _interlineWithPreviousLeg: interlineWithPreviousLeg,
       _trip: trip?.toJson(),
     };
-  }
-
-  PlanItineraryLeg copyWith({
-    String? points,
-    String? mode,
-    RouteEntity? route,
-    String? shortName,
-    String? routeLongName,
-    double? distance,
-    Duration? duration,
-    RealtimeState? realtimeState,
-    PlaceEntity? toPlace,
-    PlaceEntity? fromPlace,
-    DateTime? startTime,
-    DateTime? endTime,
-    bool? rentedBike,
-    bool? intermediatePlace,
-    bool? transitLeg,
-    bool? interlineWithPreviousLeg,
-    List<StepEntity>? steps,
-    List<PlaceEntity>? intermediatePlaces,
-    PickupBookingInfo? pickupBookingInfo,
-    BookingInfo? dropOffBookingInfo,
-    List<LatLng>? accumulatedPoints,
-    Trip? trip,
-  }) {
-    return PlanItineraryLeg(
-      points: points ?? this.points,
-      mode: mode ?? this.mode,
-      route: route ?? this.route,
-      shortName: shortName ?? this.shortName,
-      routeLongName: routeLongName ?? this.routeLongName,
-      distance: distance ?? this.distance,
-      duration: duration ?? this.duration,
-      realtimeState: realtimeState ?? this.realtimeState,
-      toPlace: toPlace ?? this.toPlace,
-      fromPlace: fromPlace ?? this.fromPlace,
-      startTime: startTime ?? this.startTime,
-      endTime: endTime ?? this.endTime,
-      rentedBike: rentedBike ?? this.rentedBike,
-      intermediatePlace: intermediatePlace ?? this.intermediatePlace,
-      transitLeg: transitLeg ?? this.transitLeg,
-      interlineWithPreviousLeg:
-          interlineWithPreviousLeg ?? this.interlineWithPreviousLeg,
-      steps: steps ?? this.steps,
-      intermediatePlaces: intermediatePlaces ?? this.intermediatePlaces,
-      pickupBookingInfo: pickupBookingInfo ?? this.pickupBookingInfo,
-      dropOffBookingInfo: dropOffBookingInfo ?? this.dropOffBookingInfo,
-      accumulatedPoints: accumulatedPoints ?? this.accumulatedPoints,
-      trip: trip ?? this.trip,
-    );
   }
 }

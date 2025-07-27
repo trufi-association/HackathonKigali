@@ -4,14 +4,14 @@ class ElevationProfileComponent {
 
   const ElevationProfileComponent({this.distance, this.elevation});
 
+  static const String _distance = 'distance';
+  static const String _elevation = 'elevation';
+
   factory ElevationProfileComponent.fromJson(Map<String, dynamic> json) =>
       ElevationProfileComponent(
-        distance: double.tryParse(json['distance'].toString()) ?? 0,
-        elevation: double.tryParse(json['elevation'].toString()) ?? 0,
+        distance: json[_distance],
+        elevation: json[_elevation],
       );
 
-  Map<String, dynamic> toJson() => {
-        'distance': distance,
-        'elevation': elevation,
-      };
+  Map<String, dynamic> toJson() => {_distance: distance, _elevation: elevation};
 }

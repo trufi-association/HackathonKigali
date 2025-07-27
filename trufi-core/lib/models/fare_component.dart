@@ -15,29 +15,32 @@ class FareComponent {
     this.routes,
   });
 
+  static const String _fareId = 'fareId';
+  static const String _currency = 'currency';
+  static const String _url = 'url';
+  static const String _cents = 'cents';
+  static const String _routes = 'routes';
+
   factory FareComponent.fromJson(Map<String, dynamic> json) => FareComponent(
-    fareId: json['fareId'] as String?,
-    currency: json['currency'] as String?,
-    url: json['url'] as String?,
-    cents: (json['cents'] as num).toInt(),
-    routes: json['routes'] != null
-        ? List<RouteEntity>.from(
-            (json["routes"] as List<dynamic>).map(
-              (x) => RouteEntity.fromJson(x as Map<String, dynamic>),
-            ),
-          )
-        : null,
+    fareId: json[_fareId],
+    currency: json[_currency],
+    url: json[_url],
+    cents: json[_cents],
+    routes:
+        json[_routes] != null
+            ? List<RouteEntity>.from(
+              (json[_routes] as List<dynamic>).map(
+                (x) => RouteEntity.fromJson(x as Map<String, dynamic>),
+              ),
+            )
+            : null,
   );
 
   Map<String, dynamic> toJson() => {
-    'fareId': fareId,
-    'currency': currency,
-    'url': url,
-    'cents': cents,
-    'routes': List<dynamic>.from((routes ?? []).map((x) => x.toJson())),
+    _fareId: fareId,
+    _currency: currency,
+    _url: url,
+    _cents: cents,
+    _routes: List<dynamic>.from((routes ?? []).map((x) => x.toJson())),
   };
-
-  AgencyEntity? get agency {
-    return (routes?.isNotEmpty ?? false) ? routes![0].agency : null;
-  }
 }

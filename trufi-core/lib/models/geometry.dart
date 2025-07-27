@@ -4,13 +4,11 @@ class Geometry {
 
   const Geometry({this.length, this.points});
 
-  factory Geometry.fromJson(Map<String, dynamic> json) => Geometry(
-        length: int.tryParse(json['length'].toString()) ?? 0,
-        points: json['points'].toString(),
-      );
+  static const String _length = 'length';
+  static const String _points = 'points';
 
-  Map<String, dynamic> toJson() => {
-        'length': length,
-        'points': points,
-      };
+  factory Geometry.fromJson(Map<String, dynamic> json) =>
+      Geometry(length: json[_length], points: json[_points]);
+
+  Map<String, dynamic> toJson() => {_length: length, _points: points};
 }

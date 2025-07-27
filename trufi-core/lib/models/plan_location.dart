@@ -1,11 +1,7 @@
 part of 'plan_entity.dart';
 
 class PlanLocation {
-  const PlanLocation({
-    this.name,
-    this.latitude,
-    this.longitude,
-  });
+  const PlanLocation({this.name, this.latitude, this.longitude});
 
   static const String _name = "name";
   static const String _latitude = "lat";
@@ -24,10 +20,6 @@ class PlanLocation {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      _name: name,
-      _latitude: latitude,
-      _longitude: longitude,
-    };
+    return {_name: name, _latitude: latitude, _longitude: longitude};
   }
 }

@@ -373,17 +373,19 @@ class BookingArrangement {
 
   factory BookingArrangement.fromJson(Map<String, dynamic> json) =>
       BookingArrangement(
-        bookingMethods: (json['bookingMethods'] as List?)
-            ?.map((e) => BookingMethod.values.fromString(e))
-            .toList(),
+        bookingMethods:
+            (json['bookingMethods'] as List?)
+                ?.map((e) => BookingMethod.values.fromString(e))
+                .toList(),
         latestBookingTime: json['latestBookingTime'],
         latestBookingDay: json['latestBookingDay'],
         bookWhen: PurchaseWhen.values.fromString(json['bookWhen']),
         minimumBookingPeriod: json['minimumBookingPeriod'],
         bookingNote: json['bookingNote'],
-        bookingContact: json['bookingContact'] != null
-            ? Contact.fromJson(json['bookingContact'])
-            : null,
+        bookingContact:
+            json['bookingContact'] != null
+                ? Contact.fromJson(json['bookingContact'])
+                : null,
       );
 }
 
@@ -406,13 +408,13 @@ class Branding {
   });
 
   factory Branding.fromJson(Map<String, dynamic> json) => Branding(
-        id: json['id'],
-        name: json['name'],
-        shortName: json['shortName'],
-        description: json['description'],
-        url: json['url'],
-        image: json['image'],
-      );
+    id: json['id'],
+    name: json['name'],
+    shortName: json['shortName'],
+    description: json['description'],
+    url: json['url'],
+    image: json['image'],
+  );
 }
 
 @immutable
@@ -439,18 +441,19 @@ class Authority {
   });
 
   factory Authority.fromJson(Map<String, dynamic> json) => Authority(
-        id: json['id'],
-        name: json['name'],
-        url: json['url'],
-        timezone: json['timezone'],
-        lang: json['lang'],
-        phone: json['phone'],
-        fareUrl: json['fareUrl'],
-        lines: (json['lines'] as List?)?.map((e) => Line.fromJson(e)).toList(),
-        situations: (json['situations'] as List?)
+    id: json['id'],
+    name: json['name'],
+    url: json['url'],
+    timezone: json['timezone'],
+    lang: json['lang'],
+    phone: json['phone'],
+    fareUrl: json['fareUrl'],
+    lines: (json['lines'] as List?)?.map((e) => Line.fromJson(e)).toList(),
+    situations:
+        (json['situations'] as List?)
             ?.map((e) => PtSituationElement.fromJson(e))
             .toList(),
-      );
+  );
 }
 
 @immutable
@@ -460,8 +463,8 @@ class AffectedLine {
   const AffectedLine({this.line});
 
   factory AffectedLine.fromJson(Map<String, dynamic> json) => AffectedLine(
-        line: json['line'] != null ? Line.fromJson(json['line']) : null,
-      );
+    line: json['line'] != null ? Line.fromJson(json['line']) : null,
+  );
 }
 
 @immutable
@@ -478,13 +481,15 @@ class AffectedServiceJourney {
 
   factory AffectedServiceJourney.fromJson(Map<String, dynamic> json) =>
       AffectedServiceJourney(
-        serviceJourney: json['serviceJourney'] != null
-            ? ServiceJourney.fromJson(json['serviceJourney'])
-            : null,
+        serviceJourney:
+            json['serviceJourney'] != null
+                ? ServiceJourney.fromJson(json['serviceJourney'])
+                : null,
         operatingDay: json['operatingDay'],
-        datedServiceJourney: json['datedServiceJourney'] != null
-            ? DatedServiceJourney.fromJson(json['datedServiceJourney'])
-            : null,
+        datedServiceJourney:
+            json['datedServiceJourney'] != null
+                ? DatedServiceJourney.fromJson(json['datedServiceJourney'])
+                : null,
       );
 }
 
@@ -498,12 +503,14 @@ class AffectedStopPlace {
   factory AffectedStopPlace.fromJson(Map<String, dynamic> json) =>
       AffectedStopPlace(
         quay: json['quay'] != null ? Quay.fromJson(json['quay']) : null,
-        stopPlace: json['stopPlace'] != null
-            ? StopPlace.fromJson(json['stopPlace'])
-            : null,
-        stopConditions: (json['stopConditions'] as List?)
-            ?.map((e) => StopCondition.values.fromString(e))
-            .toList(),
+        stopPlace:
+            json['stopPlace'] != null
+                ? StopPlace.fromJson(json['stopPlace'])
+                : null,
+        stopConditions:
+            (json['stopConditions'] as List?)
+                ?.map((e) => StopCondition.values.fromString(e))
+                .toList(),
       );
 }
 
@@ -524,13 +531,15 @@ class AffectedStopPlaceOnLine {
   factory AffectedStopPlaceOnLine.fromJson(Map<String, dynamic> json) =>
       AffectedStopPlaceOnLine(
         quay: json['quay'] != null ? Quay.fromJson(json['quay']) : null,
-        stopPlace: json['stopPlace'] != null
-            ? StopPlace.fromJson(json['stopPlace'])
-            : null,
+        stopPlace:
+            json['stopPlace'] != null
+                ? StopPlace.fromJson(json['stopPlace'])
+                : null,
         line: json['line'] != null ? Line.fromJson(json['line']) : null,
-        stopConditions: (json['stopConditions'] as List?)
-            ?.map((e) => StopCondition.values.fromString(e))
-            .toList(),
+        stopConditions:
+            (json['stopConditions'] as List?)
+                ?.map((e) => StopCondition.values.fromString(e))
+                .toList(),
       );
 }
 
@@ -553,23 +562,26 @@ class AffectedStopPlaceOnServiceJourney {
 
   factory AffectedStopPlaceOnServiceJourney.fromJson(
     Map<String, dynamic> json,
-  ) =>
-      AffectedStopPlaceOnServiceJourney(
-        quay: json['quay'] != null ? Quay.fromJson(json['quay']) : null,
-        stopPlace: json['stopPlace'] != null
+  ) => AffectedStopPlaceOnServiceJourney(
+    quay: json['quay'] != null ? Quay.fromJson(json['quay']) : null,
+    stopPlace:
+        json['stopPlace'] != null
             ? StopPlace.fromJson(json['stopPlace'])
             : null,
-        serviceJourney: json['serviceJourney'] != null
+    serviceJourney:
+        json['serviceJourney'] != null
             ? ServiceJourney.fromJson(json['serviceJourney'])
             : null,
-        operatingDay: json['operatingDay'],
-        datedServiceJourney: json['datedServiceJourney'] != null
+    operatingDay: json['operatingDay'],
+    datedServiceJourney:
+        json['datedServiceJourney'] != null
             ? DatedServiceJourney.fromJson(json['datedServiceJourney'])
             : null,
-        stopConditions: (json['stopConditions'] as List?)
+    stopConditions:
+        (json['stopConditions'] as List?)
             ?.map((e) => StopCondition.values.fromString(e))
             .toList(),
-      );
+  );
 }
 
 @immutable
@@ -601,13 +613,13 @@ class BikePark {
   });
 
   factory BikePark.fromJson(Map<String, dynamic> json) => BikePark(
-        id: json['id'],
-        name: json['name'],
-        spacesAvailable: json['spacesAvailable'],
-        realtime: json['realtime'],
-        longitude: json['longitude'],
-        latitude: json['latitude'],
-      );
+    id: json['id'],
+    name: json['name'],
+    spacesAvailable: json['spacesAvailable'],
+    realtime: json['realtime'],
+    longitude: json['longitude'],
+    latitude: json['latitude'],
+  );
 }
 
 @immutable
@@ -683,12 +695,12 @@ class Contact {
   });
 
   factory Contact.fromJson(Map<String, dynamic> json) => Contact(
-        contactPerson: json['contactPerson'],
-        email: json['email'],
-        url: json['url'],
-        phone: json['phone'],
-        furtherDetails: json['furtherDetails'],
-      );
+    contactPerson: json['contactPerson'],
+    email: json['email'],
+    url: json['url'],
+    phone: json['phone'],
+    furtherDetails: json['furtherDetails'],
+  );
 }
 
 @immutable
@@ -717,22 +729,26 @@ class DatedServiceJourney {
       DatedServiceJourney(
         id: json['id'],
         operatingDay: json['operatingDay'],
-        serviceJourney: json['serviceJourney'] != null
-            ? ServiceJourney.fromJson(json['serviceJourney'])
-            : null,
+        serviceJourney:
+            json['serviceJourney'] != null
+                ? ServiceJourney.fromJson(json['serviceJourney'])
+                : null,
         tripAlteration: ServiceAlteration.values.fromString(
           json['tripAlteration'],
         ),
-        replacementFor: (json['replacementFor'] as List?)
-            ?.map((e) => DatedServiceJourney.fromJson(e))
-            .toList(),
-        journeyPattern: json['journeyPattern'] != null
-            ? JourneyPattern.fromJson(json['journeyPattern'])
-            : null,
+        replacementFor:
+            (json['replacementFor'] as List?)
+                ?.map((e) => DatedServiceJourney.fromJson(e))
+                .toList(),
+        journeyPattern:
+            json['journeyPattern'] != null
+                ? JourneyPattern.fromJson(json['journeyPattern'])
+                : null,
         quays: (json['quays'] as List?)?.map((e) => Quay.fromJson(e)).toList(),
-        estimatedCalls: (json['estimatedCalls'] as List?)
-            ?.map((e) => EstimatedCall.fromJson(e))
-            .toList(),
+        estimatedCalls:
+            (json['estimatedCalls'] as List?)
+                ?.map((e) => EstimatedCall.fromJson(e))
+                .toList(),
       );
 }
 
@@ -827,43 +843,47 @@ class EstimatedCall {
   });
 
   factory EstimatedCall.fromJson(Map<String, dynamic> json) => EstimatedCall(
-        quay: json['quay'] != null ? Quay.fromJson(json['quay']) : null,
-        aimedArrivalTime: json['aimedArrivalTime'],
-        expectedArrivalTime: json['expectedArrivalTime'],
-        actualArrivalTime: json['actualArrivalTime'],
-        aimedDepartureTime: json['aimedDepartureTime'],
-        expectedDepartureTime: json['expectedDepartureTime'],
-        actualDepartureTime: json['actualDepartureTime'],
-        timingPoint: json['timingPoint'],
-        realtime: json['realtime'],
-        predictionInaccurate: json['predictionInaccurate'],
-        realtimeState: RealtimeState.values.fromString(json['realtimeState']),
-        occupancyStatus:
-            OccupancyStatus.values.fromString(json['occupancyStatus']),
-        stopPositionInPattern: json['stopPositionInPattern'],
-        forBoarding: json['forBoarding'],
-        forAlighting: json['forAlighting'],
-        requestStop: json['requestStop'],
-        cancellation: json['cancellation'],
-        date: json['date'],
-        serviceJourney: json['serviceJourney'] != null
+    quay: json['quay'] != null ? Quay.fromJson(json['quay']) : null,
+    aimedArrivalTime: json['aimedArrivalTime'],
+    expectedArrivalTime: json['expectedArrivalTime'],
+    actualArrivalTime: json['actualArrivalTime'],
+    aimedDepartureTime: json['aimedDepartureTime'],
+    expectedDepartureTime: json['expectedDepartureTime'],
+    actualDepartureTime: json['actualDepartureTime'],
+    timingPoint: json['timingPoint'],
+    realtime: json['realtime'],
+    predictionInaccurate: json['predictionInaccurate'],
+    realtimeState: RealtimeState.values.fromString(json['realtimeState']),
+    occupancyStatus: OccupancyStatus.values.fromString(json['occupancyStatus']),
+    stopPositionInPattern: json['stopPositionInPattern'],
+    forBoarding: json['forBoarding'],
+    forAlighting: json['forAlighting'],
+    requestStop: json['requestStop'],
+    cancellation: json['cancellation'],
+    date: json['date'],
+    serviceJourney:
+        json['serviceJourney'] != null
             ? ServiceJourney.fromJson(json['serviceJourney'])
             : null,
-        datedServiceJourney: json['datedServiceJourney'] != null
+    datedServiceJourney:
+        json['datedServiceJourney'] != null
             ? DatedServiceJourney.fromJson(json['datedServiceJourney'])
             : null,
-        destinationDisplay: json['destinationDisplay'] != null
+    destinationDisplay:
+        json['destinationDisplay'] != null
             ? DestinationDisplay.fromJson(json['destinationDisplay'])
             : null,
-        notices:
-            (json['notices'] as List?)?.map((e) => Notice.fromJson(e)).toList(),
-        situations: (json['situations'] as List?)
+    notices:
+        (json['notices'] as List?)?.map((e) => Notice.fromJson(e)).toList(),
+    situations:
+        (json['situations'] as List?)
             ?.map((e) => PtSituationElement.fromJson(e))
             .toList(),
-        bookingArrangements: json['bookingArrangements'] != null
+    bookingArrangements:
+        json['bookingArrangements'] != null
             ? BookingArrangement.fromJson(json['bookingArrangements'])
             : null,
-      );
+  );
 }
 
 @immutable
@@ -884,13 +904,13 @@ class GroupOfLines {
   });
 
   factory GroupOfLines.fromJson(Map<String, dynamic> json) => GroupOfLines(
-        id: json['id'],
-        privateCode: json['privateCode'],
-        shortName: json['shortName'],
-        name: json['name'],
-        description: json['description'],
-        lines: (json['lines'] as List?)?.map((e) => Line.fromJson(e)).toList(),
-      );
+    id: json['id'],
+    privateCode: json['privateCode'],
+    shortName: json['shortName'],
+    name: json['name'],
+    description: json['description'],
+    lines: (json['lines'] as List?)?.map((e) => Line.fromJson(e)).toList(),
+  );
 }
 
 @immutable
@@ -916,19 +936,16 @@ class InputBanned {
   });
 
   factory InputBanned.fromJson(Map<String, dynamic> json) => InputBanned(
-        lines: (json['lines'] as List?)?.map((e) => e.toString()).toList(),
-        authorities:
-            (json['authorities'] as List?)?.map((e) => e.toString()).toList(),
-        quays: (json['quays'] as List?)?.map((e) => e.toString()).toList(),
-        quaysHard:
-            (json['quaysHard'] as List?)?.map((e) => e.toString()).toList(),
-        serviceJourneys: (json['serviceJourneys'] as List?)
-            ?.map((e) => e.toString())
-            .toList(),
-        rentalNetworks: (json['rentalNetworks'] as List?)
-            ?.map((e) => e.toString())
-            .toList(),
-      );
+    lines: (json['lines'] as List?)?.map((e) => e.toString()).toList(),
+    authorities:
+        (json['authorities'] as List?)?.map((e) => e.toString()).toList(),
+    quays: (json['quays'] as List?)?.map((e) => e.toString()).toList(),
+    quaysHard: (json['quaysHard'] as List?)?.map((e) => e.toString()).toList(),
+    serviceJourneys:
+        (json['serviceJourneys'] as List?)?.map((e) => e.toString()).toList(),
+    rentalNetworks:
+        (json['rentalNetworks'] as List?)?.map((e) => e.toString()).toList(),
+  );
 
   final List<String>? lines;
   final List<String>? authorities;
@@ -963,16 +980,15 @@ class InputPlaceIds {
   });
 
   factory InputPlaceIds.fromJson(Map<String, dynamic> json) => InputPlaceIds(
-        quays: (json['quays'] as List?)?.map((e) => e.toString()).toList(),
-        lines: (json['lines'] as List?)?.map((e) => e.toString()).toList(),
-        bikeRentalStations: (json['bikeRentalStations'] as List?)
+    quays: (json['quays'] as List?)?.map((e) => e.toString()).toList(),
+    lines: (json['lines'] as List?)?.map((e) => e.toString()).toList(),
+    bikeRentalStations:
+        (json['bikeRentalStations'] as List?)
             ?.map((e) => e.toString())
             .toList(),
-        bikeParks:
-            (json['bikeParks'] as List?)?.map((e) => e.toString()).toList(),
-        carParks:
-            (json['carParks'] as List?)?.map((e) => e.toString()).toList(),
-      );
+    bikeParks: (json['bikeParks'] as List?)?.map((e) => e.toString()).toList(),
+    carParks: (json['carParks'] as List?)?.map((e) => e.toString()).toList(),
+  );
 
   final List<String>? quays;
   final List<String>? lines;
@@ -993,9 +1009,10 @@ class InputWhiteListed {
         lines: (json['lines'] as List?)?.map((e) => e.toString()).toList(),
         authorities:
             (json['authorities'] as List?)?.map((e) => e.toString()).toList(),
-        rentalNetworks: (json['rentalNetworks'] as List?)
-            ?.map((e) => e.toString())
-            .toList(),
+        rentalNetworks:
+            (json['rentalNetworks'] as List?)
+                ?.map((e) => e.toString())
+                .toList(),
       );
 }
 
@@ -1018,17 +1035,19 @@ class Interchange {
   });
 
   factory Interchange.fromJson(Map<String, dynamic> json) => Interchange(
-        staySeated: json['staySeated'],
-        guaranteed: json['guaranteed'],
-        priority: InterchangePriority.values.fromString(json['priority']),
-        maximumWaitTime: json['maximumWaitTime'],
-        fromServiceJourney: json['fromServiceJourney'] != null
+    staySeated: json['staySeated'],
+    guaranteed: json['guaranteed'],
+    priority: InterchangePriority.values.fromString(json['priority']),
+    maximumWaitTime: json['maximumWaitTime'],
+    fromServiceJourney:
+        json['fromServiceJourney'] != null
             ? ServiceJourney.fromJson(json['fromServiceJourney'])
             : null,
-        toServiceJourney: json['toServiceJourney'] != null
+    toServiceJourney:
+        json['toServiceJourney'] != null
             ? ServiceJourney.fromJson(json['toServiceJourney'])
             : null,
-      );
+  );
 }
 
 @immutable
@@ -1049,11 +1068,12 @@ class ItineraryFilters {
 
   factory ItineraryFilters.fromJson(Map<String, dynamic> json) =>
       ItineraryFilters(
-        transitGeneralizedCostLimit: json['transitGeneralizedCostLimit'] != null
-            ? TransitGeneralizedCostFilterParams.fromJson(
-                json['transitGeneralizedCostLimit'],
-              )
-            : null,
+        transitGeneralizedCostLimit:
+            json['transitGeneralizedCostLimit'] != null
+                ? TransitGeneralizedCostFilterParams.fromJson(
+                  json['transitGeneralizedCostLimit'],
+                )
+                : null,
         groupSimilarityKeepOne: json['groupSimilarityKeepOne'],
         groupSimilarityKeepThree: json['groupSimilarityKeepThree'],
         groupedOtherThanSameLegsMaxCostMultiplier:
@@ -1088,26 +1108,30 @@ class JourneyPattern {
   });
 
   factory JourneyPattern.fromJson(Map<String, dynamic> json) => JourneyPattern(
-        id: json['id'],
-        line: json['line'] != null ? Line.fromJson(json['line']) : null,
-        directionType: DirectionType.values.fromString(json['directionType']),
-        name: json['name'],
-        serviceJourneys: (json['serviceJourneys'] as List?)
+    id: json['id'],
+    line: json['line'] != null ? Line.fromJson(json['line']) : null,
+    directionType: DirectionType.values.fromString(json['directionType']),
+    name: json['name'],
+    serviceJourneys:
+        (json['serviceJourneys'] as List?)
             ?.map((e) => ServiceJourney.fromJson(e))
             .toList(),
-        quays: (json['quays'] as List?)?.map((e) => Quay.fromJson(e)).toList(),
-        pointsOnLink: json['pointsOnLink'] != null
+    quays: (json['quays'] as List?)?.map((e) => Quay.fromJson(e)).toList(),
+    pointsOnLink:
+        json['pointsOnLink'] != null
             ? PointsOnLink.fromJson(json['pointsOnLink'])
             : null,
-        stopToStopGeometries: (json['stopToStopGeometries'] as List?)
+    stopToStopGeometries:
+        (json['stopToStopGeometries'] as List?)
             ?.map((e) => StopToStopGeometry.fromJson(e))
             .toList(),
-        situations: (json['situations'] as List?)
+    situations:
+        (json['situations'] as List?)
             ?.map((e) => PtSituationElement.fromJson(e))
             .toList(),
-        notices:
-            (json['notices'] as List?)?.map((e) => Notice.fromJson(e)).toList(),
-      );
+    notices:
+        (json['notices'] as List?)?.map((e) => Notice.fromJson(e)).toList(),
+  );
 }
 
 @immutable
@@ -1188,84 +1212,93 @@ class Leg {
   });
 
   factory Leg.fromJson(Map<String, dynamic> json) => Leg(
-        id: json['id'],
-        aimedStartTime: json['aimedStartTime'],
-        expectedStartTime: json['expectedStartTime'],
-        aimedEndTime: json['aimedEndTime'],
-        expectedEndTime: json['expectedEndTime'],
-        mode: Mode.values.fromString(json['mode']),
-        transportSubmode: TransportSubmode.values.fromString(
-          json['transportSubmode'],
-        ),
-        duration: json['duration'],
-        directDuration: json['directDuration'],
-        pointsOnLink: json['pointsOnLink'] != null
+    id: json['id'],
+    aimedStartTime: json['aimedStartTime'],
+    expectedStartTime: json['expectedStartTime'],
+    aimedEndTime: json['aimedEndTime'],
+    expectedEndTime: json['expectedEndTime'],
+    mode: Mode.values.fromString(json['mode']),
+    transportSubmode: TransportSubmode.values.fromString(
+      json['transportSubmode'],
+    ),
+    duration: json['duration'],
+    directDuration: json['directDuration'],
+    pointsOnLink:
+        json['pointsOnLink'] != null
             ? PointsOnLink.fromJson(json['pointsOnLink'])
             : null,
-        authority: json['authority'] != null
+    authority:
+        json['authority'] != null
             ? Authority.fromJson(json['authority'])
             : null,
-        operator: json['operator'] != null
-            ? Operator.fromJson(json['operator'])
-            : null,
-        realtime: json['realtime'],
-        distance: json['distance'],
-        generalizedCost: json['generalizedCost'],
-        ride: json['ride'],
-        walkingBike: json['walkingBike'],
-        rentedBike: json['rentedBike'],
-        fromPlace: json['fromPlace'] != null
-            ? Place.fromJson(json['fromPlace'])
-            : null,
-        toPlace:
-            json['toPlace'] != null ? Place.fromJson(json['toPlace']) : null,
-        fromEstimatedCall: json['fromEstimatedCall'] != null
+    operator:
+        json['operator'] != null ? Operator.fromJson(json['operator']) : null,
+    realtime: json['realtime'],
+    distance: json['distance'],
+    generalizedCost: json['generalizedCost'],
+    ride: json['ride'],
+    walkingBike: json['walkingBike'],
+    rentedBike: json['rentedBike'],
+    fromPlace:
+        json['fromPlace'] != null ? Place.fromJson(json['fromPlace']) : null,
+    toPlace: json['toPlace'] != null ? Place.fromJson(json['toPlace']) : null,
+    fromEstimatedCall:
+        json['fromEstimatedCall'] != null
             ? EstimatedCall.fromJson(json['fromEstimatedCall'])
             : null,
-        toEstimatedCall: json['toEstimatedCall'] != null
+    toEstimatedCall:
+        json['toEstimatedCall'] != null
             ? EstimatedCall.fromJson(json['toEstimatedCall'])
             : null,
-        line: json['line'] != null ? Line.fromJson(json['line']) : null,
-        serviceJourney: json['serviceJourney'] != null
+    line: json['line'] != null ? Line.fromJson(json['line']) : null,
+    serviceJourney:
+        json['serviceJourney'] != null
             ? ServiceJourney.fromJson(json['serviceJourney'])
             : null,
-        datedServiceJourney: json['datedServiceJourney'] != null
+    datedServiceJourney:
+        json['datedServiceJourney'] != null
             ? DatedServiceJourney.fromJson(json['datedServiceJourney'])
             : null,
-        serviceDate: json['serviceDate'],
-        intermediateQuays: (json['intermediateQuays'] as List?)
+    serviceDate: json['serviceDate'],
+    intermediateQuays:
+        (json['intermediateQuays'] as List?)
             ?.map((e) => Quay.fromJson(e))
             .toList(),
-        intermediateEstimatedCalls:
-            (json['intermediateEstimatedCalls'] as List?)
-                ?.map((e) => EstimatedCall.fromJson(e))
-                .toList(),
-        serviceJourneyEstimatedCalls:
-            (json['serviceJourneyEstimatedCalls'] as List?)
-                ?.map((e) => EstimatedCall.fromJson(e))
-                .toList(),
-        situations: (json['situations'] as List?)
+    intermediateEstimatedCalls:
+        (json['intermediateEstimatedCalls'] as List?)
+            ?.map((e) => EstimatedCall.fromJson(e))
+            .toList(),
+    serviceJourneyEstimatedCalls:
+        (json['serviceJourneyEstimatedCalls'] as List?)
+            ?.map((e) => EstimatedCall.fromJson(e))
+            .toList(),
+    situations:
+        (json['situations'] as List?)
             ?.map((e) => PtSituationElement.fromJson(e))
             .toList(),
-        steps: (json['steps'] as List?)
-            ?.map((e) => PathGuidance.fromJson(e))
-            .toList(),
-        interchangeFrom: json['interchangeFrom'] != null
+    steps:
+        (json['steps'] as List?)?.map((e) => PathGuidance.fromJson(e)).toList(),
+    interchangeFrom:
+        json['interchangeFrom'] != null
             ? Interchange.fromJson(json['interchangeFrom'])
             : null,
-        interchangeTo: json['interchangeTo'] != null
+    interchangeTo:
+        json['interchangeTo'] != null
             ? Interchange.fromJson(json['interchangeTo'])
             : null,
-        bookingArrangements: json['bookingArrangements'] != null
+    bookingArrangements:
+        json['bookingArrangements'] != null
             ? BookingArrangement.fromJson(json['bookingArrangements'])
             : null,
-        bikeRentalNetworks: (json['bikeRentalNetworks'] as List?)
+    bikeRentalNetworks:
+        (json['bikeRentalNetworks'] as List?)
             ?.map((e) => e.toString())
             .toList(),
-        elevationProfile: (json['elevationProfile'] as List?)
+    elevationProfile:
+        (json['elevationProfile'] as List?)
             ?.map((e) => ElevationProfileStep.fromJson(e))
             .toList(),
-      );
+  );
 
   PlanItineraryLeg toPlanItineraryLeg() {
     return PlanItineraryLeg(
@@ -1289,9 +1322,10 @@ class Leg {
       intermediatePlace: null, // intermediatePlace,
       transitLeg: false, // transitLeg ?? false,
       interlineWithPreviousLeg: null, // interlineWithPreviousLeg,
-      accumulatedPoints: pointsOnLink?.points != null
-          ? decodePolyline(pointsOnLink?.points)
-          : [],
+      accumulatedPoints:
+          pointsOnLink?.points != null
+              ? TrufiMapUtils.decodePolyline(pointsOnLink?.points)
+              : [],
       trip: null, //trip,
     );
   }
@@ -1341,45 +1375,49 @@ class Line {
   });
 
   factory Line.fromJson(Map<String, dynamic> json) => Line(
-        id: json['id'],
-        authority: json['authority'] != null
+    id: json['id'],
+    authority:
+        json['authority'] != null
             ? Authority.fromJson(json['authority'])
             : null,
-        operator: json['operator'] != null
-            ? Operator.fromJson(json['operator'])
-            : null,
-        branding: json['branding'] != null
-            ? Branding.fromJson(json['branding'])
-            : null,
-        publicCode: json['publicCode'],
-        name: json['name'],
-        transportMode: TransportMode.values.fromString(json['transportMode']),
-        transportSubmode: TransportSubmode.values.fromString(
-          json['transportSubmode'],
-        ),
-        description: json['description'],
-        url: json['url'],
-        presentation: json['presentation'] != null
+    operator:
+        json['operator'] != null ? Operator.fromJson(json['operator']) : null,
+    branding:
+        json['branding'] != null ? Branding.fromJson(json['branding']) : null,
+    publicCode: json['publicCode'],
+    name: json['name'],
+    transportMode: TransportMode.values.fromString(json['transportMode']),
+    transportSubmode: TransportSubmode.values.fromString(
+      json['transportSubmode'],
+    ),
+    description: json['description'],
+    url: json['url'],
+    presentation:
+        json['presentation'] != null
             ? Presentation.fromJson(json['presentation'])
             : null,
-        bikesAllowed: BikesAllowed.values.fromString(json['bikesAllowed']),
-        journeyPatterns: (json['journeyPatterns'] as List?)
+    bikesAllowed: BikesAllowed.values.fromString(json['bikesAllowed']),
+    journeyPatterns:
+        (json['journeyPatterns'] as List?)
             ?.map((e) => JourneyPattern.fromJson(e))
             .toList(),
-        quays: (json['quays'] as List?)?.map((e) => Quay.fromJson(e)).toList(),
-        serviceJourneys: (json['serviceJourneys'] as List?)
+    quays: (json['quays'] as List?)?.map((e) => Quay.fromJson(e)).toList(),
+    serviceJourneys:
+        (json['serviceJourneys'] as List?)
             ?.map((e) => ServiceJourney.fromJson(e))
             .toList(),
-        notices:
-            (json['notices'] as List?)?.map((e) => Notice.fromJson(e)).toList(),
-        situations: (json['situations'] as List?)
+    notices:
+        (json['notices'] as List?)?.map((e) => Notice.fromJson(e)).toList(),
+    situations:
+        (json['situations'] as List?)
             ?.map((e) => PtSituationElement.fromJson(e))
             .toList(),
-        flexibleLineType: json['flexibleLineType'],
-        groupOfLines: (json['groupOfLines'] as List?)
+    flexibleLineType: json['flexibleLineType'],
+    groupOfLines:
+        (json['groupOfLines'] as List?)
             ?.map((e) => GroupOfLines.fromJson(e))
             .toList(),
-      );
+  );
   RouteEntity toRouteEntity() {
     return RouteEntity(
       id: id,
@@ -1407,12 +1445,13 @@ class Location {
   const Location({this.name, this.place, this.coordinates});
 
   factory Location.fromJson(Map<String, dynamic> json) => Location(
-        name: json['name'],
-        place: json['place'],
-        coordinates: json['coordinates'] != null
+    name: json['name'],
+    place: json['place'],
+    coordinates:
+        json['coordinates'] != null
             ? InputCoordinates.fromJson(json['coordinates'])
             : null,
-      );
+  );
 }
 
 @immutable
@@ -1429,13 +1468,14 @@ class Modes {
   final List<TransportModes>? transportModes;
 
   factory Modes.fromJson(Map<String, dynamic> json) => Modes(
-        accessMode: StreetMode.values.fromString(json['accessMode']),
-        egressMode: StreetMode.values.fromString(json['egressMode']),
-        directMode: StreetMode.values.fromString(json['directMode']),
-        transportModes: (json['transportModes'] as List?)
+    accessMode: StreetMode.values.fromString(json['accessMode']),
+    egressMode: StreetMode.values.fromString(json['egressMode']),
+    directMode: StreetMode.values.fromString(json['directMode']),
+    transportModes:
+        (json['transportModes'] as List?)
             ?.map((e) => TransportModes.fromJson(e))
             .toList(),
-      );
+  );
 }
 
 @immutable
@@ -1458,10 +1498,10 @@ class Notice {
   const Notice({this.id, this.text, this.publicCode});
 
   factory Notice.fromJson(Map<String, dynamic> json) => Notice(
-        id: json['id'],
-        text: json['text'],
-        publicCode: json['publicCode'],
-      );
+    id: json['id'],
+    text: json['text'],
+    publicCode: json['publicCode'],
+  );
 }
 
 @immutable
@@ -1482,15 +1522,16 @@ class Operator {
   });
 
   factory Operator.fromJson(Map<String, dynamic> json) => Operator(
-        id: json['id'],
-        name: json['name'],
-        url: json['url'],
-        phone: json['phone'],
-        lines: (json['lines'] as List?)?.map((e) => Line.fromJson(e)).toList(),
-        serviceJourney: (json['serviceJourney'] as List?)
+    id: json['id'],
+    name: json['name'],
+    url: json['url'],
+    phone: json['phone'],
+    lines: (json['lines'] as List?)?.map((e) => Line.fromJson(e)).toList(),
+    serviceJourney:
+        (json['serviceJourney'] as List?)
             ?.map((e) => ServiceJourney.fromJson(e))
             .toList(),
-      );
+  );
 }
 
 @immutable
@@ -1508,11 +1549,11 @@ class PageInfo {
   });
 
   factory PageInfo.fromJson(Map<String, dynamic> json) => PageInfo(
-        hasNextPage: json['hasNextPage'],
-        hasPreviousPage: json['hasPreviousPage'],
-        startCursor: json['startCursor'],
-        endCursor: json['endCursor'],
-      );
+    hasNextPage: json['hasNextPage'],
+    hasPreviousPage: json['hasPreviousPage'],
+    startCursor: json['startCursor'],
+    endCursor: json['endCursor'],
+  );
 }
 
 @immutable
@@ -1557,22 +1598,23 @@ class PathGuidance {
   });
 
   factory PathGuidance.fromJson(Map<String, dynamic> json) => PathGuidance(
-        distance: json['distance'],
-        relativeDirection: RelativeDirection.values.fromString(
-          json['relativeDirection'],
-        ),
-        streetName: json['streetName'],
-        heading: AbsoluteDirection.values.fromString(json['heading']),
-        exit: json['exit'],
-        stayOn: json['stayOn'],
-        area: json['area'],
-        bogusName: json['bogusName'],
-        latitude: json['latitude'],
-        longitude: json['longitude'],
-        elevationProfile: (json['elevationProfile'] as List?)
+    distance: json['distance'],
+    relativeDirection: RelativeDirection.values.fromString(
+      json['relativeDirection'],
+    ),
+    streetName: json['streetName'],
+    heading: AbsoluteDirection.values.fromString(json['heading']),
+    exit: json['exit'],
+    stayOn: json['stayOn'],
+    area: json['area'],
+    bogusName: json['bogusName'],
+    latitude: json['latitude'],
+    longitude: json['longitude'],
+    elevationProfile:
+        (json['elevationProfile'] as List?)
             ?.map((e) => ElevationProfileStep.fromJson(e))
             .toList(),
-      );
+  );
 }
 
 @immutable
@@ -1589,12 +1631,11 @@ class PenaltyForStreetMode {
 
   factory PenaltyForStreetMode.fromJson(
     Map<String, dynamic> json,
-  ) =>
-      PenaltyForStreetMode(
-        streetMode: StreetMode.values.fromString(json['streetMode']),
-        // timePenalty: json['timePenalty'] != null ? DoubleFunction.fromJson(json['timePenalty']) : null,
-        costFactor: json['costFactor'],
-      );
+  ) => PenaltyForStreetMode(
+    streetMode: StreetMode.values.fromString(json['streetMode']),
+    // timePenalty: json['timePenalty'] != null ? DoubleFunction.fromJson(json['timePenalty']) : null,
+    costFactor: json['costFactor'],
+  );
 }
 
 @immutable
@@ -1629,26 +1670,24 @@ class Place {
   });
 
   factory Place.fromJson(Map<String, dynamic> json) => Place(
-        name: json['name'],
-        vertexType: VertexType27.values.fromString(json['vertexType']),
-        latitude: json['latitude'],
-        longitude: json['longitude'],
-        quay: json['quay'] != null ? Quay.fromJson(json['quay']) : null,
-        flexibleArea: json['flexibleArea'],
-        bikeRentalStation: json['bikeRentalStation'] != null
+    name: json['name'],
+    vertexType: VertexType27.values.fromString(json['vertexType']),
+    latitude: json['latitude'],
+    longitude: json['longitude'],
+    quay: json['quay'] != null ? Quay.fromJson(json['quay']) : null,
+    flexibleArea: json['flexibleArea'],
+    bikeRentalStation:
+        json['bikeRentalStation'] != null
             ? BikeRentalStation.fromJson(json['bikeRentalStation'])
             : null,
-        rentalVehicle: json['rentalVehicle'] != null
+    rentalVehicle:
+        json['rentalVehicle'] != null
             ? RentalVehicle.fromJson(json['rentalVehicle'])
             : null,
-      );
+  );
 
   PlanLocation toPlanLocation() {
-    return PlanLocation(
-      name: name,
-      latitude: latitude,
-      longitude: longitude,
-    );
+    return PlanLocation(name: name, latitude: latitude, longitude: longitude);
   }
 
   PlaceEntity toPlaceEntity() {
@@ -1689,12 +1728,14 @@ class PlaceAtDistanceConnection {
 
   factory PlaceAtDistanceConnection.fromJson(Map<String, dynamic> json) =>
       PlaceAtDistanceConnection(
-        edges: (json['edges'] as List?)
-            ?.map((e) => PlaceAtDistanceEdge.fromJson(e))
-            .toList(),
-        pageInfo: json['pageInfo'] != null
-            ? PageInfo.fromJson(json['pageInfo'])
-            : null,
+        edges:
+            (json['edges'] as List?)
+                ?.map((e) => PlaceAtDistanceEdge.fromJson(e))
+                .toList(),
+        pageInfo:
+            json['pageInfo'] != null
+                ? PageInfo.fromJson(json['pageInfo'])
+                : null,
       );
 }
 
@@ -1705,13 +1746,12 @@ class PlaceAtDistanceEdge {
 
   const PlaceAtDistanceEdge({this.node, this.cursor});
 
-  factory PlaceAtDistanceEdge.fromJson(Map<String, dynamic> json) =>
-      PlaceAtDistanceEdge(
-        node: json['node'] != null
-            ? PlaceAtDistance.fromJson(json['node'])
-            : null,
-        cursor: json['cursor'],
-      );
+  factory PlaceAtDistanceEdge.fromJson(
+    Map<String, dynamic> json,
+  ) => PlaceAtDistanceEdge(
+    node: json['node'] != null ? PlaceAtDistance.fromJson(json['node']) : null,
+    cursor: json['cursor'],
+  );
 }
 
 @immutable
@@ -1772,21 +1812,26 @@ class PtSituationElement {
   factory PtSituationElement.fromJson(Map<String, dynamic> json) =>
       PtSituationElement(
         id: json['id'],
-        summary: (json['summary'] as List?)
-            ?.map((e) => MultilingualString.fromJson(e))
-            .toList(),
-        description: (json['description'] as List?)
-            ?.map((e) => MultilingualString.fromJson(e))
-            .toList(),
-        advice: (json['advice'] as List?)
-            ?.map((e) => MultilingualString.fromJson(e))
-            .toList(),
-        infoLinks: (json['infoLinks'] as List?)
-            ?.map((e) => InfoLink.fromJson(e))
-            .toList(),
-        validityPeriod: json['validityPeriod'] != null
-            ? ValidityPeriod.fromJson(json['validityPeriod'])
-            : null,
+        summary:
+            (json['summary'] as List?)
+                ?.map((e) => MultilingualString.fromJson(e))
+                .toList(),
+        description:
+            (json['description'] as List?)
+                ?.map((e) => MultilingualString.fromJson(e))
+                .toList(),
+        advice:
+            (json['advice'] as List?)
+                ?.map((e) => MultilingualString.fromJson(e))
+                .toList(),
+        infoLinks:
+            (json['infoLinks'] as List?)
+                ?.map((e) => InfoLink.fromJson(e))
+                .toList(),
+        validityPeriod:
+            json['validityPeriod'] != null
+                ? ValidityPeriod.fromJson(json['validityPeriod'])
+                : null,
         reportType: ReportType.values.fromString(json['reportType']),
         situationNumber: json['situationNumber'],
         severity: Severity.values.fromString(json['severity']),
@@ -1839,38 +1884,42 @@ class Quay {
   });
 
   factory Quay.fromJson(Map<String, dynamic> json) => Quay(
-        id: json['id'],
-        name: json['name'],
-        latitude: json['latitude'],
-        longitude: json['longitude'],
-        description: json['description'],
-        stopPlace: json['stopPlace'] != null
+    id: json['id'],
+    name: json['name'],
+    latitude: json['latitude'],
+    longitude: json['longitude'],
+    description: json['description'],
+    stopPlace:
+        json['stopPlace'] != null
             ? StopPlace.fromJson(json['stopPlace'])
             : null,
-        wheelchairAccessible: WheelchairBoarding.values.fromString(
-          json['wheelchairAccessible'],
-        ),
-        timeZone: json['timeZone'],
-        publicCode: json['publicCode'],
-        lines: (json['lines'] as List?)?.map((e) => Line.fromJson(e)).toList(),
-        journeyPatterns: (json['journeyPatterns'] as List?)
+    wheelchairAccessible: WheelchairBoarding.values.fromString(
+      json['wheelchairAccessible'],
+    ),
+    timeZone: json['timeZone'],
+    publicCode: json['publicCode'],
+    lines: (json['lines'] as List?)?.map((e) => Line.fromJson(e)).toList(),
+    journeyPatterns:
+        (json['journeyPatterns'] as List?)
             ?.map((e) => JourneyPattern.fromJson(e))
             .toList(),
-        estimatedCalls: (json['estimatedCalls'] as List?)
+    estimatedCalls:
+        (json['estimatedCalls'] as List?)
             ?.map((e) => EstimatedCall.fromJson(e))
             .toList(),
-        situations: (json['situations'] as List?)
+    situations:
+        (json['situations'] as List?)
             ?.map((e) => PtSituationElement.fromJson(e))
             .toList(),
-        stopType: json['stopType'],
-        flexibleArea: json['flexibleArea'],
-        flexibleGroup: (json['flexibleGroup'] as List?)
-            ?.map((e) => Quay.fromJson(e))
-            .toList(),
-        tariffZones: (json['tariffZones'] as List?)
+    stopType: json['stopType'],
+    flexibleArea: json['flexibleArea'],
+    flexibleGroup:
+        (json['flexibleGroup'] as List?)?.map((e) => Quay.fromJson(e)).toList(),
+    tariffZones:
+        (json['tariffZones'] as List?)
             ?.map((e) => TariffZone.fromJson(e))
             .toList(),
-      );
+  );
 }
 
 @immutable
@@ -1882,10 +1931,10 @@ class QuayAtDistance {
   const QuayAtDistance({this.id, this.quay, this.distance});
 
   factory QuayAtDistance.fromJson(Map<String, dynamic> json) => QuayAtDistance(
-        id: json['id'],
-        quay: json['quay'] != null ? Quay.fromJson(json['quay']) : null,
-        distance: json['distance'],
-      );
+    id: json['id'],
+    quay: json['quay'] != null ? Quay.fromJson(json['quay']) : null,
+    distance: json['distance'],
+  );
 }
 
 @immutable
@@ -1894,12 +1943,14 @@ class QuayAtDistanceConnection {
 
   factory QuayAtDistanceConnection.fromJson(Map<String, dynamic> json) =>
       QuayAtDistanceConnection(
-        edges: (json['edges'] as List?)
-            ?.map((e) => QuayAtDistanceEdge.fromJson(e))
-            .toList(),
-        pageInfo: json['pageInfo'] != null
-            ? PageInfo.fromJson(json['pageInfo'])
-            : null,
+        edges:
+            (json['edges'] as List?)
+                ?.map((e) => QuayAtDistanceEdge.fromJson(e))
+                .toList(),
+        pageInfo:
+            json['pageInfo'] != null
+                ? PageInfo.fromJson(json['pageInfo'])
+                : null,
       );
 
   final List<QuayAtDistanceEdge>? edges;
@@ -1951,15 +2002,16 @@ class RentalVehicle {
   });
 
   factory RentalVehicle.fromJson(Map<String, dynamic> json) => RentalVehicle(
-        id: json['id'],
-        vehicleType: json['vehicleType'] != null
+    id: json['id'],
+    vehicleType:
+        json['vehicleType'] != null
             ? RentalVehicleType.fromJson(json['vehicleType'])
             : null,
-        network: json['network'],
-        longitude: json['longitude'],
-        latitude: json['latitude'],
-        currentRangeMeters: json['currentRangeMeters'],
-      );
+    network: json['network'],
+    longitude: json['longitude'],
+    latitude: json['latitude'],
+    currentRangeMeters: json['currentRangeMeters'],
+  );
 }
 
 @immutable
@@ -1997,12 +2049,13 @@ class RoutingError {
   const RoutingError({this.code, this.inputField, this.description});
 
   factory RoutingError.fromJson(Map<String, dynamic> json) => RoutingError(
-        code: RoutingErrorCode.values.fromString(json['code']),
-        inputField: json['inputField'] != null
+    code: RoutingErrorCode.values.fromString(json['code']),
+    inputField:
+        json['inputField'] != null
             ? InputField.values.fromString(json['inputField'])
             : null,
-        description: json['description'],
-      );
+    description: json['description'],
+  );
 }
 
 @immutable
@@ -2050,53 +2103,52 @@ class RoutingParameters {
 
   factory RoutingParameters.fromJson(
     Map<String, dynamic> json,
-  ) =>
-      RoutingParameters(
-        walkSpeed: json['walkSpeed'],
-        bikeSpeed: json['bikeSpeed'],
-        maxDirectStreetDuration: json['maxDirectStreetDuration'],
-        wheelChairAccessible: json['wheelChairAccessible'],
-        numItineraries: json['numItineraries'],
-        maxSlope: json['maxSlope'],
-        transferPenalty: json['transferPenalty'],
-        walkReluctance: json['walkReluctance'],
-        stairsReluctance: json['stairsReluctance'],
-        turnReluctance: json['turnReluctance'],
-        elevatorBoardTime: json['elevatorBoardTime'],
-        elevatorBoardCost: json['elevatorBoardCost'],
-        elevatorHopTime: json['elevatorHopTime'],
-        elevatorHopCost: json['elevatorHopCost'],
-        bikeRentalPickupTime: json['bikeRentalPickupTime'],
-        bikeRentalPickupCost: json['bikeRentalPickupCost'],
-        bikeRentalDropOffTime: json['bikeRentalDropOffTime'],
-        bikeRentalDropOffCost: json['bikeRentalDropOffCost'],
-        bikeParkTime: json['bikeParkTime'],
-        bikeParkCost: json['bikeParkCost'],
-        carDropOffTime: json['carDropOffTime'],
-        waitReluctance: json['waitReluctance'],
-        walkBoardCost: json['walkBoardCost'],
-        bikeBoardCost: json['bikeBoardCost'],
-        otherThanPreferredRoutesPenalty:
-            json['otherThanPreferredRoutesPenalty'],
-        transferSlack: json['transferSlack'],
-        boardSlackDefault: json['boardSlackDefault'],
-        boardSlackList: (json['boardSlackList'] as List?)
+  ) => RoutingParameters(
+    walkSpeed: json['walkSpeed'],
+    bikeSpeed: json['bikeSpeed'],
+    maxDirectStreetDuration: json['maxDirectStreetDuration'],
+    wheelChairAccessible: json['wheelChairAccessible'],
+    numItineraries: json['numItineraries'],
+    maxSlope: json['maxSlope'],
+    transferPenalty: json['transferPenalty'],
+    walkReluctance: json['walkReluctance'],
+    stairsReluctance: json['stairsReluctance'],
+    turnReluctance: json['turnReluctance'],
+    elevatorBoardTime: json['elevatorBoardTime'],
+    elevatorBoardCost: json['elevatorBoardCost'],
+    elevatorHopTime: json['elevatorHopTime'],
+    elevatorHopCost: json['elevatorHopCost'],
+    bikeRentalPickupTime: json['bikeRentalPickupTime'],
+    bikeRentalPickupCost: json['bikeRentalPickupCost'],
+    bikeRentalDropOffTime: json['bikeRentalDropOffTime'],
+    bikeRentalDropOffCost: json['bikeRentalDropOffCost'],
+    bikeParkTime: json['bikeParkTime'],
+    bikeParkCost: json['bikeParkCost'],
+    carDropOffTime: json['carDropOffTime'],
+    waitReluctance: json['waitReluctance'],
+    walkBoardCost: json['walkBoardCost'],
+    bikeBoardCost: json['bikeBoardCost'],
+    otherThanPreferredRoutesPenalty: json['otherThanPreferredRoutesPenalty'],
+    transferSlack: json['transferSlack'],
+    boardSlackDefault: json['boardSlackDefault'],
+    boardSlackList:
+        (json['boardSlackList'] as List?)
             ?.map((e) => TransportModeSlackType.fromJson(e))
             .toList(),
-        alightSlackDefault: json['alightSlackDefault'],
-        alightSlackList: (json['alightSlackList'] as List?)
+    alightSlackDefault: json['alightSlackDefault'],
+    alightSlackList:
+        (json['alightSlackList'] as List?)
             ?.map((e) => TransportModeSlackType.fromJson(e))
             .toList(),
-        maxTransfers: json['maxTransfers'],
-        maxAdditionalTransfers: json['maxAdditionalTransfers'],
-        carDecelerationSpeed: json['carDecelerationSpeed'],
-        carAccelerationSpeed: json['carAccelerationSpeed'],
-        ignoreRealTimeUpdates: json['ignoreRealTimeUpdates'],
-        includedPlannedCancellations: json['includedPlannedCancellations'],
-        disableRemainingWeightHeuristic:
-            json['disableRemainingWeightHeuristic'],
-        geoIdElevation: json['geoIdElevation'],
-      );
+    maxTransfers: json['maxTransfers'],
+    maxAdditionalTransfers: json['maxAdditionalTransfers'],
+    carDecelerationSpeed: json['carDecelerationSpeed'],
+    carAccelerationSpeed: json['carAccelerationSpeed'],
+    ignoreRealTimeUpdates: json['ignoreRealTimeUpdates'],
+    includedPlannedCancellations: json['includedPlannedCancellations'],
+    disableRemainingWeightHeuristic: json['disableRemainingWeightHeuristic'],
+    geoIdElevation: json['geoIdElevation'],
+  );
 
   final double? walkSpeed;
   final double? bikeSpeed;
@@ -2165,17 +2217,17 @@ class ServerInfo {
   });
 
   factory ServerInfo.fromJson(Map<String, dynamic> json) => ServerInfo(
-        version: json['version'],
-        buildTime: json['buildTime'],
-        gitBranch: json['gitBranch'],
-        gitCommit: json['gitCommit'],
-        gitCommitTime: json['gitCommitTime'],
-        otpConfigVersion: json['otpConfigVersion'],
-        buildConfigVersion: json['buildConfigVersion'],
-        routerConfigVersion: json['routerConfigVersion'],
-        otpSerializationVersionId: json['otpSerializationVersionId'],
-        internalTransitModelTimeZone: json['internalTransitModelTimeZone'],
-      );
+    version: json['version'],
+    buildTime: json['buildTime'],
+    gitBranch: json['gitBranch'],
+    gitCommit: json['gitCommit'],
+    gitCommitTime: json['gitCommitTime'],
+    otpConfigVersion: json['otpConfigVersion'],
+    buildConfigVersion: json['buildConfigVersion'],
+    routerConfigVersion: json['routerConfigVersion'],
+    otpSerializationVersionId: json['otpSerializationVersionId'],
+    internalTransitModelTimeZone: json['internalTransitModelTimeZone'],
+  );
 }
 
 @immutable
@@ -2202,43 +2254,47 @@ class ServiceJourney {
   });
 
   factory ServiceJourney.fromJson(Map<String, dynamic> json) => ServiceJourney(
-        id: json['id'],
-        line: json['line'] != null ? Line.fromJson(json['line']) : null,
-        activeDates:
-            (json['activeDates'] as List?)?.map((e) => e.toString()).toList(),
-        transportMode: TransportMode.values.fromString(json['transportMode']),
-        transportSubmode: TransportSubmode.values.fromString(
-          json['transportSubmode'],
-        ),
-        publicCode: json['publicCode'],
-        privateCode: json['privateCode'],
-        operator: json['operator'] != null
-            ? Operator.fromJson(json['operator'])
-            : null,
-        directionType: DirectionType.values.fromString(json['directionType']),
-        wheelchairAccessible: WheelchairBoarding.values.fromString(
-          json['wheelchairAccessible'],
-        ),
-        bikesAllowed: BikesAllowed.values.fromString(json['bikesAllowed']),
-        journeyPattern: json['journeyPattern'] != null
+    id: json['id'],
+    line: json['line'] != null ? Line.fromJson(json['line']) : null,
+    activeDates:
+        (json['activeDates'] as List?)?.map((e) => e.toString()).toList(),
+    transportMode: TransportMode.values.fromString(json['transportMode']),
+    transportSubmode: TransportSubmode.values.fromString(
+      json['transportSubmode'],
+    ),
+    publicCode: json['publicCode'],
+    privateCode: json['privateCode'],
+    operator:
+        json['operator'] != null ? Operator.fromJson(json['operator']) : null,
+    directionType: DirectionType.values.fromString(json['directionType']),
+    wheelchairAccessible: WheelchairBoarding.values.fromString(
+      json['wheelchairAccessible'],
+    ),
+    bikesAllowed: BikesAllowed.values.fromString(json['bikesAllowed']),
+    journeyPattern:
+        json['journeyPattern'] != null
             ? JourneyPattern.fromJson(json['journeyPattern'])
             : null,
-        quays: (json['quays'] as List?)?.map((e) => Quay.fromJson(e)).toList(),
-        passingTimes: (json['passingTimes'] as List?)
+    quays: (json['quays'] as List?)?.map((e) => Quay.fromJson(e)).toList(),
+    passingTimes:
+        (json['passingTimes'] as List?)
             ?.map((e) => TimetabledPassingTime.fromJson(e))
             .toList(),
-        estimatedCalls: (json['estimatedCalls'] as List?)
+    estimatedCalls:
+        (json['estimatedCalls'] as List?)
             ?.map((e) => EstimatedCall.fromJson(e))
             .toList(),
-        pointsOnLink: json['pointsOnLink'] != null
+    pointsOnLink:
+        json['pointsOnLink'] != null
             ? PointsOnLink.fromJson(json['pointsOnLink'])
             : null,
-        notices:
-            (json['notices'] as List?)?.map((e) => Notice.fromJson(e)).toList(),
-        situations: (json['situations'] as List?)
+    notices:
+        (json['notices'] as List?)?.map((e) => Notice.fromJson(e)).toList(),
+    situations:
+        (json['situations'] as List?)
             ?.map((e) => PtSituationElement.fromJson(e))
             .toList(),
-      );
+  );
 
   final String? id;
   final Line? line;
@@ -2279,31 +2335,34 @@ class StopPlace {
   });
 
   factory StopPlace.fromJson(Map<String, dynamic> json) => StopPlace(
-        id: json['id'],
-        name: json['name'],
-        latitude: json['latitude'],
-        longitude: json['longitude'],
-        description: json['description'],
-        stopInterchangePriority: StopInterchangePriority.values.fromString(
-          json['stopInterchangePriority'],
-        ),
-        tariffZones: (json['tariffZones'] as List?)
+    id: json['id'],
+    name: json['name'],
+    latitude: json['latitude'],
+    longitude: json['longitude'],
+    description: json['description'],
+    stopInterchangePriority: StopInterchangePriority.values.fromString(
+      json['stopInterchangePriority'],
+    ),
+    tariffZones:
+        (json['tariffZones'] as List?)
             ?.map((e) => TariffZone.fromJson(e))
             .toList(),
-        transportMode: (json['transportMode'] as List?)
+    transportMode:
+        (json['transportMode'] as List?)
             ?.map((e) => TransportMode.values.fromString(e))
             .toList(),
-        transportSubmode: (json['transportSubmode'] as List?)
+    transportSubmode:
+        (json['transportSubmode'] as List?)
             ?.map((e) => TransportSubmode.values.fromString(e))
             .toList(),
-        timeZone: json['timeZone'],
-        quays: (json['quays'] as List?)?.map((e) => Quay.fromJson(e)).toList(),
-        parent:
-            json['parent'] != null ? StopPlace.fromJson(json['parent']) : null,
-        situations: (json['situations'] as List?)
+    timeZone: json['timeZone'],
+    quays: (json['quays'] as List?)?.map((e) => Quay.fromJson(e)).toList(),
+    parent: json['parent'] != null ? StopPlace.fromJson(json['parent']) : null,
+    situations:
+        (json['situations'] as List?)
             ?.map((e) => PtSituationElement.fromJson(e))
             .toList(),
-      );
+  );
 
   final String? id;
   final String? name;
@@ -2330,9 +2389,10 @@ class StopToStopGeometry {
 
   factory StopToStopGeometry.fromJson(Map<String, dynamic> json) =>
       StopToStopGeometry(
-        pointsOnLink: json['pointsOnLink'] != null
-            ? PointsOnLink.fromJson(json['pointsOnLink'])
-            : null,
+        pointsOnLink:
+            json['pointsOnLink'] != null
+                ? PointsOnLink.fromJson(json['pointsOnLink'])
+                : null,
         fromQuay:
             json['fromQuay'] != null ? Quay.fromJson(json['fromQuay']) : null,
         toQuay: json['toQuay'] != null ? Quay.fromJson(json['toQuay']) : null,
@@ -2362,10 +2422,10 @@ class StreetModes {
   const StreetModes({this.accessMode, this.egressMode, this.directMode});
 
   factory StreetModes.fromJson(Map<String, dynamic> json) => StreetModes(
-        accessMode: StreetMode.values.fromString(json['accessMode']),
-        egressMode: StreetMode.values.fromString(json['egressMode']),
-        directMode: StreetMode.values.fromString(json['directMode']),
-      );
+    accessMode: StreetMode.values.fromString(json['accessMode']),
+    egressMode: StreetMode.values.fromString(json['egressMode']),
+    directMode: StreetMode.values.fromString(json['directMode']),
+  );
 }
 
 @immutable
@@ -2442,33 +2502,40 @@ class TimetabledPassingTime {
   factory TimetabledPassingTime.fromJson(Map<String, dynamic> json) =>
       TimetabledPassingTime(
         quay: json['quay'] != null ? Quay.fromJson(json['quay']) : null,
-        arrival: json['arrival'] != null
-            ? TimeAndDayOffset.fromJson(json['arrival'])
-            : null,
-        departure: json['departure'] != null
-            ? TimeAndDayOffset.fromJson(json['departure'])
-            : null,
+        arrival:
+            json['arrival'] != null
+                ? TimeAndDayOffset.fromJson(json['arrival'])
+                : null,
+        departure:
+            json['departure'] != null
+                ? TimeAndDayOffset.fromJson(json['departure'])
+                : null,
         timingPoint: json['timingPoint'],
         forBoarding: json['forBoarding'],
         forAlighting: json['forAlighting'],
         requestStop: json['requestStop'],
-        earliestDepartureTime: json['earliestDepartureTime'] != null
-            ? TimeAndDayOffset.fromJson(json['earliestDepartureTime'])
-            : null,
-        latestArrivalTime: json['latestArrivalTime'] != null
-            ? TimeAndDayOffset.fromJson(json['latestArrivalTime'])
-            : null,
-        serviceJourney: json['serviceJourney'] != null
-            ? ServiceJourney.fromJson(json['serviceJourney'])
-            : null,
-        destinationDisplay: json['destinationDisplay'] != null
-            ? DestinationDisplay.fromJson(json['destinationDisplay'])
-            : null,
+        earliestDepartureTime:
+            json['earliestDepartureTime'] != null
+                ? TimeAndDayOffset.fromJson(json['earliestDepartureTime'])
+                : null,
+        latestArrivalTime:
+            json['latestArrivalTime'] != null
+                ? TimeAndDayOffset.fromJson(json['latestArrivalTime'])
+                : null,
+        serviceJourney:
+            json['serviceJourney'] != null
+                ? ServiceJourney.fromJson(json['serviceJourney'])
+                : null,
+        destinationDisplay:
+            json['destinationDisplay'] != null
+                ? DestinationDisplay.fromJson(json['destinationDisplay'])
+                : null,
         notices:
             (json['notices'] as List?)?.map((e) => Notice.fromJson(e)).toList(),
-        bookingArrangements: json['bookingArrangements'] != null
-            ? BookingArrangement.fromJson(json['bookingArrangements'])
-            : null,
+        bookingArrangements:
+            json['bookingArrangements'] != null
+                ? BookingArrangement.fromJson(json['bookingArrangements'])
+                : null,
       );
 
   final Quay? quay;
@@ -2498,11 +2565,10 @@ class TransitGeneralizedCostFilterParams {
 
   factory TransitGeneralizedCostFilterParams.fromJson(
     Map<String, dynamic> json,
-  ) =>
-      TransitGeneralizedCostFilterParams(
-        // costLimitFunction: json['costLimitFunction'] != null ? DoubleFunction.fromJson(json['costLimitFunction']) : null,
-        intervalRelaxFactor: json['intervalRelaxFactor'],
-      );
+  ) => TransitGeneralizedCostFilterParams(
+    // costLimitFunction: json['costLimitFunction'] != null ? DoubleFunction.fromJson(json['costLimitFunction']) : null,
+    intervalRelaxFactor: json['intervalRelaxFactor'],
+  );
 }
 
 @immutable
@@ -2512,11 +2578,12 @@ class TransportModes {
   const TransportModes({this.transportMode, this.transportSubModes});
 
   factory TransportModes.fromJson(Map<String, dynamic> json) => TransportModes(
-        transportMode: TransportMode.values.fromString(json['transportMode']),
-        transportSubModes: (json['transportSubModes'] as List?)
+    transportMode: TransportMode.values.fromString(json['transportMode']),
+    transportSubModes:
+        (json['transportSubModes'] as List?)
             ?.map((e) => TransportSubmode.values.fromString(e))
             .toList(),
-      );
+  );
 }
 
 @immutable
@@ -2528,9 +2595,10 @@ class TransportModeSlack {
   factory TransportModeSlack.fromJson(Map<String, dynamic> json) =>
       TransportModeSlack(
         slack: json['slack'],
-        modes: (json['modes'] as List?)
-            ?.map((e) => TransportMode.values.fromString(e))
-            .toList(),
+        modes:
+            (json['modes'] as List?)
+                ?.map((e) => TransportMode.values.fromString(e))
+                .toList(),
       );
 }
 
@@ -2543,9 +2611,10 @@ class TransportModeSlackType {
   factory TransportModeSlackType.fromJson(Map<String, dynamic> json) =>
       TransportModeSlackType(
         slack: json['slack'],
-        modes: (json['modes'] as List?)
-            ?.map((e) => TransportMode.values.fromString(e))
-            .toList(),
+        modes:
+            (json['modes'] as List?)
+                ?.map((e) => TransportMode.values.fromString(e))
+                .toList(),
       );
 }
 
@@ -2599,38 +2668,39 @@ class Trip {
   });
 
   factory Trip.fromJson(Map<String, dynamic> json) => Trip(
-        dateTime: json['dateTime'],
-        metadata: json['metadata'] != null
+    dateTime: json['dateTime'],
+    metadata:
+        json['metadata'] != null
             ? TripSearchData.fromJson(json['metadata'])
             : null,
-        fromPlace: json['fromPlace'] != null
-            ? Place.fromJson(json['fromPlace'])
-            : null,
-        toPlace:
-            json['toPlace'] != null ? Place.fromJson(json['toPlace']) : null,
-        tripPatterns: (json['tripPatterns'] as List?)
+    fromPlace:
+        json['fromPlace'] != null ? Place.fromJson(json['fromPlace']) : null,
+    toPlace: json['toPlace'] != null ? Place.fromJson(json['toPlace']) : null,
+    tripPatterns:
+        (json['tripPatterns'] as List?)
             ?.map((e) => TripPattern.fromJson(e))
             .toList(),
-        routingErrors: (json['routingErrors'] as List?)
+    routingErrors:
+        (json['routingErrors'] as List?)
             ?.map((e) => RoutingError.fromJson(e))
             .toList(),
-        debugOutput: json['debugOutput'] != null
+    debugOutput:
+        json['debugOutput'] != null
             ? DebugOutput.fromJson(json['debugOutput'])
             : null,
-        previousPageCursor: json['previousPageCursor'],
-        nextPageCursor: json['nextPageCursor'],
-      );
+    previousPageCursor: json['previousPageCursor'],
+    nextPageCursor: json['nextPageCursor'],
+  );
 
   PlanEntity toUIModel() {
     return PlanEntity(
       from: fromPlace?.toPlanLocation(),
       to: toPlace?.toPlanLocation(),
-      itineraries: tripPatterns
-          ?.map(
-            (itinerary) => itinerary.toPlanItinerary(),
-          )
-          .toList(),
-    ).copyWith(type: 'plan');
+      itineraries:
+          tripPatterns
+              ?.map((itinerary) => itinerary.toPlanItinerary())
+              .toList(),
+    );
   }
 }
 
@@ -2640,12 +2710,14 @@ class TripFilterInput {
 
   factory TripFilterInput.fromJson(Map<String, dynamic> json) =>
       TripFilterInput(
-        select: (json['select'] as List?)
-            ?.map((e) => TripFilterSelectInput.fromJson(e))
-            .toList(),
-        not: (json['not'] as List?)
-            ?.map((e) => TripFilterSelectInput.fromJson(e))
-            .toList(),
+        select:
+            (json['select'] as List?)
+                ?.map((e) => TripFilterSelectInput.fromJson(e))
+                .toList(),
+        not:
+            (json['not'] as List?)
+                ?.map((e) => TripFilterSelectInput.fromJson(e))
+                .toList(),
       );
 
   final List<TripFilterSelectInput>? select;
@@ -2672,12 +2744,14 @@ class TripFilterSelectInput {
         lines: (json['lines'] as List?)?.map((e) => e.toString()).toList(),
         authorities:
             (json['authorities'] as List?)?.map((e) => e.toString()).toList(),
-        serviceJourneys: (json['serviceJourneys'] as List?)
-            ?.map((e) => e.toString())
-            .toList(),
-        transportModes: (json['transportModes'] as List?)
-            ?.map((e) => TransportModes.fromJson(e))
-            .toList(),
+        serviceJourneys:
+            (json['serviceJourneys'] as List?)
+                ?.map((e) => e.toString())
+                .toList(),
+        transportModes:
+            (json['transportModes'] as List?)
+                ?.map((e) => TransportModes.fromJson(e))
+                .toList(),
         groupOfLines:
             (json['groupOfLines'] as List?)?.map((e) => e.toString()).toList(),
       );
@@ -2692,9 +2766,10 @@ class TripPassThroughViaLocationInput {
   factory TripPassThroughViaLocationInput.fromJson(Map<String, dynamic> json) =>
       TripPassThroughViaLocationInput(
         label: json['label'],
-        stopLocationIds: (json['stopLocationIds'] as List?)
-            ?.map((e) => e.toString())
-            .toList(),
+        stopLocationIds:
+            (json['stopLocationIds'] as List?)
+                ?.map((e) => e.toString())
+                .toList(),
       );
 }
 
@@ -2738,28 +2813,30 @@ class TripPattern {
   });
 
   factory TripPattern.fromJson(Map<String, dynamic> json) => TripPattern(
-        aimedStartTime: json['aimedStartTime'],
-        expectedStartTime: json['expectedStartTime'],
-        aimedEndTime: json['aimedEndTime'],
-        expectedEndTime: json['expectedEndTime'],
-        duration: json['duration'],
-        directDuration: json['directDuration'],
-        waitingTime: json['waitingTime'],
-        distance: json['distance'],
-        walkTime: json['walkTime'],
-        streetDistance: json['streetDistance'],
-        legs: (json['legs'] as List?)?.map((e) => Leg.fromJson(e)).toList(),
-        systemNotices: (json['systemNotices'] as List?)
+    aimedStartTime: json['aimedStartTime'],
+    expectedStartTime: json['expectedStartTime'],
+    aimedEndTime: json['aimedEndTime'],
+    expectedEndTime: json['expectedEndTime'],
+    duration: json['duration'],
+    directDuration: json['directDuration'],
+    waitingTime: json['waitingTime'],
+    distance: json['distance'],
+    walkTime: json['walkTime'],
+    streetDistance: json['streetDistance'],
+    legs: (json['legs'] as List?)?.map((e) => Leg.fromJson(e)).toList(),
+    systemNotices:
+        (json['systemNotices'] as List?)
             ?.map((e) => SystemNotice.fromJson(e))
             .toList(),
-        generalizedCost: json['generalizedCost'],
-        generalizedCost2: json['generalizedCost2'],
-        waitTimeOptimizedCost: json['waitTimeOptimizedCost'],
-        transferPriorityCost: json['transferPriorityCost'],
-        timePenalty: (json['timePenalty'] as List?)
+    generalizedCost: json['generalizedCost'],
+    generalizedCost2: json['generalizedCost2'],
+    waitTimeOptimizedCost: json['waitTimeOptimizedCost'],
+    transferPriorityCost: json['transferPriorityCost'],
+    timePenalty:
+        (json['timePenalty'] as List?)
             ?.map((e) => TimePenaltyWithCost.fromJson(e))
             .toList(),
-      );
+  );
 
   PlanItinerary toPlanItinerary() {
     return PlanItinerary(
@@ -2795,12 +2872,14 @@ class TripViaLocationInput {
 
   factory TripViaLocationInput.fromJson(Map<String, dynamic> json) =>
       TripViaLocationInput(
-        visit: json['visit'] != null
-            ? TripVisitViaLocationInput.fromJson(json['visit'])
-            : null,
-        passThrough: json['passThrough'] != null
-            ? TripPassThroughViaLocationInput.fromJson(json['passThrough'])
-            : null,
+        visit:
+            json['visit'] != null
+                ? TripVisitViaLocationInput.fromJson(json['visit'])
+                : null,
+        passThrough:
+            json['passThrough'] != null
+                ? TripPassThroughViaLocationInput.fromJson(json['passThrough'])
+                : null,
       );
 }
 
@@ -2821,12 +2900,14 @@ class TripVisitViaLocationInput {
       TripVisitViaLocationInput(
         label: json['label'],
         minimumWaitTime: json['minimumWaitTime'],
-        stopLocationIds: (json['stopLocationIds'] as List?)
-            ?.map((e) => e.toString())
-            .toList(),
-        coordinate: json['coordinate'] != null
-            ? InputCoordinates.fromJson(json['coordinate'])
-            : null,
+        stopLocationIds:
+            (json['stopLocationIds'] as List?)
+                ?.map((e) => e.toString())
+                .toList(),
+        coordinate:
+            json['coordinate'] != null
+                ? InputCoordinates.fromJson(json['coordinate'])
+                : null,
       );
 }
 
@@ -2872,9 +2953,10 @@ class ViaLocationInput {
       ViaLocationInput(
         name: json['name'],
         place: json['place'],
-        coordinates: json['coordinates'] != null
-            ? InputCoordinates.fromJson(json['coordinates'])
-            : null,
+        coordinates:
+            json['coordinates'] != null
+                ? InputCoordinates.fromJson(json['coordinates'])
+                : null,
         minSlack: json['minSlack'],
         maxSlack: json['maxSlack'],
       );
@@ -2890,9 +2972,10 @@ class ViaSegmentInput {
       ViaSegmentInput(
         modes:
             json['modes'] != null ? StreetModes.fromJson(json['modes']) : null,
-        filters: (json['filters'] as List?)
-            ?.map((e) => TripFilterInput.fromJson(e))
-            .toList(),
+        filters:
+            (json['filters'] as List?)
+                ?.map((e) => TripFilterInput.fromJson(e))
+                .toList(),
       );
 }
 
@@ -2908,16 +2991,19 @@ class ViaTrip {
   });
 
   factory ViaTrip.fromJson(Map<String, dynamic> json) => ViaTrip(
-        tripPatternsPerSegment: (json['tripPatternsPerSegment'] as List?)
+    tripPatternsPerSegment:
+        (json['tripPatternsPerSegment'] as List?)
             ?.map((e) => ViaTripPatternSegment.fromJson(e))
             .toList(),
-        tripPatternCombinations: (json['tripPatternCombinations'] as List?)
+    tripPatternCombinations:
+        (json['tripPatternCombinations'] as List?)
             ?.map((e) => ViaConnection.fromJson(e))
             .toList(),
-        routingErrors: (json['routingErrors'] as List?)
+    routingErrors:
+        (json['routingErrors'] as List?)
             ?.map((e) => RoutingError.fromJson(e))
             .toList(),
-      );
+  );
 }
 
 @immutable
@@ -2927,8 +3013,9 @@ class ViaTripPatternSegment {
 
   factory ViaTripPatternSegment.fromJson(Map<String, dynamic> json) =>
       ViaTripPatternSegment(
-        tripPatterns: (json['tripPatterns'] as List?)
-            ?.map((e) => TripPattern.fromJson(e))
-            .toList(),
+        tripPatterns:
+            (json['tripPatterns'] as List?)
+                ?.map((e) => TripPattern.fromJson(e))
+                .toList(),
       );
 }

@@ -31,37 +31,53 @@ class StepEntity {
     this.walkingBike,
   });
 
+  static const String _distance = 'distance';
+  static const String _lon = 'lon';
+  static const String _lat = 'lat';
+  static const String _elevationProfile = 'elevationProfile';
+  static const String _relativeDirection = 'relativeDirection';
+  static const String _absoluteDirection = 'absoluteDirection';
+  static const String _streetName = 'streetName';
+  static const String _exit = 'exit';
+  static const String _stayOn = 'stayOn';
+  static const String _area = 'area';
+  static const String _bogusName = 'bogusName';
+  static const String _walkingBike = 'walkingBike';
+
   factory StepEntity.fromJson(Map<String, dynamic> json) => StepEntity(
-        distance: double.tryParse(json['distance'].toString()) ?? 0,
-        lon: double.tryParse(json['lon'].toString()) ?? 0,
-        lat: double.tryParse(json['lat'].toString()) ?? 0,
-        relativeDirection: json['relativeDirection'] != null
-            ? getRelativeDirectionByString(json['relativeDirection'])
+    distance: json[_distance],
+    lon: json[_lon],
+    lat: json[_lat],
+    relativeDirection:
+        json[_relativeDirection] != null
+            ? getRelativeDirectionByString(json[_relativeDirection])
             : null,
-        absoluteDirection: json['absoluteDirection'] != null
-            ? getAbsoluteDirectionByString(json['absoluteDirection'])
+    absoluteDirection:
+        json[_absoluteDirection] != null
+            ? getAbsoluteDirectionByString(json[_absoluteDirection])
             : null,
-        streetName: json['streetName'],
-        exit: json['exit'],
-        stayOn: json['stayOn'],
-        area: json['area'],
-        bogusName: json['bogusName'],
-        walkingBike: json['walkingBike'],
-      );
+    streetName: json[_streetName],
+    exit: json[_exit],
+    stayOn: json[_stayOn],
+    area: json[_area],
+    bogusName: json[_bogusName],
+    walkingBike: json[_walkingBike],
+  );
 
   Map<String, dynamic> toMap() => {
-        'distance': distance,
-        'lon': lon,
-        'lat': lat,
-        'elevationProfile':
-            List<dynamic>.from((elevationProfile ?? []).map((x) => x.toJson())),
-        'relativeDirection': relativeDirection?.name,
-        'absoluteDirection': absoluteDirection?.name,
-        'streetName': streetName,
-        'exit': exit,
-        'stayOn': stayOn,
-        'area': area,
-        'bogusName': bogusName,
-        'walkingBike': walkingBike,
-      };
+    _distance: distance,
+    _lon: lon,
+    _lat: lat,
+    _elevationProfile: List<dynamic>.from(
+      (elevationProfile ?? []).map((x) => x.toJson()),
+    ),
+    _relativeDirection: relativeDirection?.name,
+    _absoluteDirection: absoluteDirection?.name,
+    _streetName: streetName,
+    _exit: exit,
+    _stayOn: stayOn,
+    _area: area,
+    _bogusName: bogusName,
+    _walkingBike: walkingBike,
+  };
 }

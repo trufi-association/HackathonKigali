@@ -1,17 +1,6 @@
 part of 'plan_entity.dart';
 
 class PlanItinerary {
-  static const String _legs = "legs";
-  static const String _startTime = "startTime";
-  static const String _endTime = "endTime";
-  static const String _walkTime = "walkTime";
-  static const String _durationTrip = "duration";
-  static const String _walkDistance = "walkDistance";
-  static const String _arrivedAtDestinationWithRentedBicycle =
-      "arrivedAtDestinationWithRentedBicycle";
-  static const String _emissionsPerPerson = "emissionsPerPerson";
-  static const String _emissionsPerPersonCo2 = "emissionsPerPersonCo2";
-
   static int _distanceForLegs(List<PlanItineraryLeg> legs) =>
       legs.fold<int>(0, (distance, leg) => distance += leg.distance.ceil());
 
@@ -28,6 +17,17 @@ class PlanItinerary {
     this.isMinorEmissionsPerPerson = false,
   }) : distance = _distanceForLegs(legs);
 
+  static const String _legs = "legs";
+  static const String _startTime = "startTime";
+  static const String _endTime = "endTime";
+  static const String _walkTime = "walkTime";
+  static const String _durationTrip = "duration";
+  static const String _walkDistance = "walkDistance";
+  static const String _arrivedAtDestinationWithRentedBicycle =
+      "arrivedAtDestinationWithRentedBicycle";
+  static const String _emissionsPerPerson = "emissionsPerPerson";
+  static const String _emissionsPerPersonCo2 = "emissionsPerPersonCo2";
+
   final List<PlanItineraryLeg> legs;
   final DateTime startTime;
   final DateTime endTime;
@@ -43,16 +43,16 @@ class PlanItinerary {
 
   factory PlanItinerary.fromJson(Map<String, dynamic> json) {
     return PlanItinerary(
-      legs: json[_legs].map<PlanItineraryLeg>((dynamic json) {
-        return PlanItineraryLeg.fromJson(json as Map<String, dynamic>);
-      }).toList() as List<PlanItineraryLeg>,
-      startTime: DateTime.fromMillisecondsSinceEpoch(
-          int.tryParse(json[_startTime].toString()) ?? 0),
-      endTime: DateTime.fromMillisecondsSinceEpoch(
-          int.tryParse(json[_endTime].toString()) ?? 0),
-      walkTime: Duration(seconds: (json[_walkTime] ?? 0) as int),
-      duration: Duration(seconds: (json[_durationTrip] ?? 0) as int),
-      walkDistance: double.tryParse(json[_walkDistance].toString()) ?? 0,
+      legs:
+          json[_legs].map<PlanItineraryLeg>((dynamic json) {
+                return PlanItineraryLeg.fromJson(json as Map<String, dynamic>);
+              }).toList()
+              as List<PlanItineraryLeg>,
+      startTime: DateTime.fromMillisecondsSinceEpoch(json[_startTime]),
+      endTime: DateTime.fromMillisecondsSinceEpoch(json[_endTime]),
+      walkTime: Duration(seconds: json[_walkTime]),
+      duration: Duration(seconds: json[_durationTrip]),
+      walkDistance: json[_walkDistance],
       arrivedAtDestinationWithRentedBicycle:
           json[_arrivedAtDestinationWithRentedBicycle],
       emissionsPerPerson: json[_emissionsPerPerson]?[_emissionsPerPersonCo2],
@@ -69,38 +69,7 @@ class PlanItinerary {
       _walkDistance: walkDistance,
       _arrivedAtDestinationWithRentedBicycle:
           arrivedAtDestinationWithRentedBicycle,
-      _emissionsPerPerson: {
-        _emissionsPerPersonCo2: emissionsPerPerson,
-      }
+      _emissionsPerPerson: {_emissionsPerPersonCo2: emissionsPerPerson},
     };
-  }
-
-  PlanItinerary copyWith({
-    List<PlanItineraryLeg>? legs,
-    DateTime? startTime,
-    DateTime? endTime,
-    Duration? walkTime,
-    Duration? durationTrip,
-    double? walkDistance,
-    bool? arrivedAtDestinationWithRentedBicycle,
-    bool? isOnlyShowItinerary,
-    double? emissionsPerPerson,
-    bool? isMinorEmissionsPerPerson,
-  }) {
-    return PlanItinerary(
-      legs: legs ?? this.legs,
-      startTime: startTime ?? this.startTime,
-      endTime: endTime ?? this.endTime,
-      walkTime: walkTime ?? this.walkTime,
-      duration: durationTrip ?? duration,
-      walkDistance: walkDistance ?? this.walkDistance,
-      arrivedAtDestinationWithRentedBicycle:
-          arrivedAtDestinationWithRentedBicycle ??
-              this.arrivedAtDestinationWithRentedBicycle,
-      isOnlyShowItinerary: isOnlyShowItinerary ?? this.isOnlyShowItinerary,
-      emissionsPerPerson: emissionsPerPerson ?? this.emissionsPerPerson,
-      isMinorEmissionsPerPerson:
-          isMinorEmissionsPerPerson ?? this.isMinorEmissionsPerPerson,
-    );
   }
 }

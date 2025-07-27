@@ -19,27 +19,35 @@ class BikeParkEntity {
     this.lat,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'bikeParkId': bikeParkId,
-      'name': name,
-      'spacesAvailable': spacesAvailable,
-      'realtime': realtime,
-      'lon': lon,
-      'lat': lat,
-    };
+  static const String _id = 'id';
+  static const String _bikeParkId = 'bikeParkId';
+  static const String _name = 'name';
+  static const String _spacesAvailable = 'spacesAvailable';
+  static const String _realtime = 'realtime';
+  static const String _lon = 'lon';
+  static const String _lat = 'lat';
+
+  factory BikeParkEntity.fromJson(Map<String, dynamic> map) {
+    return BikeParkEntity(
+      id: map[_id],
+      bikeParkId: map[_bikeParkId],
+      name: map[_name],
+      spacesAvailable: map[_spacesAvailable],
+      realtime: map[_realtime],
+      lon: map[_lon],
+      lat: map[_lat],
+    );
   }
 
-  factory BikeParkEntity.fromMap(Map<String, dynamic> map) {
-    return BikeParkEntity(
-      id: map['id'] as String?,
-      bikeParkId: map['bikeParkId'] as String?,
-      name: map['name'] as String?,
-      spacesAvailable: map['spacesAvailable'] as int?,
-      realtime: map['realtime'] as bool?,
-      lon: map['lon'] as double?,
-      lat: map['lat'] as double?,
-    );
+  Map<String, dynamic> toJson() {
+    return {
+      _id: id,
+      _bikeParkId: bikeParkId,
+      _name: name,
+      _spacesAvailable: spacesAvailable,
+      _realtime: realtime,
+      _lon: lon,
+      _lat: lat,
+    };
   }
 }

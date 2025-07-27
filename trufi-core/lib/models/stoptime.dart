@@ -38,79 +38,61 @@ class Stoptime {
     this.headsign,
   });
 
+  static const String _stop = 'stop';
+  static const String _scheduledArrival = 'scheduledArrival';
+  static const String _realtimeArrival = 'realtimeArrival';
+  static const String _arrivalDelay = 'arrivalDelay';
+  static const String _scheduledDeparture = 'scheduledDeparture';
+  static const String _realtimeDeparture = 'realtimeDeparture';
+  static const String _departureDelay = 'departureDelay';
+  static const String _timepoint = 'timepoint';
+  static const String _realtime = 'realtime';
+  static const String _realtimeState = 'realtimeState';
+  static const String _pickupType = 'pickupType';
+  static const String _dropoffType = 'dropoffType';
+  static const String _serviceDay = 'serviceDay';
+  static const String _trip = 'trip';
+  static const String _headsign = 'headsign';
+
   factory Stoptime.fromJson(Map<String, dynamic> json) => Stoptime(
-        stop: json['stop'] != null
-            ? StopEntity.fromMap(json['stop'] as Map<String, dynamic>)
+    stop:
+        json[_stop] != null
+            ? StopEntity.fromJson(json[_stop] as Map<String, dynamic>)
             : null,
-        scheduledArrival:
-            int.tryParse(json['scheduledArrival'].toString()) ?? 0,
-        realtimeArrival: int.tryParse(json['realtimeArrival'].toString()) ?? 0,
-        arrivalDelay: int.tryParse(json['arrivalDelay'].toString()) ?? 0,
-        scheduledDeparture:
-            int.tryParse(json['scheduledDeparture'].toString()) ?? 0,
-        realtimeDeparture:
-            int.tryParse(json['realtimeDeparture'].toString()) ?? 0,
-        departureDelay: int.tryParse(json['departureDelay'].toString()) ?? 0,
-        timepoint: json['timepoint'] as bool?,
-        realtime: json['realtime'] as bool?,
-        realtimeState:
-            getRealtimeStateByString(json['realtimeState'].toString()),
-        pickupType: getPickupDropoffTypeByString(json['pickupType'].toString()),
-        dropoffType:
-            getPickupDropoffTypeByString(json['dropoffType'].toString()),
-        serviceDay: double.tryParse(json['serviceDay'].toString()) ?? 0,
-        trip: json['trip'] != null
-            ? Trip.fromJson(json['trip'] as Map<String, dynamic>)
+    scheduledArrival: json[_scheduledArrival],
+    realtimeArrival: json[_realtimeArrival],
+    arrivalDelay: json[_arrivalDelay],
+    scheduledDeparture: json[_scheduledDeparture],
+    realtimeDeparture: json[_realtimeDeparture],
+    departureDelay: json[_departureDelay],
+    timepoint: json[_timepoint],
+    realtime: json[_realtime],
+    realtimeState: getRealtimeStateByString(json[_realtimeState]),
+    pickupType: getPickupDropoffTypeByString(json[_pickupType]),
+    dropoffType: getPickupDropoffTypeByString(json[_dropoffType]),
+    serviceDay: json[_serviceDay],
+    trip:
+        json[_trip] != null
+            ? Trip.fromJson(json[_trip] as Map<String, dynamic>)
             : null,
-        headsign: json['headsign'] as String?,
-      );
+    headsign: json[_headsign],
+  );
 
   Map<String, dynamic> toJson() => {
-        'stop': stop?.toMap(),
-        'scheduledArrival': scheduledArrival,
-        'realtimeArrival': realtimeArrival,
-        'arrivalDelay': arrivalDelay,
-        'scheduledDeparture': scheduledDeparture,
-        'realtimeDeparture': realtimeDeparture,
-        'departureDelay': departureDelay,
-        'timepoint': timepoint,
-        'realtime': realtime,
-        'realtimeState': realtimeState?.name,
-        'pickupType': pickupType?.name,
-        'dropoffType': dropoffType?.name,
-        'serviceDay': serviceDay,
-        'trip': trip?.toJson(),
-        'headsign': headsign,
-      };
-
-  bool get isArrival {
-    return pickupType == PickupDropoffType.none;
-  }
-
-  bool get canceled {
-    return realtimeState == RealtimeState.canceled;
-  }
-
-  int get arrivalTime {
-    return ((serviceDay ?? 0) +
-            (canceled ? scheduledArrival ?? 0 : realtimeArrival ?? 0))
-        .truncate();
-  }
-
-  int get departureTime {
-    return ((serviceDay ?? 0) +
-            (canceled ? scheduledDeparture ?? 0 : realtimeDeparture ?? 0))
-        .truncate();
-  }
-
-  DateTime get dateTime {
-    final int timestamp = isArrival ? arrivalTime : departureTime;
-    return DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
-  }
-
-  bool get isNextDay {
-    final now = DateTime.now();
-    final dateTemp = DateTime(now.year, now.month, now.day, 23, 59, 59);
-    return dateTime.isAfter(dateTemp);
-  }
+    _stop: stop?.toJson(),
+    _scheduledArrival: scheduledArrival,
+    _realtimeArrival: realtimeArrival,
+    _arrivalDelay: arrivalDelay,
+    _scheduledDeparture: scheduledDeparture,
+    _realtimeDeparture: realtimeDeparture,
+    _departureDelay: departureDelay,
+    _timepoint: timepoint,
+    _realtime: realtime,
+    _realtimeState: realtimeState?.name,
+    _pickupType: pickupType?.name,
+    _dropoffType: dropoffType?.name,
+    _serviceDay: serviceDay,
+    _trip: trip?.toJson(),
+    _headsign: headsign,
+  };
 }

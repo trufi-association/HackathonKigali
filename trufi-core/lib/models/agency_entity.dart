@@ -21,25 +21,34 @@ class AgencyEntity {
     required this.fareUrl,
   });
 
-  factory AgencyEntity.fromMap(Map<String, dynamic> map) => AgencyEntity(
-        id: int.tryParse(map['id'].toString()) ?? 0,
-        gtfsId: map['gtfsId'].toString(),
-        name: map['name'].toString(),
-        url: map['url'].toString(),
-        timezone: map['timezone'].toString(),
-        lang: map['lang'].toString(),
-        phone: map['phone'].toString(),
-        fareUrl: map['fareUrl'].toString(),
-      );
+  static const String _id = 'id';
+  static const String _gtfsId = 'gtfsId';
+  static const String _name = 'name';
+  static const String _url = 'url';
+  static const String _timezone = 'timezone';
+  static const String _lang = 'lang';
+  static const String _phone = 'phone';
+  static const String _fareUrl = 'fareUrl';
 
-  Map<String, dynamic> toMap() => {
-        'id': id,
-        'gtfsId': gtfsId,
-        'name': name,
-        'url': url,
-        'timezone': timezone,
-        'lang': lang,
-        'phone': phone,
-        'fareUrl': fareUrl,
-      };
+  factory AgencyEntity.fromJson(Map<String, dynamic> map) => AgencyEntity(
+    id: map[_id],
+    gtfsId: map[_gtfsId],
+    name: map[_name],
+    url: map[_url],
+    timezone: map[_timezone],
+    lang: map[_lang],
+    phone: map[_phone],
+    fareUrl: map[_fareUrl],
+  );
+
+  Map<String, dynamic> toJson() => {
+    _id: id,
+    _gtfsId: gtfsId,
+    _name: name,
+    _url: url,
+    _timezone: timezone,
+    _lang: lang,
+    _phone: phone,
+    _fareUrl: fareUrl,
+  };
 }

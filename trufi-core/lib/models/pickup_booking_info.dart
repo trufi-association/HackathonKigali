@@ -4,21 +4,24 @@ class PickupBookingInfo {
   final String? message;
   final ContactInfo? contactInfo;
 
-  const PickupBookingInfo({
-    this.message,
-    this.contactInfo,
-  });
+  const PickupBookingInfo({this.message, this.contactInfo});
 
-  factory PickupBookingInfo.fromMap(Map<String, dynamic> map) =>
+  static const String _message = 'message';
+  static const String _contactInfo = 'contactInfo';
+
+  factory PickupBookingInfo.fromJson(Map<String, dynamic> map) =>
       PickupBookingInfo(
-        message: map['message'] as String?,
-        contactInfo: map['contactInfo'] != null
-            ? ContactInfo.fromMap(map['contactInfo'] as Map<String, dynamic>)
-            : null,
+        message: map[_message],
+        contactInfo:
+            map[_contactInfo] != null
+                ? ContactInfo.fromJson(
+                  map[_contactInfo] as Map<String, dynamic>,
+                )
+                : null,
       );
 
-  Map<String, dynamic> toMap() => {
-        'message': message,
-        'contactInfo': contactInfo?.toMap(),
-      };
+  Map<String, dynamic> toJson() => {
+    _message: message,
+    _contactInfo: contactInfo?.toJson(),
+  };
 }

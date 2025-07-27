@@ -21,29 +21,38 @@ class CarParkEntity {
     this.lat,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'carParkId': carParkId,
-      'name': name,
-      'maxCapacity': maxCapacity,
-      'spacesAvailable': spacesAvailable,
-      'realtime': realtime,
-      'lon': lon,
-      'lat': lat,
-    };
+  static const String _id = 'id';
+  static const String _carParkId = 'carParkId';
+  static const String _name = 'name';
+  static const String _maxCapacity = 'maxCapacity';
+  static const String _spacesAvailable = 'spacesAvailable';
+  static const String _realtime = 'realtime';
+  static const String _lon = 'lon';
+  static const String _lat = 'lat';
+
+  factory CarParkEntity.fromJson(Map<String, dynamic> map) {
+    return CarParkEntity(
+      id: map[_id],
+      carParkId: map[_carParkId],
+      name: map[_name],
+      maxCapacity: map[_maxCapacity],
+      spacesAvailable: map[_spacesAvailable],
+      realtime: map[_realtime],
+      lon: map[_lon],
+      lat: map[_lat],
+    );
   }
 
-  factory CarParkEntity.fromMap(Map<String, dynamic> map) {
-    return CarParkEntity(
-      id: map['id'] as String?,
-      carParkId: map['carParkId'] as String?,
-      name: map['name'] as String?,
-      maxCapacity: map['maxCapacity'] as int?,
-      spacesAvailable: map['spacesAvailable'] as int?,
-      realtime: map['realtime'] as bool?,
-      lon: map['lon'] as double?,
-      lat: map['lat'] as double?,
-    );
+  Map<String, dynamic> toJson() {
+    return {
+      _id: id,
+      _carParkId: carParkId,
+      _name: name,
+      _maxCapacity: maxCapacity,
+      _spacesAvailable: spacesAvailable,
+      _realtime: realtime,
+      _lon: lon,
+      _lat: lat,
+    };
   }
 }

@@ -5,23 +5,24 @@ class BookingInfo {
   final String? dropOffMessage;
   final ContactInfo? contactInfo;
 
-  const BookingInfo({
-    this.message,
-    this.dropOffMessage,
-    this.contactInfo,
-  });
+  const BookingInfo({this.message, this.dropOffMessage, this.contactInfo});
 
-  factory BookingInfo.fromMap(Map<String, dynamic> map) => BookingInfo(
-        message: map['message'] as String?,
-        dropOffMessage: map['dropOffMessage'] as String?,
-        contactInfo: map['contactInfo'] != null
-            ? ContactInfo.fromMap(map['contactInfo'] as Map<String, dynamic>)
+  static const String _message = 'message';
+  static const String _dropOffMessage = 'dropOffMessage';
+  static const String _contactInfo = 'contactInfo';
+
+  factory BookingInfo.fromJson(Map<String, dynamic> map) => BookingInfo(
+    message: map[_message],
+    dropOffMessage: map[_dropOffMessage],
+    contactInfo:
+        map[_contactInfo] != null
+            ? ContactInfo.fromJson(map[_contactInfo] as Map<String, dynamic>)
             : null,
-      );
+  );
 
-  Map<String, dynamic> toMap() => {
-        'message': message,
-        'dropOffMessage': dropOffMessage,
-        'contactInfo': contactInfo?.toMap(),
-      };
+  Map<String, dynamic> toJson() => {
+    _message: message,
+    _dropOffMessage: dropOffMessage,
+    _contactInfo: contactInfo?.toJson(),
+  };
 }

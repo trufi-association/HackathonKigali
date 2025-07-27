@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:trufi_core/models/alert.dart';
 import 'package:trufi_core/models/booking_info.dart';
@@ -11,12 +10,9 @@ import 'package:trufi_core/models/step_entity.dart';
 import 'package:trufi_core/models/trip.dart';
 import 'package:trufi_core/models/trufi_map_utils.dart';
 
-import 'utils/modes_transport_utils.dart';
-
 part 'bike_park_entity.dart';
 part 'stop_entity.dart';
 part 'bike_rental_station_entity.dart';
-part 'modes_transport_entity.dart';
 part 'place_entity.dart';
 part 'car_park_entity.dart';
 part 'route_entity.dart';
@@ -26,17 +22,12 @@ part 'plan_itinerary_leg.dart';
 part 'plan_location.dart';
 
 class PlanEntity {
-  const PlanEntity({
-    this.type,
-    this.from,
-    this.to,
-    this.itineraries,
-  });
+  const PlanEntity({this.type, this.from, this.to, this.itineraries});
 
-  static const _itineraries = "itineraries";
-  static const _from = "from";
-  static const _to = "to";
-  static const _type = "type";
+  static const String _from = 'from';
+  static const String _to = 'to';
+  static const String _type = 'type';
+  static const String _itineraries = 'itineraries';
 
   final PlanLocation? from;
   final PlanLocation? to;
@@ -47,11 +38,14 @@ class PlanEntity {
     return PlanEntity(
       from: PlanLocation.fromJson(json[_from]),
       to: PlanLocation.fromJson(json[_to]),
-      itineraries: json[_itineraries]
-          .map<PlanItinerary>(
-            (dynamic itineraryJson) => PlanItinerary.fromJson(itineraryJson),
-          )
-          .toList() as List<PlanItinerary>,
+      itineraries:
+          json[_itineraries]
+                  .map<PlanItinerary>(
+                    (dynamic itineraryJson) =>
+                        PlanItinerary.fromJson(itineraryJson),
+                  )
+                  .toList()
+              as List<PlanItinerary>,
       type: json[_type],
     );
   }

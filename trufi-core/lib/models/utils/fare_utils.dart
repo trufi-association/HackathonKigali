@@ -14,12 +14,10 @@ Future<List<Fare>> fetchFares(PlanItinerary itinerary, String faresUrl) async {
     'endTime': itinerary.endTime.millisecondsSinceEpoch,
     'walkDistance': itinerary.walkDistance,
     'duration': itinerary.duration.inSeconds,
-    'legs': itinerary.legs..map((e) => e.toJson()).toList()
+    'legs': itinerary.legs..map((e) => e.toJson()).toList(),
   };
   final response = await http.post(
-    Uri.parse(
-      faresUrl,
-    ),
+    Uri.parse(faresUrl),
     body: jsonEncode(body),
     headers: {'content-type': 'application/json'},
   );
@@ -28,17 +26,18 @@ Future<List<Fare>> fetchFares(PlanItinerary itinerary, String faresUrl) async {
       "Server Error on fetchPBF ${response.request?.url} with ${response.statusCode}",
     );
   }
-  return List<Fare>.from((jsonDecode(response.body) as List<dynamic>)
-      .map((x) => Fare.fromMap(x as Map<String, dynamic>)));
+  return List<Fare>.from(
+    (jsonDecode(response.body) as List<dynamic>).map(
+      (x) => Fare.fromJson(x as Map<String, dynamic>),
+    ),
+  );
 }
 
 List<RouteEntity?> getRoutes(List<PlanItineraryLeg> legs) {
   return legs.map((e) => e.route).toList();
 }
 
-List<FareComponent> getFares(
-  List<Fare> fares,
-) {
+List<FareComponent> getFares(List<Fare> fares) {
   if (fares.isNotEmpty) {
     final knownFares = mapFares(fares);
     return [...(knownFares ?? [])];
@@ -52,17 +51,19 @@ List<FareComponent?> getUnknownFares(
   List<RouteEntity?> routes,
 ) {
   if (fares.isNotEmpty) {
-    final routesWithFares = (knownFares ?? [])
-        .map((fareComponent) => fareComponent?.routes ?? <RouteEntity>[])
-        .reduce((value, element) => [...value, ...element])
-        .map((route) => route.gtfsId)
-        .toList();
+    final routesWithFares =
+        (knownFares ?? [])
+            .map((fareComponent) => fareComponent?.routes ?? <RouteEntity>[])
+            .reduce((value, element) => [...value, ...element])
+            .map((route) => route.gtfsId)
+            .toList();
 
     final unknownTotalFare = fares[0].type == 'regular' && fares[0].cents == -1;
-    final unknownFares = (unknownTotalFare ? routes : <RouteEntity>[])
-        .where((route) => !routesWithFares.contains(route?.gtfsId))
-        .map((e) => null)
-        .toList();
+    final unknownFares =
+        (unknownTotalFare ? routes : <RouteEntity>[])
+            .where((route) => !routesWithFares.contains(route?.gtfsId))
+            .map((e) => null)
+            .toList();
 
     return [...unknownFares];
   }
