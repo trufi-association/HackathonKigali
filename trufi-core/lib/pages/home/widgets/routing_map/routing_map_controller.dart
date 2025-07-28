@@ -11,7 +11,7 @@ import 'package:trufi_core/trufi_map_controller.dart';
 import 'package:trufi_core/widgets/base_marker/from_marker.dart';
 import 'package:trufi_core/widgets/base_marker/to_marker.dart';
 
-class RoutingMapComponent extends TrufiLayer {
+class RoutingMapComponent extends TrufiLayer with ChangeNotifier {
   static const String layerId = 'routing-map-component';
 
   RoutingMapComponent(super.controller) : super(id: layerId);
@@ -24,38 +24,49 @@ class RoutingMapComponent extends TrufiLayer {
   PlanEntity? plan;
   PlanItinerary? selectedItinerary;
 
+  void changeItinerary(PlanItinerary itinerary) {
+    selectedItinerary = itinerary;
+    mutateLayers();
+    notifyListeners();
+  }
+
   void cleanOriginAndDestination() {
     origin = null;
     destination = null;
     plan = null;
     selectedItinerary = null;
     mutateLayers();
+    notifyListeners();
   }
 
   void addOrigin(TrufiLocation origin) async {
     this.origin = origin;
     mutateLayers();
+    notifyListeners();
     if (destination != null) {
       plan = await service.fetchPlanAdvanced(
         fromLocation: origin,
         toLocation: destination!,
       );
       selectedItinerary = plan?.itineraries?.firstOrNull;
+      mutateLayers();
+      notifyListeners();
     }
-    mutateLayers();
   }
 
   void addDestination(TrufiLocation destination) async {
     this.destination = destination;
     mutateLayers();
+    notifyListeners();
     if (origin != null) {
       plan = await service.fetchPlanAdvanced(
         fromLocation: origin!,
         toLocation: destination,
       );
       selectedItinerary = plan?.itineraries?.firstOrNull;
+      mutateLayers();
+      notifyListeners();
     }
-    mutateLayers();
   }
 
   void selectNextItinerary() async {
@@ -67,6 +78,7 @@ class RoutingMapComponent extends TrufiLayer {
 
     selectedItinerary = itineraries[nextIndex];
     mutateLayers();
+    notifyListeners();
   }
 
   @override
