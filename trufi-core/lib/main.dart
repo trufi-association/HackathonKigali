@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Custom Draggable Sheet',
-      home: FullDynamicMap(),
+      home: HomeScreen(),
     );
   }
 }
