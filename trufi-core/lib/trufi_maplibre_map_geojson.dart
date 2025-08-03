@@ -31,8 +31,8 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
   bool _mapReady = false;
   bool _suppressSync = false;
 
-  // Stores the hash of each rendered marker by its ID
-  final Map<String, int> _renderedMarkerHashes = <String, int>{};
+  // final Map<int, String> _imageCache = {};
+  final Set<String> _loadedImages = {};
 
   @override
   void initState() {
@@ -47,6 +47,7 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
     final camera = widget.controller.cameraPositionNotifier.value;
     if (_mapReady && _mapCtl != null) {
       _suppressSync = true;
+      print("Camera listener triggered -> syncing camera");
       _mapCtl!.animateCamera(
         CameraUpdate.newCameraPosition(_toCameraPosition(camera)),
       );
@@ -56,6 +57,7 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
   void _layersListener() {
     final visibleLayers = widget.controller.visibleLayers;
     if (_mapReady && _mapCtl != null) {
+      print("Layers listener triggered -> syncing layers");
       _syncLayers(visibleLayers);
     }
   }
@@ -70,11 +72,13 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
   Future<void> _handleCameraIdle() async {
     if (_suppressSync) {
       _suppressSync = false;
+      print("Camera idle ignored (suppressed)");
       return;
     }
     final ctl = _mapCtl;
     if (ctl == null) return;
     final cam = await ctl.cameraPosition!;
+    print("Camera idle -> updating controller");
     widget.controller.updateCamera(
       target: latlng.LatLng(cam.target.latitude, cam.target.longitude),
       zoom: toLeafletZoom(cam.zoom),
@@ -83,139 +87,135 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
   }
 
   Future<void> _syncLayers(List<TrufiLayer> visibleLayers) async {
-    print("Paint-----");
+    print("_syncLayers");
     final ctl = _mapCtl;
     if (ctl == null) return;
 
     for (final layer in visibleLayers) {
       final sourceId = layer.id;
-      final layerId = 'layer_$sourceId';
 
       final features = <Map<String, dynamic>>[];
-      final lineFeatures = <Map<String, dynamic>>[];
 
-      for (final marker in layer.entries.where((m) => m.visible)) {
-        final markerHash = marker.hashCode;
-        final wasRendered = _renderedMarkerHashes.containsKey(marker.id);
-        final hashUnchanged =
-            wasRendered && _renderedMarkerHashes[marker.id] == markerHash;
+      // 🔹 Procesar marcadores
+      for (final marker in layer.entries) {
+        final imageId = marker.widget.hashCode.toString();
 
-        final imageId = 'marker_${marker.id}_$markerHash';
-
-        if (!hashUnchanged) {
-          _renderedMarkerHashes[marker.id] = markerHash;
+        if (!_loadedImages.contains(imageId)) {
+          print("still load");
           final bytes = await _widgetToBytes(marker);
           await ctl.addImage(imageId, bytes);
+          _loadedImages.add(imageId);
         }
-
+        print(marker.layerLevel);
         features.add({
-          'type': 'Feature',
-          'geometry': {
-            'type': 'Point',
-            'coordinates': [
+          "type": "Feature",
+          "id": imageId,
+          "geometry": {
+            "type": "Point",
+            "coordinates": [
               marker.position.longitude,
               marker.position.latitude,
             ],
           },
-          'properties': {
-            'icon': imageId,
-            'id': marker.id,
-            if (marker.alignment == 'top')
-              'offset': [0.0, -marker.size.height / 2],
-            'layerLevel': marker.layerLevel,
+          "properties": {
+            "icon": imageId,
+            "id": imageId,
+            if (marker.alignment == "top")
+              "offset": [0.0, -marker.size.height / 2],
+            "layerLevel": marker.layerLevel,
           },
         });
       }
 
-      for (final line in layer.lines.where((l) => l.visible)) {
-        final coordinates = line.position
-            .map((e) => [e.longitude, e.latitude])
-            .toList();
-
-        lineFeatures.add({
-          'type': 'Feature',
-          'geometry': {'type': 'LineString', 'coordinates': coordinates},
-          'properties': {
-            'id': line.id,
-            'color': decodeFillColor(line.color),
-            'width': line.lineWidth,
-            'layerLevel': line.layerLevel,
-            'dotted': line.activeDots,
+      // 🔹 Procesar líneas
+      for (final line in layer.lines) {
+        features.add({
+          "type": "Feature",
+          "id": line.id,
+          "geometry": {
+            "type": "LineString",
+            "coordinates": line.position
+                .map((e) => [e.longitude, e.latitude])
+                .toList(),
+          },
+          "properties": {
+            "color": decodeFillColor(line.color),
+            "width": line.lineWidth,
+            "layerLevel": line.layerLevel,
+            "dotted": line.activeDots,
           },
         });
       }
 
-      final geojson = {
-        'type': 'FeatureCollection',
-        'features': [...features, ...lineFeatures],
-      };
-
+      final geojson = {"type": "FeatureCollection", "features": features};
+      print("features");
+      print(features[2]);
+      print(features[3]);
       final existingSources = await ctl.getSourceIds();
       final sourceExists = existingSources.contains(sourceId);
+
       if (!sourceExists) {
+        print("Adding new source and layers -> $sourceId");
         await ctl.addGeoJsonSource(sourceId, geojson);
 
         await ctl.addLineLayer(
           sourceId,
-          'line_${layerId}_round',
+          "${sourceId}_dotted",
           LineLayerProperties(
-            lineColor: ['get', 'color'],
-            lineWidth: ['get', 'width'],
-            lineSortKey: ['get', 'layerLevel'],
+            lineColor: ["get", "color"],
+            lineWidth: ["get", "width"],
+            lineSortKey: ["get", "layerLevel"],
             lineDasharray: [0.5, 1.5],
-            lineJoin: 'round',
-            lineCap: 'round',
+            lineJoin: "round",
+            lineCap: "round",
           ),
           filter: [
-            '==',
-            ['get', 'dotted'],
+            "==",
+            ["get", "dotted"],
             true,
           ],
+          enableInteraction: false,
         );
+
         await ctl.addLineLayer(
           sourceId,
-          'line_$layerId',
+          "${sourceId}_solid",
           LineLayerProperties(
-            lineColor: ['get', 'color'],
-            lineWidth: ['get', 'width'],
-            lineSortKey: ['get', 'layerLevel'],
-            lineJoin: 'round',
-            lineCap: 'round',
+            lineColor: ["get", "color"],
+            lineWidth: ["get", "width"],
+            lineSortKey: ["get", "layerLevel"],
+            lineJoin: "round",
+            lineCap: "round",
           ),
           filter: [
-            '==',
-            ['get', 'dotted'],
+            "==",
+            ["get", "dotted"],
             false,
           ],
           enableInteraction: false,
         );
+
         await ctl.addSymbolLayer(
           sourceId,
-          layerId,
+          "${sourceId}_marker",
           SymbolLayerProperties(
-            iconImage: ['get', 'icon'],
+            iconImage: ["get", "icon"],
             iconSize: 1.0,
             iconAllowOverlap: true,
-            iconOffset: ['get', 'offset'],
-            symbolSortKey: ['get', 'layerLevel'],
+            iconOffset: ["get", "offset"],
+            symbolSortKey: ["get", "layerLevel"],
           ),
           enableInteraction: false,
         );
       } else {
+        print("Updating existing source -> $sourceId");
+        
+      
         await ctl.setGeoJsonSource(sourceId, geojson);
+     
       }
     }
-
-    // Limpieza de marcadores eliminados
-    final currentIds = visibleLayers
-        .expand((layer) => layer.entries)
-        .where((m) => m.visible)
-        .map((m) => m.id)
-        .toSet();
-    final toRemove = _renderedMarkerHashes.keys.toSet().difference(currentIds);
-    for (final id in toRemove) {
-      _renderedMarkerHashes.remove(id);
-    }
+    print("_syncLayers end");
   }
 
   Future<Uint8List> _widgetToBytes(TrufiMarker marker) {
@@ -239,11 +239,12 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
       onMapCreated: (ctl) async {
         _mapCtl = ctl;
         _mapReady = true;
+        print("Map created -> syncing layers");
         await _syncLayers(widget.controller.visibleLayers);
       },
       onCameraIdle: _handleCameraIdle,
       onMapClick: (points, latlng) {
-        print("main onMapClick");
+        print("Map clicked");
         widget.onMapClick?.call(points, latlng);
       },
     );

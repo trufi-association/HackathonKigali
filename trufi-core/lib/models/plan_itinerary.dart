@@ -40,7 +40,6 @@ class PlanItinerary {
   final bool isMinorEmissionsPerPerson;
 
   final int distance;
-
   factory PlanItinerary.fromJson(Map<String, dynamic> json) {
     return PlanItinerary(
       legs:

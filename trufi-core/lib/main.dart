@@ -1,11 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart' as latlng;
 import 'package:trufi_core/hive_init.dart';
+import 'package:trufi_core/moving_line_map.dart';
 import 'package:trufi_core/pages/home/home_page.dart';
 import 'package:trufi_core/pages/home/widgets/routing_map/routing_map_controller.dart';
 import 'package:trufi_core/trufi_flutter_map.dart';
 import 'package:trufi_core/trufi_map_controller.dart';
-import 'package:trufi_core/trufi_maplibre_map_symbol.dart';
+import 'package:trufi_core/trufi_maplibre_map_geojson.dart';
+// import 'package:trufi_core/trufi_maplibre_map_symbol.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:trufi_core/models/enums/transport_mode.dart';
+import 'package:trufi_core/models/plan_entity.dart';
+import 'package:trufi_core/pages/home/widgets/routing_map/routing_map_controller.dart';
+import 'package:trufi_core/trufi_map_controller.dart';
+import 'package:latlong2/latlong.dart' as latlng;
+import 'package:trufi_core/trufi_maplibre_map_geojson.dart';
+import 'package:trufi_core/widgets/utils.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,7 +32,7 @@ class MyApp extends StatelessWidget {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Custom Draggable Sheet',
-      home: HomePage(),
+      home: FullDynamicMap(),
     );
   }
 }
@@ -34,7 +45,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  bool showMapLibre = true;
+  bool showMapLibre = false;
   final mapController = TrufiMapController(
     initialCameraPosition: TrufiCameraPosition(
       target: latlng.LatLng(-1.949516, 30.069619),
@@ -51,7 +62,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
-  Widget build(BuildContext context) { final mediaQuery = MediaQuery.of(context);
+  Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
 
     print('MediaQueryData:');
     print('Size: ${mediaQuery.size}');
@@ -61,26 +73,26 @@ class _HomeScreenState extends State<HomeScreen> {
     print('ViewInsets: ${mediaQuery.viewInsets}');
     print('Platform Brightness: ${mediaQuery.platformBrightness}');
     print('Orientation: ${mediaQuery.orientation}');
+
     return Scaffold(
       body: Stack(
         children: [
           // if (showMapLibre)
           TrufiMapLibreMap(
             controller: mapController,
+            trufiLayer: routingMapComponent,
             // routingMapComponent:routingMapComponent,
             styleString:
                 'https://tileserver.kigali.trufi.dev/styles/test-style/style.json',
             onMapClick: (_, coord) {
               if (routingMapComponent.origin == null) {
-                // routingMapComponent.addOrigin(
-                //   latlng.LatLng(coord.latitude, coord.longitude),
-                //   "description",
-                // );
+                routingMapComponent.addOrigin(
+                  latlng.LatLng(coord.latitude, coord.longitude),
+                );
               } else if (routingMapComponent.destination == null) {
-                // routingMapComponent.addDestination(
-                //   latlng.LatLng(coord.latitude, coord.longitude),
-                //   "description",
-                // );
+                routingMapComponent.addDestination(
+                  latlng.LatLng(coord.latitude, coord.longitude),
+                );
               } else {
                 routingMapComponent.cleanOriginAndDestination();
               }
@@ -97,9 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
               tileUrl:
                   'https://tileserver.kigali.trufi.dev/styles/test-style/{z}/{x}/{y}.png',
               onMapClick: (position) {
-                setState(() {
-                  
-                });
+                setState(() {});
                 if (routingMapComponent.origin == null) {
                   // routingMapComponent.addOrigin(position, "description");
                 } else if (routingMapComponent.destination == null) {
@@ -139,58 +149,64 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          SafeArea(
-            bottom: false,
-            child: DraggableScrollableSheet(
-              initialChildSize: 0.15,
-              minChildSize: 0.15,
-              maxChildSize: 1,
-              builder: (context, scrollController) => Container(
-                decoration: BoxDecoration(
-                  color: Colors.black,
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(5),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      blurRadius: 10,
-                    ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    Center(
-                      child: Container(
-                        width: 40,
-                        height: 5,
-                        margin: const EdgeInsets.only(top: 8, bottom: 8),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[400],
-                          borderRadius: BorderRadius.circular(10),
-                        ),
+          ValueListenableBuilder(
+            valueListenable: mapController.layersNotifier,
+            builder: (context, layers, child) {
+              return SafeArea(
+                bottom: false,
+                child: DraggableScrollableSheet(
+                  initialChildSize: 0.15,
+                  minChildSize: 0.15,
+                  maxChildSize: 1,
+                  builder: (context, scrollController) => Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black,
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(5),
                       ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 10,
+                        ),
+                      ],
                     ),
-                    Expanded(
-                      child: ListView.builder(
-                        controller: scrollController,
-                        itemCount: 50,
-                        padding: EdgeInsets.zero,
-                        itemBuilder: (_, i) => Padding(
-                          padding: const EdgeInsets.all(2),
-                          child: _buildRouteOption(
-                            "50",
-                            "Avenida Carlos Medinaceli y Avenida Jaime Mendoza",
-                            "8 min",
-                            "2.0 km",
+                    child: Column(
+                      children: [
+                        Center(
+                          child: Container(
+                            width: 40,
+                            height: 5,
+                            margin: const EdgeInsets.only(top: 8, bottom: 8),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[400],
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                           ),
                         ),
-                      ),
+                        Expanded(
+                          child: ListView.builder(
+                            controller: scrollController,
+                            itemCount:
+                                routingMapComponent.plan?.itineraries?.length ??
+                                0,
+                            padding: EdgeInsets.zero,
+                            itemBuilder: (_, i) {
+                              final itinerary =
+                                  routingMapComponent.plan!.itineraries![i];
+                              return Padding(
+                                padding: const EdgeInsets.all(2),
+                                child: _buildRouteOption(itinerary),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
+              );
+            },
           ),
           GestureDetector(
             onTap: () {
@@ -299,59 +315,94 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildRouteOption(
-    String routeNumber,
-    String stop,
-    String duration,
-    String distance,
-  ) {
-    return Container(
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade900,
-        borderRadius: BorderRadius.circular(5),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Text(
-                "30 min",
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+  Widget _buildRouteOption(PlanItinerary itinerary) {
+    final duration = itinerary.duration;
+
+    final startTime = itinerary.startTime;
+    final endTime = itinerary.endTime;
+
+    final formattedTime = "${_formatTime(startTime)} - ${_formatTime(endTime)}";
+
+    final firstLeg = itinerary.legs.firstOrNull;
+    final fromPlace = firstLeg?.fromPlace?.name ?? "Unknown";
+
+    return InkWell(
+      onTap: () {
+        setState(() {
+        routingMapComponent.changeItinerary(itinerary);
+          
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade900,
+          borderRadius: BorderRadius.circular(5),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(
+                  _formatDuration(duration),
+                  style: const TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 16),
-              const Text(
-                "03:41 - 04:10",
-                style: TextStyle(color: Colors.white70, fontSize: 16),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              _stepIcon(Icons.directions_walk, "6"),
-              _arrowIcon(),
-              _busChip("150A"),
-              _busChip("150B"),
-              _arrowIcon(),
-              _stepIcon(Icons.directions_walk, "4"),
-              _arrowIcon(),
-              _busChip("24", color: Colors.green),
-            ],
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            "03:46 from 941 Santa Fe Av.",
-            style: TextStyle(color: Colors.white70, fontSize: 16),
-          ),
-        ],
+                const SizedBox(width: 16),
+                Text(
+                  formattedTime,
+                  style: const TextStyle(color: Colors.white70, fontSize: 16),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: itinerary.legs.expand((leg) {
+                final widgets = <Widget>[];
+                if (leg.transportMode == TransportMode.walk) {
+                  widgets.add(
+                    _stepIcon(
+                      Icons.directions_walk,
+                      "${leg.duration.inSeconds}",
+                    ),
+                  );
+                } else {
+                  widgets.add(
+                    _busChip(
+                      leg.route?.shortName ?? "?",
+                      color: hexToColor(leg.route?.color ?? ''),
+                    ),
+                  );
+                }
+                widgets.add(_arrowIcon());
+                return widgets;
+              }).toList()..removeLast(),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "${_formatTime(startTime)} from $fromPlace",
+              style: const TextStyle(color: Colors.white70, fontSize: 16),
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  String _formatTime(DateTime? time) {
+    if (time == null) return "--:--";
+    final hour = time.hour.toString().padLeft(2, '0');
+    final minute = time.minute.toString().padLeft(2, '0');
+    return "$hour:$minute";
+  }
+
+  String _formatDuration(Duration duration) {
+    final mins = duration.inMinutes;
+    return "$mins min";
   }
 
   Widget _stepIcon(IconData icon, String text) {

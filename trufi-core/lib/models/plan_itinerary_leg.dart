@@ -25,7 +25,84 @@ class PlanItineraryLeg {
     this.interlineWithPreviousLeg,
     this.accumulatedPoints = const [],
     this.trip,
-  }) {
+  }) : selectedMarker = TrufiMarker(
+         id: "$shortName",
+         position: accumulatedPoints[(accumulatedPoints.length / 2).floor()],
+         widget: Container(
+           padding: const EdgeInsets.all(4.0),
+           decoration: BoxDecoration(
+             color: hexToColor(route?.color ?? 'd81b60'),
+             borderRadius: const BorderRadius.all(Radius.circular(4.0)),
+           ),
+           child: FittedBox(
+             fit: BoxFit.scaleDown,
+             child: Row(
+               children: [
+                 SizedBox(
+                   height: 28,
+                   width: 28,
+                   child: getTransportMode(
+                     mode: mode,
+                     specificTransport: routeLongName,
+                   ).getImage(color: Colors.white),
+                 ),
+                 Padding(
+                   padding: const EdgeInsets.symmetric(horizontal: 4),
+                   child: Text(
+                     route?.shortName ?? 'no name',
+                     style: const TextStyle(
+                       color: Colors.white,
+                       fontSize: 17,
+                       fontWeight: FontWeight.w600,
+                     ),
+                   ),
+                 ),
+               ],
+             ),
+           ),
+         ),
+         size: Size(60, 30),
+         layerLevel: 2,
+       ),
+       unSelectedMarker = TrufiMarker(
+         id: "${shortName}",
+         position: accumulatedPoints[(accumulatedPoints.length / 2).floor()],
+         widget: Container(
+           padding: const EdgeInsets.all(4.0),
+           decoration: BoxDecoration(
+             color: Colors.grey,
+             borderRadius: const BorderRadius.all(Radius.circular(4.0)),
+           ),
+           child: FittedBox(
+             fit: BoxFit.scaleDown,
+             child: Row(
+               children: [
+                 SizedBox(
+                   height: 28,
+                   width: 28,
+                   child: getTransportMode(
+                     mode: mode,
+                     specificTransport: routeLongName,
+                   ).getImage(color: Colors.white),
+                 ),
+                 Padding(
+                   padding: const EdgeInsets.symmetric(horizontal: 4),
+                   child: Text(
+                     route?.shortName ?? 'no name',
+                     style: const TextStyle(
+                       color: Colors.white,
+                       fontSize: 17,
+                       fontWeight: FontWeight.w600,
+                     ),
+                   ),
+                 ),
+               ],
+             ),
+           ),
+         ),
+         size: Size(60, 30),
+         layerLevel: 1,
+       ) {
     transportMode = getTransportMode(
       mode: mode,
       specificTransport: routeLongName,
@@ -80,69 +157,62 @@ class PlanItineraryLeg {
 
   late TransportMode transportMode;
   final List<LatLng> accumulatedPoints;
+  final TrufiMarker selectedMarker;
+  final TrufiMarker unSelectedMarker;
 
   factory PlanItineraryLeg.fromJson(Map<String, dynamic> json) {
     return PlanItineraryLeg(
       points: json[_legGeometry][_points],
       mode: json[_mode],
-      route:
-          json[_route] != null
-              ? ((json[_route] is Map<String, dynamic>)
-                  ? RouteEntity.fromJson(json[_route] as Map<String, dynamic>)
-                  : null)
-              : null,
-      shortName:
-          json[_route] != null
-              ? ((json[_route] is String) && json[_route] != ''
-                  ? json[_route]
-                  : null)
-              : null,
+      route: json[_route] != null
+          ? ((json[_route] is Map<String, dynamic>)
+                ? RouteEntity.fromJson(json[_route] as Map<String, dynamic>)
+                : null)
+          : null,
+      shortName: json[_route] != null
+          ? ((json[_route] is String) && json[_route] != ''
+                ? json[_route]
+                : null)
+          : null,
       routeLongName: json[_routeLongName],
       distance: json[_distance],
       duration: Duration(seconds: json[_duration]),
-      agency:
-          json[_agency] != null
-              ? AgencyEntity.fromJson(json[_agency] as Map<String, dynamic>)
-              : null,
+      agency: json[_agency] != null
+          ? AgencyEntity.fromJson(json[_agency] as Map<String, dynamic>)
+          : null,
       realtimeState: getRealtimeStateByString(json[_realtimeState]),
-      toPlace:
-          json[_toPlace] != null
-              ? PlaceEntity.fromJson(json[_toPlace] as Map<String, dynamic>)
-              : null,
-      fromPlace:
-          json[_fromPlace] != null
-              ? PlaceEntity.fromJson(json[_fromPlace] as Map<String, dynamic>)
-              : null,
+      toPlace: json[_toPlace] != null
+          ? PlaceEntity.fromJson(json[_toPlace] as Map<String, dynamic>)
+          : null,
+      fromPlace: json[_fromPlace] != null
+          ? PlaceEntity.fromJson(json[_fromPlace] as Map<String, dynamic>)
+          : null,
       startTime: DateTime.fromMillisecondsSinceEpoch(json[_startTime]),
       endTime: DateTime.fromMillisecondsSinceEpoch(json[_endTime]),
-      steps:
-          json[_steps] != null
-              ? List<StepEntity>.from(
-                (json[_steps] as List<dynamic>).map(
-                  (x) => StepEntity.fromJson(x as Map<String, dynamic>),
-                ),
-              )
-              : null,
-      intermediatePlaces:
-          json[_intermediatePlaces] != null
-              ? List<PlaceEntity>.from(
-                (json[_intermediatePlaces] as List<dynamic>).map(
-                  (x) => PlaceEntity.fromJson(x as Map<String, dynamic>),
-                ),
-              )
-              : null,
-      pickupBookingInfo:
-          json[_pickupBookingInfo] != null
-              ? PickupBookingInfo.fromJson(
-                json[_pickupBookingInfo] as Map<String, dynamic>,
-              )
-              : null,
-      dropOffBookingInfo:
-          json[_dropOffBookingInfo] != null
-              ? BookingInfo.fromJson(
-                json[_dropOffBookingInfo] as Map<String, dynamic>,
-              )
-              : null,
+      steps: json[_steps] != null
+          ? List<StepEntity>.from(
+              (json[_steps] as List<dynamic>).map(
+                (x) => StepEntity.fromJson(x as Map<String, dynamic>),
+              ),
+            )
+          : null,
+      intermediatePlaces: json[_intermediatePlaces] != null
+          ? List<PlaceEntity>.from(
+              (json[_intermediatePlaces] as List<dynamic>).map(
+                (x) => PlaceEntity.fromJson(x as Map<String, dynamic>),
+              ),
+            )
+          : null,
+      pickupBookingInfo: json[_pickupBookingInfo] != null
+          ? PickupBookingInfo.fromJson(
+              json[_pickupBookingInfo] as Map<String, dynamic>,
+            )
+          : null,
+      dropOffBookingInfo: json[_dropOffBookingInfo] != null
+          ? BookingInfo.fromJson(
+              json[_dropOffBookingInfo] as Map<String, dynamic>,
+            )
+          : null,
       transitLeg: json[_transitLeg],
       intermediatePlace: json[_intermediatePlace],
       rentedBike: json[_rentedBike],
@@ -150,10 +220,9 @@ class PlanItineraryLeg {
       accumulatedPoints: TrufiMapUtils.decodePolyline(
         json[_legGeometry][_points],
       ),
-      trip:
-          json[_trip] != null
-              ? Trip.fromJson(json[_trip] as Map<String, dynamic>)
-              : null,
+      trip: json[_trip] != null
+          ? Trip.fromJson(json[_trip] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -171,14 +240,12 @@ class PlanItineraryLeg {
       _fromPlace: fromPlace?.toJson(),
       _startTime: startTime.millisecondsSinceEpoch,
       _endTime: endTime.millisecondsSinceEpoch,
-      _steps:
-          steps != null
-              ? List<dynamic>.from(steps!.map((x) => x.toMap()))
-              : null,
-      _intermediatePlaces:
-          intermediatePlaces != null
-              ? List<dynamic>.from(intermediatePlaces!.map((x) => x.toJson()))
-              : null,
+      _steps: steps != null
+          ? List<dynamic>.from(steps!.map((x) => x.toMap()))
+          : null,
+      _intermediatePlaces: intermediatePlaces != null
+          ? List<dynamic>.from(intermediatePlaces!.map((x) => x.toJson()))
+          : null,
       _pickupBookingInfo: pickupBookingInfo?.toJson(),
       _dropOffBookingInfo: dropOffBookingInfo?.toJson(),
       _intermediatePlace: intermediatePlace,

@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:trufi_core/models/alert.dart';
 import 'package:trufi_core/models/booking_info.dart';
@@ -9,6 +10,8 @@ import 'package:trufi_core/models/pickup_booking_info.dart';
 import 'package:trufi_core/models/step_entity.dart';
 import 'package:trufi_core/models/trip.dart';
 import 'package:trufi_core/models/trufi_map_utils.dart';
+import 'package:trufi_core/trufi_map_controller.dart';
+import 'package:trufi_core/widgets/utils.dart';
 
 part 'bike_park_entity.dart';
 part 'stop_entity.dart';

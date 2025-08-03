@@ -74,6 +74,10 @@ class TrufiMapController {
     return true;
   }
 
+  TrufiLayer? getLayerById(String layerId) {
+    return layersNotifier.value[layerId];
+  }
+
   bool removeLayer(String layerId) {
     final layers = Map<String, TrufiLayer>.from(layersNotifier.value);
     if (!layers.containsKey(layerId)) return false;
@@ -112,21 +116,6 @@ class TrufiMarker {
   final double rotation;
   final bool visible;
   final String? alignment;
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        other is TrufiMarker &&
-            id == other.id &&
-            position == other.position &&
-            size == other.size &&
-            rotation == other.rotation &&
-            visible == other.visible &&
-            widget.runtimeType == other.widget.runtimeType;
-  }
-
-  @override
-  int get hashCode =>
-      Object.hash(id, position, size, rotation, visible, widget.runtimeType);
 }
 
 class TrufiLine {
@@ -153,7 +142,7 @@ abstract class TrufiLayer {
   TrufiLayer(this.controller, {required this.id, this.visible = true}) {
     controller.addLayer(this);
   }
-  
+
   final TrufiMapController controller;
   String id;
   bool visible;
