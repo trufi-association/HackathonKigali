@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/widgets.dart';
+import 'package:trufi_core/trufi_map_controller.dart';
 
 abstract class ImageTool {
   static Future<Uint8List> svgToPng(String svgString) async {
@@ -15,6 +16,18 @@ abstract class ImageTool {
       format: ui.ImageByteFormat.png,
     );
     return data!.buffer.asUint8List();
+  }
+
+  static Future<Uint8List> widgetToBytes(
+    TrufiMarker marker,
+    BuildContext context,
+  ) {
+    final mediaQuery = MediaQuery.of(context);
+    return ImageTool.widgetToPng(
+      marker.widget,
+      devicePixelRatio: mediaQuery.devicePixelRatio,
+      size: marker.size,
+    );
   }
 
   static Future<Uint8List> widgetToPng(
@@ -41,19 +54,19 @@ abstract class ImageTool {
     pipelineOwner.rootNode = renderView;
     renderView.prepareInitialFrame();
 
-  final renderWidget = Directionality(
-    textDirection: TextDirection.ltr,
-    child: MediaQuery(
-      data: MediaQueryData(size: size, devicePixelRatio: devicePixelRatio),
-      child: Center(
-        child: SizedBox(
-          width: size.width,
-          height: size.height,
-          child: widget,
+    final renderWidget = Directionality(
+      textDirection: TextDirection.ltr,
+      child: MediaQuery(
+        data: MediaQueryData(size: size, devicePixelRatio: devicePixelRatio),
+        child: Center(
+          child: SizedBox(
+            width: size.width,
+            height: size.height,
+            child: widget,
+          ),
         ),
       ),
-    ),
-  );
+    );
 
     final renderElement = RenderObjectToWidgetAdapter<RenderBox>(
       container: repaintBoundary,

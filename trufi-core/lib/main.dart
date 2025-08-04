@@ -88,10 +88,12 @@ class _HomeScreenState extends State<HomeScreen> {
               if (routingMapComponent.origin == null) {
                 routingMapComponent.addOrigin(
                   latlng.LatLng(coord.latitude, coord.longitude),
+                  context,
                 );
               } else if (routingMapComponent.destination == null) {
                 routingMapComponent.addDestination(
                   latlng.LatLng(coord.latitude, coord.longitude),
+                  context,
                 );
               } else {
                 routingMapComponent.cleanOriginAndDestination();
@@ -328,10 +330,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return InkWell(
       onTap: () {
-        setState(() {
         routingMapComponent.changeItinerary(itinerary);
-          
-        });
       },
       child: Container(
         padding: const EdgeInsets.all(10),

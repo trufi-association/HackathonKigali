@@ -102,11 +102,14 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
 
         if (!_loadedImages.contains(imageId)) {
           print("still load");
-          final bytes = await _widgetToBytes(marker);
+          if (!mounted) return;
+          final bytes =
+              marker.widgetBytes ??
+              await ImageTool.widgetToBytes(marker, context);
           await ctl.addImage(imageId, bytes);
           _loadedImages.add(imageId);
         }
-        print(marker.layerLevel);
+        // print(marker.layerLevel);
         features.add({
           "type": "Feature",
           "id": imageId,
@@ -149,8 +152,8 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
 
       final geojson = {"type": "FeatureCollection", "features": features};
       print("features");
-      print(features[2]);
-      print(features[3]);
+      // print(features[2]);
+      // print(features[3]);
       final existingSources = await ctl.getSourceIds();
       final sourceExists = existingSources.contains(sourceId);
 
@@ -209,10 +212,8 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
         );
       } else {
         print("Updating existing source -> $sourceId");
-        
-      
+
         await ctl.setGeoJsonSource(sourceId, geojson);
-     
       }
     }
     print("_syncLayers end");

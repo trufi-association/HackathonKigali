@@ -1,6 +1,5 @@
-import 'package:flutter/cupertino.dart';
+import 'package:trufi_core/image_tool.dart';
 import 'package:trufi_core/widgets/utils.dart';
-import 'package:uuid/uuid.dart';
 import 'package:flutter/material.dart';
 import 'package:trufi_core/consts.dart';
 import 'package:trufi_core/models/enums/transport_mode.dart';
@@ -8,8 +7,6 @@ import 'package:trufi_core/models/plan_entity.dart';
 import 'package:trufi_core/pages/home/service/i_plan_repository.dart';
 import 'package:trufi_core/pages/home/service/routing_service/otp_2_7/graphql_plan_data_source.dart';
 import 'package:trufi_core/trufi_map_controller.dart';
-import 'package:trufi_core/widgets/base_marker/from_marker.dart';
-import 'package:trufi_core/widgets/base_marker/to_marker.dart';
 import 'package:latlong2/latlong.dart' as latlng;
 
 class RoutingMapComponent extends TrufiLayer {
@@ -94,7 +91,7 @@ class RoutingMapComponent extends TrufiLayer {
     mutateLayers();
   }
 
-  void addOrigin(latlng.LatLng position) async {
+  void addOrigin(latlng.LatLng position, BuildContext context) async {
     origin = TrufiMarker(
       id: "origin",
       position: position,
@@ -103,28 +100,12 @@ class RoutingMapComponent extends TrufiLayer {
     );
     mutateLayers();
     if (destination != null) {
-      plan = await service.fetchPlanAdvanced(
-        fromLocation: TrufiLocation(
-          description: "Origin",
-          position: latlng.LatLng(
-            origin!.position.latitude,
-            origin!.position.longitude,
-          ),
-        ),
-        toLocation: TrufiLocation(
-          description: "Destination",
-          position: latlng.LatLng(
-            destination!.position.latitude,
-            destination!.position.longitude,
-          ),
-        ),
-      );
-      selectedItinerary = plan?.itineraries?.firstOrNull;
+      await fetchPlan(context);
       mutateLayers();
     }
   }
 
-  void addDestination(latlng.LatLng position) async {
+  void addDestination(latlng.LatLng position, BuildContext context) async {
     destination = TrufiMarker(
       id: "destination",
       position: position,
@@ -134,25 +115,47 @@ class RoutingMapComponent extends TrufiLayer {
     mutateLayers();
 
     if (origin != null) {
-      plan = await service.fetchPlanAdvanced(
-        fromLocation: TrufiLocation(
-          description: "Origin",
-          position: latlng.LatLng(
-            origin!.position.latitude,
-            origin!.position.longitude,
-          ),
-        ),
-        toLocation: TrufiLocation(
-          description: "Destination",
-          position: latlng.LatLng(
-            destination!.position.latitude,
-            destination!.position.longitude,
-          ),
-        ),
-      );
-      selectedItinerary = plan?.itineraries?.firstOrNull;
+      await fetchPlan(context);
       mutateLayers();
     }
+  }
+
+  Future<void> fetchPlan(BuildContext context) async {
+    plan = await service.fetchPlanAdvanced(
+      fromLocation: TrufiLocation(
+        description: "Origin",
+        position: latlng.LatLng(
+          origin!.position.latitude,
+          origin!.position.longitude,
+        ),
+      ),
+      toLocation: TrufiLocation(
+        description: "Destination",
+        position: latlng.LatLng(
+          destination!.position.latitude,
+          destination!.position.longitude,
+        ),
+      ),
+    );
+    if (plan?.itineraries != null && plan!.itineraries!.isNotEmpty) {
+      for (final itinerary in plan!.itineraries!) {
+        for (final e in itinerary.legs) {
+          if (e.transportMode == TransportMode.walk) return;
+          if (!context.mounted) return;
+          e.selectedMarker.widgetBytes = await ImageTool.widgetToBytes(
+            e.selectedMarker,
+            context,
+          );
+
+          if (!context.mounted) return;
+          e.unSelectedMarker.widgetBytes = await ImageTool.widgetToBytes(
+            e.unSelectedMarker,
+            context,
+          );
+        }
+      }
+    }
+    selectedItinerary = plan?.itineraries?.firstOrNull;
   }
 
   void selectNextItinerary() async {
@@ -202,7 +205,7 @@ class RoutingMapComponent extends TrufiLayer {
                             ? Colors.black
                             : hexToColor(leg.route?.color ?? 'd81b60')
                       : Colors.grey.withAlpha(128),
-                  layerLevel: selectedItinerary == itinerary ? 10 : 1,
+                  layerLevel: selectedItinerary == itinerary ? 10 : 2,
                   lineWidth: selectedItinerary == itinerary ? 5 : 3,
                 ),
               )),
