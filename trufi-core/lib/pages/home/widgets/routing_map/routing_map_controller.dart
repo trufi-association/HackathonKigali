@@ -137,20 +137,23 @@ class RoutingMapComponent extends TrufiLayer {
       ),
     );
     if (plan?.itineraries != null && plan!.itineraries!.isNotEmpty) {
+      final List<Future<void>> tasks = [];
+
       for (final itinerary in plan!.itineraries!) {
         for (final e in itinerary.legs) {
-          if (e.transportMode == TransportMode.walk) return;
-          if (!context.mounted) return;
-          await e.selectedMarker.generateBytes(context);
-          if (!context.mounted) return;
-          await e.unSelectedMarker.generateBytes(context);
+          if (e.transportMode == TransportMode.walk) continue;
+
+          tasks.add(e.selectedMarker.generateBytes(context));
+          tasks.add(e.unSelectedMarker.generateBytes(context));
         }
       }
+
+      await Future.wait(tasks);
     }
     selectedItinerary = plan?.itineraries?.firstOrNull;
   }
 
-  void selectNextItinerary() async {
+  void selectNextItinerary()  {
     final itineraries = plan?.itineraries;
     if (itineraries == null || itineraries.isEmpty) return;
 

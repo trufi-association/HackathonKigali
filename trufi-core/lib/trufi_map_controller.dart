@@ -123,7 +123,11 @@ class TrufiMarker {
   final String? alignment;
 
   Future<void> generateBytes(BuildContext context) async {
-    widgetBytes = await ImageTool.widgetToBytes(this, context);
+    try {
+      widgetBytes = await ImageTool.widgetToBytes(this, context);
+    } catch (e, stack) {
+      debugPrint('Error generating bytes for marker $id: $e\n$stack');
+    }
   }
 }
 
