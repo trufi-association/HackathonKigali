@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -149,7 +150,6 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
           },
         });
       }
-
       final geojson = {"type": "FeatureCollection", "features": features};
       print("features");
       // print(features[2]);
@@ -212,8 +212,10 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
         );
       } else {
         print("Updating existing source -> $sourceId");
-
         await ctl.setGeoJsonSource(sourceId, geojson);
+        if (Platform.isAndroid) {
+          await ctl.moveCamera(CameraUpdate.zoomBy(0.0001));
+        }
       }
     }
     print("_syncLayers end");
