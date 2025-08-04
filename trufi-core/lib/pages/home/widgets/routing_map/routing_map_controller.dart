@@ -1,4 +1,3 @@
-import 'package:trufi_core/image_tool.dart';
 import 'package:trufi_core/widgets/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:trufi_core/consts.dart';
@@ -142,16 +141,9 @@ class RoutingMapComponent extends TrufiLayer {
         for (final e in itinerary.legs) {
           if (e.transportMode == TransportMode.walk) return;
           if (!context.mounted) return;
-          e.selectedMarker.widgetBytes = await ImageTool.widgetToBytes(
-            e.selectedMarker,
-            context,
-          );
-
+          await e.selectedMarker.generateBytes(context);
           if (!context.mounted) return;
-          e.unSelectedMarker.widgetBytes = await ImageTool.widgetToBytes(
-            e.unSelectedMarker,
-            context,
-          );
+          await e.unSelectedMarker.generateBytes(context);
         }
       }
     }
@@ -205,7 +197,7 @@ class RoutingMapComponent extends TrufiLayer {
                             ? Colors.black
                             : hexToColor(leg.route?.color ?? 'd81b60')
                       : Colors.grey.withAlpha(128),
-                  layerLevel: selectedItinerary == itinerary ? 10 : 2,
+                  layerLevel: selectedItinerary == itinerary ? 10 : 1,
                   lineWidth: selectedItinerary == itinerary ? 5 : 3,
                 ),
               )),

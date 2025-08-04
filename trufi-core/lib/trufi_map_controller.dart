@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart' as latlng;
+import 'package:trufi_core/image_tool.dart';
 
 class TrufiCameraPosition {
   const TrufiCameraPosition({
@@ -120,6 +121,10 @@ class TrufiMarker {
   final double rotation;
   final bool visible;
   final String? alignment;
+
+  Future<void> generateBytes(BuildContext context) async {
+    widgetBytes = await ImageTool.widgetToBytes(this, context);
+  }
 }
 
 class TrufiLine {
