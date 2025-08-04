@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
@@ -219,15 +218,6 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
       }
     }
     print("_syncLayers end");
-  }
-
-  Future<Uint8List> _widgetToBytes(TrufiMarker marker) {
-    final mediaQuery = MediaQuery.of(context);
-    return ImageTool.widgetToPng(
-      marker.widget,
-      devicePixelRatio: mediaQuery.devicePixelRatio,
-      size: marker.size,
-    );
   }
 
   @override
