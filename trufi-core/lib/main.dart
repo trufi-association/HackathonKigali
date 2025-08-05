@@ -1,21 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart' as latlng;
 import 'package:trufi_core/hive_init.dart';
-import 'package:trufi_core/moving_line_map.dart';
-import 'package:trufi_core/pages/home/home_page.dart';
+import 'package:trufi_core/moving_line_map_component.dart';
 import 'package:trufi_core/pages/home/widgets/routing_map/routing_map_controller.dart';
 import 'package:trufi_core/trufi_flutter_map.dart';
 import 'package:trufi_core/trufi_map_controller.dart';
 import 'package:trufi_core/trufi_maplibre_map_geojson.dart';
 // import 'package:trufi_core/trufi_maplibre_map_symbol.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:trufi_core/models/enums/transport_mode.dart';
 import 'package:trufi_core/models/plan_entity.dart';
-import 'package:trufi_core/pages/home/widgets/routing_map/routing_map_controller.dart';
-import 'package:trufi_core/trufi_map_controller.dart';
-import 'package:latlong2/latlong.dart' as latlng;
-import 'package:trufi_core/trufi_maplibre_map_geojson.dart';
 import 'package:trufi_core/widgets/utils.dart';
 
 void main() async {
@@ -54,10 +47,18 @@ class _HomeScreenState extends State<HomeScreen> {
     ),
   );
   late RoutingMapComponent routingMapComponent;
+  late MovingLineMapComponent movingLineComponent;
   @override
   void initState() {
     routingMapComponent = RoutingMapComponent(mapController);
-    mapController.addLayer(routingMapComponent);
+    // mapController.addLayer(routingMapComponent);  
+    movingLineComponent = MovingLineMapComponent(
+    mapController,
+    nMarkers: 500,
+    nLines: 20,
+    updateInterval: const Duration(seconds: 2),
+  );
+  mapController.addLayer(movingLineComponent);
     super.initState();
   }
 

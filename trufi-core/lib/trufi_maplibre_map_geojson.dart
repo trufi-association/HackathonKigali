@@ -93,6 +93,7 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
 
     for (final layer in visibleLayers) {
       final sourceId = layer.id;
+      print(sourceId);
 
       final features = <Map<String, dynamic>>[];
 
