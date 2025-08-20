@@ -31,8 +31,8 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
   bool _mapReady = false;
   bool _suppressSync = false;
 
-  // final Map<int, String> _imageCache = {};
   final Set<String> _loadedImages = {};
+  final Map<String, Future<void>> _imageLoaders = {};
 
   @override
   void initState() {
@@ -43,11 +43,18 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
     });
   }
 
+  @override
+  void dispose() {
+    widget.controller.cameraPositionNotifier.removeListener(_cameraListener);
+    widget.controller.layersNotifier.removeListener(_layersListener);
+    super.dispose();
+  }
+
   void _cameraListener() {
     final camera = widget.controller.cameraPositionNotifier.value;
     if (_mapReady && _mapCtl != null) {
       _suppressSync = true;
-      print("Camera listener triggered -> syncing camera");
+      // print("Camera listener triggered -> syncing camera");
       _mapCtl!.animateCamera(
         CameraUpdate.newCameraPosition(_toCameraPosition(camera)),
       );
@@ -57,28 +64,21 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
   void _layersListener() {
     final visibleLayers = widget.controller.visibleLayers;
     if (_mapReady && _mapCtl != null) {
-      print("Layers listener triggered -> syncing layers");
+      // print("Layers listener triggered -> syncing layers");
       _syncLayers(visibleLayers);
     }
-  }
-
-  @override
-  void dispose() {
-    widget.controller.cameraPositionNotifier.removeListener(_cameraListener);
-    widget.controller.layersNotifier.removeListener(_layersListener);
-    super.dispose();
   }
 
   Future<void> _handleCameraIdle() async {
     if (_suppressSync) {
       _suppressSync = false;
-      print("Camera idle ignored (suppressed)");
+      // print("Camera idle ignored (suppressed)");
       return;
     }
     final ctl = _mapCtl;
     if (ctl == null) return;
     final cam = await ctl.cameraPosition!;
-    print("Camera idle -> updating controller");
+    // print("Camera idle -> updating controller");
     widget.controller.updateCamera(
       target: latlng.LatLng(cam.target.latitude, cam.target.longitude),
       zoom: toLeafletZoom(cam.zoom),
@@ -87,138 +87,188 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
   }
 
   Future<void> _syncLayers(List<TrufiLayer> visibleLayers) async {
-    print("_syncLayers");
     final ctl = _mapCtl;
     if (ctl == null) return;
 
-    for (final layer in visibleLayers) {
-      final sourceId = layer.id;
-      print(sourceId);
+    final sorted = [...visibleLayers]
+      ..sort((a, b) => a.layerLevel.compareTo(b.layerLevel));
 
-      final features = <Map<String, dynamic>>[];
-
-      // 🔹 Procesar marcadores
-      for (final marker in layer.entries) {
-        final imageId = marker.widget.hashCode.toString();
-
-        if (!_loadedImages.contains(imageId)) {
-          print("still load");
-          if (!mounted) return;
-          final bytes =
-              marker.widgetBytes ??
-              await ImageTool.widgetToBytes(marker, context);
-          await ctl.addImage(imageId, bytes);
-          _loadedImages.add(imageId);
-        }
-        // print(marker.layerLevel);
-        features.add({
-          "type": "Feature",
-          "id": imageId,
-          "geometry": {
-            "type": "Point",
-            "coordinates": [
-              marker.position.longitude,
-              marker.position.latitude,
-            ],
-          },
-          "properties": {
-            "icon": imageId,
-            "id": imageId,
-            if (marker.alignment == "top")
-              "offset": [0.0, -marker.size.height / 2],
-            "layerLevel": marker.layerLevel,
-          },
-        });
-      }
-
-      // 🔹 Procesar líneas
-      for (final line in layer.lines) {
-        features.add({
-          "type": "Feature",
-          "id": line.id,
-          "geometry": {
-            "type": "LineString",
-            "coordinates": line.position
-                .map((e) => [e.longitude, e.latitude])
-                .toList(),
-          },
-          "properties": {
-            "color": decodeFillColor(line.color),
-            "width": line.lineWidth,
-            "layerLevel": line.layerLevel,
-            "dotted": line.activeDots,
-          },
-        });
-      }
-      final geojson = {"type": "FeatureCollection", "features": features};
-      print("features");
-      // print(features[2]);
-      // print(features[3]);
-      final existingSources = await ctl.getSourceIds();
-      final sourceExists = existingSources.contains(sourceId);
-
-      if (!sourceExists) {
-        print("Adding new source and layers -> $sourceId");
-        await ctl.addGeoJsonSource(sourceId, geojson);
-
-        await ctl.addLineLayer(
-          sourceId,
-          "${sourceId}_dotted",
-          LineLayerProperties(
-            lineColor: ["get", "color"],
-            lineWidth: ["get", "width"],
-            lineSortKey: ["get", "layerLevel"],
-            lineDasharray: [0.5, 1.5],
-            lineJoin: "round",
-            lineCap: "round",
-          ),
-          filter: [
-            "==",
-            ["get", "dotted"],
-            true,
-          ],
-          enableInteraction: false,
-        );
-
-        await ctl.addLineLayer(
-          sourceId,
-          "${sourceId}_solid",
-          LineLayerProperties(
-            lineColor: ["get", "color"],
-            lineWidth: ["get", "width"],
-            lineSortKey: ["get", "layerLevel"],
-            lineJoin: "round",
-            lineCap: "round",
-          ),
-          filter: [
-            "==",
-            ["get", "dotted"],
-            false,
-          ],
-          enableInteraction: false,
-        );
-
-        await ctl.addSymbolLayer(
-          sourceId,
-          "${sourceId}_marker",
-          SymbolLayerProperties(
-            iconImage: ["get", "icon"],
-            iconSize: 1.0,
-            iconAllowOverlap: true,
-            iconOffset: ["get", "offset"],
-            symbolSortKey: ["get", "layerLevel"],
-          ),
-          enableInteraction: false,
-        );
-      } else {
-        print("Updating existing source -> $sourceId");
-        await ctl.setGeoJsonSource(sourceId, geojson);
-        if (Platform.isAndroid) {
-          await ctl.moveCamera(CameraUpdate.zoomBy(0.0001));
-        }
-      }
+    for (final layer in sorted) {
+      await _ensureLayerInitialized(layer, ctl);
     }
-    print("_syncLayers end");
+
+    await Future.wait(
+      sorted.map((l) => _updateLayerData(l, ctl)),
+      eagerError: true,
+    );
+
+  }
+
+  Future<void> _ensureLayerInitialized(
+    TrufiLayer layer,
+    MapLibreMapController ctl,
+  ) async {
+    final sourceId = layer.id;
+    final existingSources = await ctl.getSourceIds();
+    final exists = existingSources.contains(sourceId);
+    if (exists) return;
+
+    print("_ensureLayerInitialized $sourceId");
+    await ctl.addGeoJsonSource(sourceId, const {
+      "type": "FeatureCollection",
+      "features": [],
+    });
+
+    await ctl.addLineLayer(
+      sourceId,
+      "${sourceId}_dotted",
+      LineLayerProperties(
+        lineColor: ["get", "color"],
+        lineWidth: ["get", "width"],
+        lineSortKey: ["get", "layerLevel"],
+        lineDasharray: [0.5, 1.5],
+        lineJoin: "round",
+        lineCap: "round",
+      ),
+      filter: [
+        "==",
+        ["get", "dotted"],
+        true,
+      ],
+      enableInteraction: false,
+    );
+
+    await ctl.addLineLayer(
+      sourceId,
+      "${sourceId}_solid",
+      LineLayerProperties(
+        lineColor: ["get", "color"],
+        lineWidth: ["get", "width"],
+        lineSortKey: ["get", "layerLevel"],
+        lineJoin: "round",
+        lineCap: "round",
+      ),
+      filter: [
+        "==",
+        ["get", "dotted"],
+        false,
+      ],
+      enableInteraction: false,
+    );
+
+    await ctl.addSymbolLayer(
+      sourceId,
+      "${sourceId}_marker",
+      SymbolLayerProperties(
+        iconImage: ["get", "icon"],
+        iconSize: 1.0,
+        iconAllowOverlap: true,
+        iconOffset: ["get", "offset"],
+        symbolSortKey: ["get", "layerLevel"],
+      ),
+      enableInteraction: false,
+    );
+  }
+
+  /// Construye el GeoJSON y lo setea en el source.
+  Future<void> _updateLayerData(
+    TrufiLayer layer,
+    MapLibreMapController ctl,
+  ) async {
+    final geojson = await _buildGeoJsonForLayer(layer, ctl);
+    await ctl.setGeoJsonSource(layer.id, geojson);
+
+    if (Platform.isAndroid) {
+      // Fuerza un pequeño re-render en Android.
+      await ctl.moveCamera(CameraUpdate.zoomBy(0.0001));
+    }
+  }
+
+  /// Arma FeatureCollection para el layer (marcadores y líneas).
+  Future<Map<String, dynamic>> _buildGeoJsonForLayer(
+    TrufiLayer layer,
+    MapLibreMapController ctl,
+  ) async {
+    final features = <Map<String, dynamic>>[];
+
+    // Marcadores
+    for (final marker in layer.entries) {
+      // Si tienes un ID estable, úsalo en lugar de hashCode del widget.
+      final imageId = marker.widget.hashCode.toString();
+
+      await _ensureImageLoaded(imageId, () async {
+        if (!mounted) return;
+        final bytes =
+            marker.widgetBytes ??
+            await ImageTool.widgetToBytes(marker, context);
+        await ctl.addImage(imageId, bytes);
+      });
+
+      features.add({
+        "type": "Feature",
+        "id": imageId,
+        "geometry": {
+          "type": "Point",
+          "coordinates": [marker.position.longitude, marker.position.latitude],
+        },
+        "properties": {
+          "icon": imageId,
+          "id": imageId,
+          if (marker.alignment == "top")
+            "offset": [0.0, -marker.size.height / 2],
+          "layerLevel": marker.layerLevel,
+        },
+      });
+    }
+
+    // Líneas
+    for (final line in layer.lines) {
+      features.add({
+        "type": "Feature",
+        "id": line.id,
+        "geometry": {
+          "type": "LineString",
+          "coordinates": line.position
+              .map((e) => [e.longitude, e.latitude])
+              .toList(),
+        },
+        "properties": {
+          "color": decodeFillColor(line.color),
+          "width": line.lineWidth,
+          "layerLevel": line.layerLevel,
+          "dotted": line.activeDots,
+        },
+      });
+    }
+
+    return {"type": "FeatureCollection", "features": features};
+  }
+
+  /// Dedup de carga de imágenes con sincronización entre llamadas paralelas.
+  Future<void> _ensureImageLoaded(
+    String imageId,
+    Future<void> Function() loader,
+  ) async {
+    if (_loadedImages.contains(imageId)) return;
+
+    final inFlight = _imageLoaders[imageId];
+    if (inFlight != null) {
+      await inFlight;
+      return;
+    }
+
+    final future = loader()
+        .then((_) {
+          _loadedImages.add(imageId);
+          _imageLoaders.remove(imageId);
+        })
+        .catchError((e, st) {
+          _imageLoaders.remove(imageId);
+          throw e;
+        });
+
+    _imageLoaders[imageId] = future;
+    await future;
   }
 
   @override
@@ -233,12 +283,12 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
       onMapCreated: (ctl) async {
         _mapCtl = ctl;
         _mapReady = true;
-        print("Map created -> syncing layers");
+        // print("Map created -> syncing layers");
         await _syncLayers(widget.controller.visibleLayers);
       },
       onCameraIdle: _handleCameraIdle,
       onMapClick: (points, latlng) {
-        print("Map clicked");
+        // print("Map clicked");
         widget.onMapClick?.call(points, latlng);
       },
     );

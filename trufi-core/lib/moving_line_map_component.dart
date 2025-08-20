@@ -29,7 +29,7 @@ final Widget widget=Container(
     this.nMarkers = 100,
     this.nLines = 10,
     this.updateInterval = const Duration(seconds: 1),
-  }) : super(id: layerId) {
+  }) : super(id: layerId,layerLevel: 1) {
     _initFeatures();
     _startUpdates();
   }

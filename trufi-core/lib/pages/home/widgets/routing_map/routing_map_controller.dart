@@ -67,7 +67,7 @@ class RoutingMapComponent extends TrufiLayer {
     ),
   );
 
-  RoutingMapComponent(super.controller) : super(id: layerId);
+  RoutingMapComponent(super.controller) : super(id: layerId,layerLevel: 2);
   final IPlanRepository service = GraphQLPlanDataSource(
     ApiConfig().openTripPlannerUrl,
   );

@@ -152,12 +152,19 @@ class TrufiLine {
 }
 
 abstract class TrufiLayer {
-  TrufiLayer(this.controller, {required this.id, this.visible = true}) {
+  TrufiLayer(
+    this.controller, {
+    required this.id,
+    required this.layerLevel,
+    this.visible = true,
+  }) {
     controller.addLayer(this);
   }
 
   final TrufiMapController controller;
   String id;
+
+  final int layerLevel;
   bool visible;
   List<TrufiMarker> get entries;
   List<TrufiLine> get lines;
