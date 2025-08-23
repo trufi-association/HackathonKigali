@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:maplibre_gl/maplibre_gl.dart';
+import 'package:maplibre_gl/maplibre_gl.dart' hide LatLngBounds;
 import 'package:latlong2/latlong.dart' as latlng;
 import 'package:trufi_core/image_tool.dart';
 import 'package:trufi_core/models/enums/custom_icons.dart';
@@ -78,11 +78,23 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
     final ctl = _mapCtl;
     if (ctl == null) return;
     final cam = await ctl.cameraPosition!;
+
+    final visibleRegion = await ctl.getVisibleRegion();
     // print("Camera idle -> updating controller");
     widget.controller.updateCamera(
       target: latlng.LatLng(cam.target.latitude, cam.target.longitude),
       zoom: toLeafletZoom(cam.zoom),
       bearing: toLeafletBearing(cam.bearing),
+      visibleRegion: LatLngBounds(
+        latlng.LatLng(
+          visibleRegion.southwest.latitude,
+          visibleRegion.southwest.longitude,
+        ),
+        latlng.LatLng(
+          visibleRegion.northeast.latitude,
+          visibleRegion.northeast.longitude,
+        ),
+      ),
     );
   }
 
@@ -101,7 +113,6 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
       sorted.map((l) => _updateLayerData(l, ctl)),
       eagerError: true,
     );
-
   }
 
   Future<void> _ensureLayerInitialized(
@@ -279,6 +290,7 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
       ),
       styleString: widget.styleString,
       trackCameraPosition: true,
+      rotateGesturesEnabled: false,
       compassEnabled: false,
       onMapCreated: (ctl) async {
         _mapCtl = ctl;

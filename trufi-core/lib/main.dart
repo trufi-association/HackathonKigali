@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart' as latlng;
+import 'package:trufi_core/tile_grid_layer.dart';
 import 'package:trufi_core/hive_init.dart';
 import 'package:trufi_core/moving_line_map_component.dart';
 import 'package:trufi_core/pages/home/widgets/routing_map/routing_map_controller.dart';
@@ -42,23 +43,31 @@ class _HomeScreenState extends State<HomeScreen> {
   final mapController = TrufiMapController(
     initialCameraPosition: TrufiCameraPosition(
       target: latlng.LatLng(-1.949516, 30.069619),
-      zoom: 10,
+      zoom: 17,
       bearing: 0,
     ),
   );
   late RoutingMapComponent routingMapComponent;
   late MovingLineMapComponent movingLineComponent;
+  late TileGridLayer tileGridLayer;
   @override
   void initState() {
     routingMapComponent = RoutingMapComponent(mapController);
-    // mapController.addLayer(routingMapComponent);  
-    movingLineComponent = MovingLineMapComponent(
-    mapController,
-    nMarkers: 500,
-    nLines: 20,
-    updateInterval: const Duration(seconds: 2),
-  );
-  mapController.addLayer(movingLineComponent);
+    // mapController.addLayer(routingMapComponent);
+    // movingLineComponent = MovingLineMapComponent(
+    //   mapController,
+    //   nMarkers: 500,
+    //   nLines: 20,
+    //   updateInterval: const Duration(seconds: 2),
+    // );
+    tileGridLayer = TileGridLayer(
+      mapController,
+      // tilesUrlTemplate: 'https://api.dev.stadtnavi.eu/map/v1/weather-stations/z/x/y.pbf',
+      // Si el backend es {x}/{y}/{z}.pbf:
+      // tilesUrlTemplate: 'https://tiles.tu-backend.com/{x}/{y}/{z}.pbf',
+      // templateIsZXY: false,
+    );
+    // mapController.addLayer(movingLineComponent);
     super.initState();
   }
 
@@ -78,7 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // if (showMapLibre)
+          if (!showMapLibre)
           TrufiMapLibreMap(
             controller: mapController,
             trufiLayer: routingMapComponent,
@@ -110,7 +119,7 @@ class _HomeScreenState extends State<HomeScreen> {
             TrufiFlutterMap(
               controller: mapController,
               tileUrl:
-                  'https://tileserver.kigali.trufi.dev/styles/test-style/{z}/{x}/{y}.png',
+                  'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
               onMapClick: (position) {
                 setState(() {});
                 if (routingMapComponent.origin == null) {

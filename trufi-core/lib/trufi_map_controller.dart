@@ -4,25 +4,55 @@ import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart' as latlng;
 import 'package:trufi_core/image_tool.dart';
 
+/// ===== Bounds con igualdad/hash =====
+class LatLngBounds {
+  final latlng.LatLng southWest;
+  final latlng.LatLng northEast;
+
+  const LatLngBounds(this.southWest, this.northEast);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is LatLngBounds &&
+          runtimeType == other.runtimeType &&
+          southWest == other.southWest &&
+          northEast == other.northEast;
+
+  @override
+  int get hashCode => southWest.hashCode ^ northEast.hashCode;
+
+  @override
+  String toString() =>
+      'LatLngBounds(sw: ${southWest.latitude},${southWest.longitude}; ne: ${northEast.latitude},${northEast.longitude})';
+}
+
+/// ===== Camera con visibleRegion opcional =====
 class TrufiCameraPosition {
   const TrufiCameraPosition({
     required this.target,
     this.zoom = 0.0,
     this.bearing = 0.0,
+    this.visibleRegion, // 👈 opcional para no romper código existente
   });
 
   final latlng.LatLng target;
   final double zoom;
   final double bearing;
 
+  /// Bounds visibles del viewport (si están disponibles).
+  final LatLngBounds? visibleRegion;
+
   TrufiCameraPosition copyWith({
     latlng.LatLng? target,
     double? zoom,
     double? bearing,
+    LatLngBounds? visibleRegion,
   }) => TrufiCameraPosition(
     target: target ?? this.target,
     zoom: zoom ?? this.zoom,
     bearing: bearing ?? this.bearing,
+    visibleRegion: visibleRegion ?? this.visibleRegion,
   );
 
   @override
@@ -32,10 +62,20 @@ class TrufiCameraPosition {
           runtimeType == other.runtimeType &&
           target == other.target &&
           zoom == other.zoom &&
-          bearing == other.bearing;
+          bearing == other.bearing &&
+          visibleRegion == other.visibleRegion;
 
   @override
-  int get hashCode => target.hashCode ^ zoom.hashCode ^ bearing.hashCode;
+  int get hashCode =>
+      target.hashCode ^
+      zoom.hashCode ^
+      bearing.hashCode ^
+      visibleRegion.hashCode;
+
+  @override
+  String toString() =>
+      'TrufiCameraPosition(target: ${target.latitude},${target.longitude}, '
+      'zoom: $zoom, bearing: $bearing, visibleRegion: $visibleRegion)';
 }
 
 class TrufiMapController {
@@ -50,16 +90,45 @@ class TrufiMapController {
       layersNotifier.value.values.where((l) => l.visible).toList();
 
   bool setCameraPosition(TrufiCameraPosition position) {
-    if (position == cameraPositionNotifier.value) return false;
+    final prev = cameraPositionNotifier.value;
+
+    // Igual que antes: si es exactamente igual, no emitas
+    if (position == prev) return false;
+
+    // ---- Anti-loop por zoomBy(0.0001) ----
+    final sameTarget = prev.target == position.target;
+    final sameBearing = prev.bearing == position.bearing;
+    final sameIntZoom = prev.zoom.floor() == position.zoom.floor();
+    final tinyZoomDiff = (prev.zoom - position.zoom).abs() < 0.001;
+
+    // 👇 NUEVO: considerar también los bounds
+    final sameVisibleRegion = prev.visibleRegion == position.visibleRegion;
+
+    // Skip solo si: único cambio es una fracción ínfima del zoom
+    // y además NO cambió target, bearing ni visibleRegion.
+    if (sameTarget &&
+        sameBearing &&
+        sameIntZoom &&
+        tinyZoomDiff &&
+        sameVisibleRegion) {
+      return false;
+    }
+
     cameraPositionNotifier.value = position;
     return true;
   }
 
-  bool updateCamera({latlng.LatLng? target, double? zoom, double? bearing}) {
+  bool updateCamera({
+    latlng.LatLng? target,
+    double? zoom,
+    double? bearing,
+    LatLngBounds? visibleRegion,
+  }) {
     final next = cameraPositionNotifier.value.copyWith(
       target: target,
       zoom: zoom,
       bearing: bearing != null ? bearing % 360 : null,
+      visibleRegion: visibleRegion,
     );
     return setCameraPosition(next);
   }
@@ -169,6 +238,7 @@ abstract class TrufiLayer {
   List<TrufiMarker> get entries;
   List<TrufiLine> get lines;
   void mutateLayers() => controller.mutateLayers();
+  void dispose() {}
 }
 
 class TrufiLocation {
