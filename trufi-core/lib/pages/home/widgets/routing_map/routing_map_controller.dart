@@ -1,3 +1,4 @@
+import 'package:trufi_core/pages/home/repository/hive_local_repository.dart';
 import 'package:trufi_core/widgets/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:trufi_core/consts.dart';
@@ -66,8 +67,15 @@ class RoutingMapComponent extends TrufiLayer {
       ),
     ),
   );
+  final MapRouteHiveLocalRepository mapRouteHiveLocal =
+      MapRouteHiveLocalRepository();
 
-  RoutingMapComponent(super.controller) : super(id: layerId,layerLevel: 2);
+  RoutingMapComponent(super.controller) : super(id: layerId, layerLevel: 2) {
+    mapRouteHiveLocal.loadRepository().then((e) async {
+      plan = await mapRouteHiveLocal.getPlan();
+      mutateLayers();
+    });
+  }
   final IPlanRepository service = GraphQLPlanDataSource(
     ApiConfig().openTripPlannerUrl,
   );
@@ -149,11 +157,12 @@ class RoutingMapComponent extends TrufiLayer {
       }
 
       await Future.wait(tasks);
+      await mapRouteHiveLocal.savePlan(plan);
     }
     selectedItinerary = plan?.itineraries?.firstOrNull;
   }
 
-  void selectNextItinerary()  {
+  void selectNextItinerary() {
     final itineraries = plan?.itineraries;
     if (itineraries == null || itineraries.isEmpty) return;
 

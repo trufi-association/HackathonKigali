@@ -1,6 +1,6 @@
 enum RealtimeState { scheduled, updated, canceled, added, modified }
 
-RealtimeState getRealtimeStateByString(String realtimeState) {
+RealtimeState getRealtimeStateByString(String? realtimeState) {
   return RealtimeStateExtension.names.keys.firstWhere(
     (key) => key.name == realtimeState,
     orElse: () => RealtimeState.scheduled,
