@@ -42,6 +42,8 @@ dependencies:
   flutter_svg: ^2.2.0
   graphql: ^5.2.1
   path_provider: ^2.1.5
+  vector_tile: ^3.0.0
+  dio: ^5.9.0
 
 dev_dependencies:
   flutter_test:

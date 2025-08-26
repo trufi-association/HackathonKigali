@@ -10,9 +10,17 @@ import 'package:trufi_core/pages/home/widgets/travel_bottom_sheet/travel_bottom_
 import 'package:trufi_core/trufi_flutter_map.dart';
 import 'package:trufi_core/trufi_map_controller.dart';
 import 'package:trufi_core/trufi_maplibre_map_geojson.dart';
+import 'package:trufi_core/weather/weather_layer.dart';
+import 'package:trufi_core/widgets/bottom_sheet/trufi_bottom_sheet.dart';
+import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  const String appLocale = 'en';
+
+  Intl.defaultLocale = appLocale;
+  await initializeDateFormatting(appLocale); // <- clave
   await initHiveForFlutter();
   runApp(MyApp());
 }
@@ -44,14 +52,15 @@ class _HomeScreenState extends State<HomeScreen> {
   bool showMapLibre = false;
   final mapController = TrufiMapController(
     initialCameraPosition: TrufiCameraPosition(
-      target: latlng.LatLng(-1.949516, 30.069619),
+      target: latlng.LatLng(48.5950, 8.8672),
       zoom: 17,
       bearing: 0,
     ),
   );
   late RoutingMapComponent routingMapComponent;
-  late MovingLineMapComponent movingLineComponent;
+  // late MovingLineMapComponent movingLineComponent;
   late TileGridLayer tileGridLayer;
+  late WeatherLayer weatherLayer;
   @override
   void initState() {
     routingMapComponent = RoutingMapComponent(mapController);
@@ -62,17 +71,19 @@ class _HomeScreenState extends State<HomeScreen> {
     //   nLines: 20,
     //   updateInterval: const Duration(seconds: 2),
     // );
-    tileGridLayer = TileGridLayer(
-      mapController,
-      // tilesUrlTemplate: 'https://api.dev.stadtnavi.eu/map/v1/weather-stations/z/x/y.pbf',
-      // Si el backend es {x}/{y}/{z}.pbf:
-      // tilesUrlTemplate: 'https://tiles.tu-backend.com/{x}/{y}/{z}.pbf',
-      // templateIsZXY: false,
-    );
+    // tileGridLayer = TileGridLayer(
+    //   mapController,
+    //   // tilesUrlTemplate: 'https://api.dev.stadtnavi.eu/map/v1/weather-stations/z/x/y.pbf',
+    //   // Si el backend es {x}/{y}/{z}.pbf:
+    //   // tilesUrlTemplate: 'https://tiles.tu-backend.com/{x}/{y}/{z}.pbf',
+    //   // templateIsZXY: false,
+    // );
+    weatherLayer = WeatherLayer(mapController);
     // mapController.addLayer(movingLineComponent);
     super.initState();
   }
 
+  TrufiMarker? selectedMarker;
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
@@ -90,38 +101,42 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Stack(
         children: [
           if (!showMapLibre)
-          TrufiMapLibreMap(
-            controller: mapController,
-            trufiLayer: routingMapComponent,
-            // routingMapComponent:routingMapComponent,
-            styleString:
-                'https://tileserver.kigali.trufi.dev/styles/test-style/style.json',
-            onMapClick: (_, coord) {
-              if (routingMapComponent.origin == null) {
-                routingMapComponent.addOrigin(
-                  latlng.LatLng(coord.latitude, coord.longitude),
-                  context,
+            TrufiMapLibreMap(
+              controller: mapController,
+              trufiLayer: routingMapComponent,
+              // routingMapComponent:routingMapComponent,
+              styleString:
+                  'https://tiles-eu.stadtnavi.eu/styles/streets/style.json',
+              onMapClick: (mapLatLng) {
+                final nearest = mapController.pickNearestMarkerAt(
+                  mapLatLng,
+                  hitboxPx: 24.0,
                 );
-              } else if (routingMapComponent.destination == null) {
-                routingMapComponent.addDestination(
-                  latlng.LatLng(coord.latitude, coord.longitude),
-                  context,
-                );
-              } else {
-                routingMapComponent.cleanOriginAndDestination();
-              }
-              //  mapController.updateCamera(
-              //     target: latlng.LatLng(coord.latitude, coord.longitude),
-              //   );
-            },
-          ),
+                print(nearest);
+                setState(() {
+                  selectedMarker = nearest;
+                });
+              },
+
+              onMapLongClick: (coord) {
+                if (routingMapComponent.origin == null) {
+                  routingMapComponent.addOrigin(coord, context);
+                } else if (routingMapComponent.destination == null) {
+                  routingMapComponent.addDestination(coord, context);
+                } else {
+                  routingMapComponent.cleanOriginAndDestination();
+                }
+                //  mapController.updateCamera(
+                //     target: latlng.LatLng(coord.latitude, coord.longitude),
+                //   );
+              },
+            ),
 
           // else
           if (showMapLibre)
             TrufiFlutterMap(
               controller: mapController,
-              tileUrl:
-                  'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+              tileUrl: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
               onMapClick: (position) {
                 setState(() {});
                 if (routingMapComponent.origin == null) {
@@ -137,10 +152,12 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
           LocationSearchBar(),
-          TransitBottomSheet(
-            routingMapComponent: routingMapComponent,
-            trufiMapController: mapController,
-          ),
+          if (selectedMarker?.buildPanel != null)
+            TrufiBottomSheet(child: selectedMarker!.buildPanel!(context)),
+          // TransitBottomSheet(
+          //   routingMapComponent: routingMapComponent,
+          //   trufiMapController: mapController,
+          // ),
           // Positioned(
           //   bottom: 100,
           //   child: GestureDetector(

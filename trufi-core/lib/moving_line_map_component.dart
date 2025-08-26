@@ -6,63 +6,67 @@ import 'package:trufi_core/trufi_map_controller.dart';
 
 class MovingLineMapComponent extends TrufiLayer {
   static const String layerId = 'moving-line-map-component';
+
   final Random _random = Random();
   final int nMarkers;
   final int nLines;
   final Duration updateInterval;
 
-  // 📌 Coordenada base: Kigali
+  // Coordenada base (Kigali)
   final latlng.LatLng baseCoord = const latlng.LatLng(-1.949516, 30.069619);
-final Widget widget=Container(
-            width: 14,
-            height: 14,
-            decoration: const BoxDecoration(
-              color: Colors.blue,
-              shape: BoxShape.circle,
-            ));
+
+  // Widget del marker (círculo azul chico)
+  static const Widget _markerWidget = SizedBox(
+    width: 14,
+    height: 14,
+    child: DecoratedBox(
+      decoration: BoxDecoration(color: Colors.blue, shape: BoxShape.circle),
+    ),
+  );
+
   Timer? _timer;
-  final List<TrufiMarker> _markers = [];
-  final List<TrufiLine> _lines = [];
 
   MovingLineMapComponent(
     super.controller, {
     this.nMarkers = 100,
     this.nLines = 10,
     this.updateInterval = const Duration(seconds: 1),
-  }) : super(id: layerId,layerLevel: 1) {
+  }) : super(id: layerId, layerLevel: 1) {
     _initFeatures();
     _startUpdates();
   }
 
-  /// Inicializa los marcadores y líneas alrededor de baseCoord
+  /// Crea listas iniciales y las setea en el layer (dispara mutateLayers())
   void _initFeatures() {
-    const double offsetRange = 0.02; // +- ~2km
-
-    // Marcadores
+    const double offsetRange = 0.02; // ~±2km
+    // markers
+    final markers = <TrufiMarker>[];
     for (int i = 0; i < nMarkers; i++) {
-      final position = latlng.LatLng(
+      final pos = latlng.LatLng(
         baseCoord.latitude + (_random.nextDouble() - 0.5) * offsetRange,
         baseCoord.longitude + (_random.nextDouble() - 0.5) * offsetRange,
       );
-      _markers.add(
+      markers.add(
         TrufiMarker(
-          id: "marker_$i",
-          position: position,
-          widget: widget,
+          id: 'marker_$i',
+          position: pos,
+          widget: _markerWidget,
           size: const Size(14, 14),
         ),
       );
     }
+    setMarkers(markers);
 
-    // Líneas
+    // lines
+    final linesList = <TrufiLine>[];
     for (int i = 0; i < nLines; i++) {
       final start = latlng.LatLng(
         baseCoord.latitude + (_random.nextDouble() - 0.5) * offsetRange,
         baseCoord.longitude + (_random.nextDouble() - 0.5) * offsetRange,
       );
-      _lines.add(
+      linesList.add(
         TrufiLine(
-          id: "line_$i",
+          id: 'line_$i',
           position: List.generate(
             6,
             (j) => latlng.LatLng(
@@ -75,62 +79,71 @@ final Widget widget=Container(
         ),
       );
     }
+    setLines(linesList);
   }
 
-  /// Inicia actualizaciones periódicas
   void _startUpdates() {
     _timer?.cancel();
     _timer = Timer.periodic(updateInterval, (_) => _updateFeatures());
   }
 
-  /// Actualiza marcadores y líneas con movimiento aleatorio
+  /// Reemplaza markers y lines con posiciones movidas aleatoriamente
   void _updateFeatures() {
-    const double moveRange = 0.001; // +- ~100m
+    const double moveRange = 0.001; // ~±100m
 
-    // Mover marcadores
-    for (var i = 0; i < _markers.length; i++) {
-      final m = _markers[i];
-      _markers[i] = TrufiMarker(
-        id: m.id,
-        position: latlng.LatLng(
-          m.position.latitude + (_random.nextDouble() - 0.5) * moveRange,
-          m.position.longitude + (_random.nextDouble() - 0.5) * moveRange,
+    // Mover todos los markers (clon + reemplazo)
+    final movedMarkers = <TrufiMarker>[];
+    for (final m in markers) {
+      movedMarkers.add(
+        TrufiMarker(
+          id: m.id,
+          position: latlng.LatLng(
+            m.position.latitude + (_random.nextDouble() - 0.5) * moveRange,
+            m.position.longitude + (_random.nextDouble() - 0.5) * moveRange,
+          ),
+          widget: m.widget,
+          size: m.size,
+          rotation: m.rotation,
+          layerLevel: m.layerLevel,
+          alignment: m.alignment,
+          widgetBytes: m.widgetBytes,
+          // visible se mantiene igual
+          // visible: m.visible,
         ),
-        widget: m.widget,
-        size: m.size,
       );
     }
+    setMarkers(movedMarkers); // notifica
 
-    // Mover líneas
-    for (var line in List.of(_lines)) {
+    // Mover todas las líneas (agregar punto al final, recortar a 20)
+    final movedLines = <TrufiLine>[];
+    for (final line in lines) {
       final last = line.position.last;
       final newPoint = latlng.LatLng(
         last.latitude + (_random.nextDouble() - 0.5) * moveRange,
         last.longitude + (_random.nextDouble() - 0.5) * moveRange,
       );
+      final pts = List<latlng.LatLng>.from(line.position)..add(newPoint);
+      if (pts.length > 20) pts.removeAt(0);
 
-      final updatedPoints = [...line.position, newPoint];
-      if (updatedPoints.length > 20) updatedPoints.removeAt(0);
-
-      _lines[_lines.indexOf(line)] = TrufiLine(
-        id: line.id,
-        position: updatedPoints,
-        color: line.color,
-        lineWidth: line.lineWidth,
+      movedLines.add(
+        TrufiLine(
+          id: line.id,
+          position: pts,
+          color: line.color,
+          lineWidth: line.lineWidth,
+          activeDots: line.activeDots,
+          layerLevel: line.layerLevel,
+          visible: line.visible,
+        ),
       );
     }
-
-    mutateLayers();
+    setLines(movedLines); // notifica (segunda vez en el tick)
   }
 
+  @override
   void dispose() {
     _timer?.cancel();
     _timer = null;
+    super.dispose();
   }
-
-  @override
-  List<TrufiMarker> get entries => _markers;
-
-  @override
-  List<TrufiLine> get lines => _lines;
 }

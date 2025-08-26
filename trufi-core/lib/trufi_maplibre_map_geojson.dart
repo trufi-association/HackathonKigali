@@ -1,12 +1,17 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:maplibre_gl/maplibre_gl.dart' hide LatLngBounds;
 import 'package:latlong2/latlong.dart' as latlng;
 import 'package:trufi_core/image_tool.dart';
+import 'package:trufi_core/marker_list.dart';
 import 'package:trufi_core/models/enums/custom_icons.dart';
 import 'package:trufi_core/trufi_map_controller.dart';
+
+// IMPORTA donde tengas MarkersContainer / MarkerLayers
+// import 'markers_container.dart';
 
 class TrufiMapLibreMap extends StatefulWidget {
   const TrufiMapLibreMap({
@@ -14,14 +19,15 @@ class TrufiMapLibreMap extends StatefulWidget {
     required this.controller,
     required this.trufiLayer,
     required this.styleString,
-    required this.onMapClick,
+    this.onMapClick,
+    this.onMapLongClick,
   });
 
   final TrufiMapController controller;
   final TrufiLayer trufiLayer;
   final String styleString;
-  final OnMapClickCallback? onMapClick;
-
+  final void Function(latlng.LatLng)? onMapClick;
+  final void Function(latlng.LatLng)? onMapLongClick;
   @override
   State<TrufiMapLibreMap> createState() => _TrufiMapLibreMapState();
 }
@@ -33,6 +39,9 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
 
   final Set<String> _loadedImages = {};
   final Map<String, Future<void>> _imageLoaders = {};
+
+  // NUEVO: índice espacial por layer (dos listas: lat/lng)
+  final MarkersContainer _markers = MarkersContainer();
 
   @override
   void initState() {
@@ -54,7 +63,6 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
     final camera = widget.controller.cameraPositionNotifier.value;
     if (_mapReady && _mapCtl != null) {
       _suppressSync = true;
-      // print("Camera listener triggered -> syncing camera");
       _mapCtl!.animateCamera(
         CameraUpdate.newCameraPosition(_toCameraPosition(camera)),
       );
@@ -64,7 +72,6 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
   void _layersListener() {
     final visibleLayers = widget.controller.visibleLayers;
     if (_mapReady && _mapCtl != null) {
-      // print("Layers listener triggered -> syncing layers");
       _syncLayers(visibleLayers);
     }
   }
@@ -72,7 +79,6 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
   Future<void> _handleCameraIdle() async {
     if (_suppressSync) {
       _suppressSync = false;
-      // print("Camera idle ignored (suppressed)");
       return;
     }
     final ctl = _mapCtl;
@@ -80,7 +86,6 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
     final cam = await ctl.cameraPosition!;
 
     final visibleRegion = await ctl.getVisibleRegion();
-    // print("Camera idle -> updating controller");
     widget.controller.updateCamera(
       target: latlng.LatLng(cam.target.latitude, cam.target.longitude),
       zoom: toLeafletZoom(cam.zoom),
@@ -124,7 +129,6 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
     final exists = existingSources.contains(sourceId);
     if (exists) return;
 
-    print("_ensureLayerInitialized $sourceId");
     await ctl.addGeoJsonSource(sourceId, const {
       "type": "FeatureCollection",
       "features": [],
@@ -181,7 +185,7 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
     );
   }
 
-  /// Construye el GeoJSON y lo setea en el source.
+  /// Construye el GeoJSON, lo setea en el source **y actualiza el índice por layer**.
   Future<void> _updateLayerData(
     TrufiLayer layer,
     MapLibreMapController ctl,
@@ -189,8 +193,10 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
     final geojson = await _buildGeoJsonForLayer(layer, ctl);
     await ctl.setGeoJsonSource(layer.id, geojson);
 
+    // >>> NUEVO: al finalizar, actualizamos el índice por layer
+    _markers.setLayerMarkers(layer.id, layer.markers);
+
     if (Platform.isAndroid) {
-      // Fuerza un pequeño re-render en Android.
       await ctl.moveCamera(CameraUpdate.zoomBy(0.0001));
     }
   }
@@ -203,8 +209,7 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
     final features = <Map<String, dynamic>>[];
 
     // Marcadores
-    for (final marker in layer.entries) {
-      // Si tienes un ID estable, úsalo en lugar de hashCode del widget.
+    for (final marker in layer.markers) {
       final imageId = marker.widget.hashCode.toString();
 
       await _ensureImageLoaded(imageId, () async {
@@ -217,14 +222,16 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
 
       features.add({
         "type": "Feature",
-        "id": imageId,
+        // IMPORTANTE: usa el id REAL del marker para poder mapearlo luego
+        "id": marker.id,
         "geometry": {
           "type": "Point",
           "coordinates": [marker.position.longitude, marker.position.latitude],
         },
         "properties": {
+          "type": "marker",
           "icon": imageId,
-          "id": imageId,
+          "markerId": marker.id,
           if (marker.alignment == "top")
             "offset": [0.0, -marker.size.height / 2],
           "layerLevel": marker.layerLevel,
@@ -261,13 +268,11 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
     Future<void> Function() loader,
   ) async {
     if (_loadedImages.contains(imageId)) return;
-
     final inFlight = _imageLoaders[imageId];
     if (inFlight != null) {
       await inFlight;
       return;
     }
-
     final future = loader()
         .then((_) {
           _loadedImages.add(imageId);
@@ -277,7 +282,6 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
           _imageLoaders.remove(imageId);
           throw e;
         });
-
     _imageLoaders[imageId] = future;
     await future;
   }
@@ -295,13 +299,18 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
       onMapCreated: (ctl) async {
         _mapCtl = ctl;
         _mapReady = true;
-        // print("Map created -> syncing layers");
         await _syncLayers(widget.controller.visibleLayers);
       },
       onCameraIdle: _handleCameraIdle,
-      onMapClick: (points, latlng) {
-        // print("Map clicked");
-        widget.onMapClick?.call(points, latlng);
+      onMapLongClick: (point, coordinates) {
+        widget.onMapLongClick?.call(
+          latlng.LatLng(coordinates.latitude, coordinates.longitude),
+        );
+      },
+      onMapClick: (points, coordinates) {
+        widget.onMapClick?.call(
+          latlng.LatLng(coordinates.latitude, coordinates.longitude),
+        );
       },
     );
   }
@@ -319,4 +328,24 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
       (360 - leafletBearing) % 360;
   double toLeafletBearing(double mapLibreBearing) =>
       (360 - mapLibreBearing) % 360;
+
+  /// -------------------------------------------
+  /// Helper: px → metros (aprox) en WebMercator
+  /// -------------------------------------------
+  double _hitboxPxToMeters({
+    required double centerLatDeg,
+    required double zoomMapLibre,
+    required double hitboxPx,
+  }) {
+    // Tamaño base del tile: 256 px
+    // Aproximación: m/px = C * cos(lat) / (256 * 2^zoom)
+    const double earthCircumference = 40075016.68557849; // m
+    final double metersPerPixel =
+        (earthCircumference * math.cos(centerLatDeg * math.pi / 180.0)) /
+        (256.0 * math.pow(2.0, zoomMapLibre));
+
+    // Usa mitad del lado para radio aprox (o full, según lo que prefieras)
+    final double half = hitboxPx * 0.5;
+    return metersPerPixel * half;
+  }
 }

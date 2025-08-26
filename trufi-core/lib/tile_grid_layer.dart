@@ -8,7 +8,6 @@ class TileGridLayer extends TrufiLayer {
 
   final int granularityLevels;
 
-  final List<TrufiLine> _lines = [];
   final Set<String> _drawnBoxes = <String>{};
 
   TileGridLayer(super.controller, {this.granularityLevels = 0})
@@ -41,13 +40,14 @@ class TileGridLayer extends TrufiLayer {
       granularityLevels: granularityLevels,
     );
 
-    var added = false;
+    // juntamos primero y agregamos en lote para una sola notificación
+    final newLines = <TrufiLine>[];
     for (final t in tiles) {
       final id = 'box-${t.z}-${t.x}-${t.y}';
       if (_drawnBoxes.contains(id)) continue;
 
       final outline = TileUtils.tileOutline(x: t.x, y: t.y, z: t.z);
-      _lines.add(
+      newLines.add(
         TrufiLine(
           id: id,
           position: outline,
@@ -58,15 +58,15 @@ class TileGridLayer extends TrufiLayer {
         ),
       );
       _drawnBoxes.add(id);
-      added = true;
     }
 
-    if (added) mutateLayers();
+    if (newLines.isNotEmpty) {
+      // usa el mutador del TrufiLayer base; ya dispara mutateLayers()
+      addLines(newLines);
+    }
   }
 
-  @override
-  List<TrufiMarker> get entries => const [];
-
-  @override
-  List<TrufiLine> get lines => _lines;
+  // No hace falta override de entries/lines:
+  // - entries: viene de TrufiLayer como alias de markers (aquí no usamos markers)
+  // - lines:    viene de TrufiLayer y ya refleja lo agregado con addLines()
 }

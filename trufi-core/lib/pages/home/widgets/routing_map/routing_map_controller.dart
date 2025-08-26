@@ -1,16 +1,20 @@
-import 'package:trufi_core/pages/home/repository/hive_local_repository.dart';
-import 'package:trufi_core/widgets/utils.dart';
+import 'dart:async';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart' as latlng;
+
+import 'package:trufi_core/pages/home/repository/hive_local_repository.dart';
+import 'package:trufi_core/widgets/utils.dart'; // hexToColor
 import 'package:trufi_core/consts.dart';
 import 'package:trufi_core/models/enums/transport_mode.dart';
 import 'package:trufi_core/models/plan_entity.dart';
 import 'package:trufi_core/pages/home/service/i_plan_repository.dart';
 import 'package:trufi_core/pages/home/service/routing_service/otp_2_7/graphql_plan_data_source.dart';
 import 'package:trufi_core/trufi_map_controller.dart';
-import 'package:latlong2/latlong.dart' as latlng;
 
 class RoutingMapComponent extends TrufiLayer {
   static const String layerId = 'routing-map-component';
+
   static final Widget fromMarker = Container(
     height: 24,
     color: Colors.amber,
@@ -29,8 +33,8 @@ class RoutingMapComponent extends TrufiLayer {
           Container(
             width: 5.2,
             height: 5.2,
-            decoration: BoxDecoration(
-              color: const Color(0xffd81b60),
+            decoration: const BoxDecoration(
+              color: Color(0xffd81b60),
               shape: BoxShape.circle,
             ),
           ),
@@ -62,20 +66,14 @@ class RoutingMapComponent extends TrufiLayer {
             color: Colors.white,
           ),
           const Icon(Icons.location_on, size: 23, color: Colors.white),
-          Icon(Icons.location_on, color: const Color(0xffd81b60), size: 20),
+          const Icon(Icons.location_on, color: Color(0xffd81b60), size: 20),
         ],
       ),
     ),
   );
+
   final MapRouteHiveLocalRepository mapRouteHiveLocal =
       MapRouteHiveLocalRepository();
-
-  RoutingMapComponent(super.controller) : super(id: layerId, layerLevel: 2) {
-    mapRouteHiveLocal.loadRepository().then((e) async {
-      plan = await mapRouteHiveLocal.getPlan();
-      mutateLayers();
-    });
-  }
   final IPlanRepository service = GraphQLPlanDataSource(
     ApiConfig().openTripPlannerUrl,
   );
@@ -85,49 +83,69 @@ class RoutingMapComponent extends TrufiLayer {
   PlanEntity? plan;
   PlanItinerary? selectedItinerary;
 
-  void changeItinerary(PlanItinerary itinerary) {
-    selectedItinerary = itinerary;
-    mutateLayers();
+  RoutingMapComponent(super.controller) : super(id: layerId, layerLevel: 2) {
+    // carga plan guardado (si existe) y reconstruye capa
+    mapRouteHiveLocal.loadRepository().then((_) async {
+      plan = await mapRouteHiveLocal.getPlan();
+      selectedItinerary = plan?.itineraries?.firstOrNull;
+      _rebuildGraphics();
+    });
   }
 
+  /// Cambia el itinerario seleccionado y reconstruye
+  void changeItinerary(PlanItinerary itinerary) {
+    selectedItinerary = itinerary;
+    _rebuildGraphics();
+  }
+
+  /// Limpia origen/destino y plan
   void cleanOriginAndDestination() {
     origin = null;
     destination = null;
     plan = null;
     selectedItinerary = null;
-    mutateLayers();
+    _rebuildGraphics();
   }
 
-  void addOrigin(latlng.LatLng position, BuildContext context) async {
+  /// Define origen y, si hay destino, consulta plan
+  Future<void> addOrigin(latlng.LatLng position, BuildContext context) async {
     origin = TrufiMarker(
       id: "origin",
       position: position,
       widget: fromMarker,
-      size: Size(20, 20),
+      size: const Size(20, 20),
     );
-    mutateLayers();
+    _rebuildGraphics();
+
     if (destination != null) {
       await fetchPlan(context);
-      mutateLayers();
+      _rebuildGraphics();
     }
   }
 
-  void addDestination(latlng.LatLng position, BuildContext context) async {
+  /// Define destino y, si hay origen, consulta plan
+  Future<void> addDestination(
+    latlng.LatLng position,
+    BuildContext context,
+  ) async {
     destination = TrufiMarker(
       id: "destination",
       position: position,
       widget: toMarker,
       alignment: "top",
     );
-    mutateLayers();
+    _rebuildGraphics();
 
     if (origin != null) {
       await fetchPlan(context);
-      mutateLayers();
+      _rebuildGraphics();
     }
   }
 
+  /// Obtiene plan desde OTP y prepara assets de markers
   Future<void> fetchPlan(BuildContext context) async {
+    if (origin == null || destination == null) return;
+
     plan = await service.fetchPlanAdvanced(
       fromLocation: TrufiLocation(
         description: "Origin",
@@ -144,77 +162,84 @@ class RoutingMapComponent extends TrufiLayer {
         ),
       ),
     );
+
     if (plan?.itineraries != null && plan!.itineraries!.isNotEmpty) {
       final List<Future<void>> tasks = [];
-
       for (final itinerary in plan!.itineraries!) {
-        for (final e in itinerary.legs) {
-          if (e.transportMode == TransportMode.walk) continue;
-
-          tasks.add(e.selectedMarker.generateBytes(context));
-          tasks.add(e.unSelectedMarker.generateBytes(context));
+        for (final leg in itinerary.legs) {
+          if (leg.transportMode == TransportMode.walk) continue;
+          tasks.add(leg.selectedMarker.generateBytes(context));
+          tasks.add(leg.unSelectedMarker.generateBytes(context));
         }
       }
-
       await Future.wait(tasks);
       await mapRouteHiveLocal.savePlan(plan);
+      selectedItinerary = plan!.itineraries!.firstOrNull;
+    } else {
+      selectedItinerary = null;
     }
-    selectedItinerary = plan?.itineraries?.firstOrNull;
   }
 
+  /// Selecciona siguiente itinerario y reconstruye
   void selectNextItinerary() {
     final itineraries = plan?.itineraries;
     if (itineraries == null || itineraries.isEmpty) return;
-
-    final currentIndex = itineraries.indexOf(selectedItinerary!);
+    final currentIndex = selectedItinerary != null
+        ? itineraries.indexOf(selectedItinerary!)
+        : -1;
     final nextIndex = (currentIndex + 1) % itineraries.length;
-
     selectedItinerary = itineraries[nextIndex];
-    mutateLayers();
+    _rebuildGraphics();
   }
 
-  @override
-  List<TrufiMarker> get entries => [
-    if (origin != null) origin!,
-    if (destination != null) destination!,
+  // ------------------------------------------------------------
+  // Construcción de markers y lines en base al estado actual
+  // (usa setMarkers / setLines que ya notifican al controller)
+  // ------------------------------------------------------------
+  void _rebuildGraphics() {
+    // MARKERS
+    final List<TrufiMarker> ms = <TrufiMarker>[
+      if (origin != null) origin!,
+      if (destination != null) destination!,
+    ];
 
-    ...(plan?.itineraries != null && plan!.itineraries!.isNotEmpty)
-        ? plan!.itineraries!
-              .map(
-                ((itinerary) => itinerary.legs
-                    .where((leg) => leg.transportMode != TransportMode.walk)
-                    .map(
-                      (leg) => selectedItinerary == itinerary
-                          ? leg.selectedMarker
-                          : leg.unSelectedMarker,
-                    )),
-              )
-              .expand((e) => e)
-              .toList()
-        : <TrufiMarker>[],
-  ];
+    final its = plan?.itineraries;
+    if (its != null && its.isNotEmpty) {
+      for (final itinerary in its) {
+        for (final leg in itinerary.legs) {
+          if (leg.transportMode == TransportMode.walk) continue;
+          ms.add(
+            (selectedItinerary == itinerary)
+                ? leg.selectedMarker
+                : leg.unSelectedMarker,
+          );
+        }
+      }
+    }
+    setMarkers(ms);
 
-  @override
-  List<TrufiLine> get lines =>
-      (plan?.itineraries != null && plan!.itineraries!.isNotEmpty)
-      ? plan!.itineraries!
-            .map(
-              ((itinerary) => itinerary.legs.map(
-                (leg) => TrufiLine(
-                  id: leg.points,
-                  position: leg.accumulatedPoints,
-                  activeDots: leg.transportMode == TransportMode.walk,
-                  color: selectedItinerary == itinerary
-                      ? leg.transportMode == TransportMode.walk
-                            ? Colors.black
-                            : hexToColor(leg.route?.color ?? 'd81b60')
-                      : Colors.grey.withAlpha(128),
-                  layerLevel: selectedItinerary == itinerary ? 10 : 1,
-                  lineWidth: selectedItinerary == itinerary ? 5 : 3,
-                ),
-              )),
-            )
-            .expand((e) => e)
-            .toList()
-      : [];
+    // LINES
+    final List<TrufiLine> ls = <TrufiLine>[];
+    if (its != null && its.isNotEmpty) {
+      for (final itinerary in its) {
+        for (final leg in itinerary.legs) {
+          ls.add(
+            TrufiLine(
+              id: leg.points,
+              position: leg.accumulatedPoints,
+              activeDots: leg.transportMode == TransportMode.walk,
+              color: (selectedItinerary == itinerary)
+                  ? (leg.transportMode == TransportMode.walk
+                        ? Colors.black
+                        : hexToColor(leg.route?.color ?? 'd81b60'))
+                  : Colors.grey.withAlpha(128),
+              layerLevel: (selectedItinerary == itinerary) ? 10 : 1,
+              lineWidth: (selectedItinerary == itinerary) ? 5 : 3,
+            ),
+          );
+        }
+      }
+    }
+    setLines(ls);
+  }
 }

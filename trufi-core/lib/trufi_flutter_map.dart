@@ -105,7 +105,7 @@ class _TrufiFlutterMapState extends State<TrufiFlutterMap> {
         for (final layer in visibleLayers)
           fm.MarkerLayer(
             markers: [
-              for (final marker in layer.entries.where((e) => e.visible))
+              for (final marker in layer.markers)
                 fm.Marker(
                   point: marker.position,
                   width: marker.size.width,
