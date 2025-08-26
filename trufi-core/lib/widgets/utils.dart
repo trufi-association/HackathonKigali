@@ -15,10 +15,12 @@ String decodeFillColor(Color? color) {
   }
   return stringColor;
 }
- Color hexToColor(String hex) {
-    hex = hex.replaceFirst('#', '');
-    if (hex.length == 6) {
-      hex = 'FF$hex';
-    }
-    return Color(int.parse('0x$hex'));
+
+Color hexToColor(String? hex) {
+  String hexAux = hex ?? "000000";
+  hexAux = hexAux.replaceFirst('#', '');
+  if (hexAux.length == 6) {
+    hexAux = 'FF$hexAux';
   }
+  return Color(int.parse('0x$hexAux'));
+}
