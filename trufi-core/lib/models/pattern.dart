@@ -5,22 +5,22 @@ import 'coordinates.dart';
 import 'geometry.dart';
 import 'trip.dart';
 
-class PatternOtp {
+class PatternOtpEntity {
   final String? id;
   final RouteEntity? route;
   final int? directionId;
   final String? name;
   final String? code;
   final String? headsign;
-  final List<Trip>? trips;
-  final List<Trip>? tripsForDate;
+  final List<TripEntity>? trips;
+  final List<TripEntity>? tripsForDate;
   final List<StopEntity>? stops;
-  final List<Coordinates>? geometry;
-  final Geometry? patternGeometry;
+  final List<CoordinatesEntity>? geometry;
+  final GeometryEntity? patternGeometry;
   final String? semanticHash;
-  final List<Alert>? alerts;
+  final List<AlertEntity>? alerts;
 
-  const PatternOtp({
+  const PatternOtpEntity({
     this.id,
     this.route,
     this.directionId,
@@ -50,7 +50,7 @@ class PatternOtp {
   static const String _semanticHash = 'semanticHash';
   static const String _alerts = 'alerts';
 
-  factory PatternOtp.fromJson(Map<String, dynamic> json) => PatternOtp(
+  factory PatternOtpEntity.fromJson(Map<String, dynamic> json) => PatternOtpEntity(
     id: json[_id],
     route:
         json[_route] != null
@@ -62,17 +62,17 @@ class PatternOtp {
     headsign: json[_headsign],
     trips:
         json[_trips] != null
-            ? List<Trip>.from(
+            ? List<TripEntity>.from(
               (json[_trips] as List<dynamic>).map(
-                (x) => Trip.fromJson(x as Map<String, dynamic>),
+                (x) => TripEntity.fromJson(x as Map<String, dynamic>),
               ),
             )
             : null,
     tripsForDate:
         json[_tripsForDate] != null
-            ? List<Trip>.from(
+            ? List<TripEntity>.from(
               (json[_tripsForDate] as List<dynamic>).map(
-                (x) => Trip.fromJson(x as Map<String, dynamic>),
+                (x) => TripEntity.fromJson(x as Map<String, dynamic>),
               ),
             )
             : null,
@@ -86,22 +86,22 @@ class PatternOtp {
             : null,
     geometry:
         json[_geometry] != null
-            ? List<Coordinates>.from(
+            ? List<CoordinatesEntity>.from(
               (json[_geometry] as List<dynamic>).map(
-                (x) => Coordinates.fromJson(x as Map<String, dynamic>),
+                (x) => CoordinatesEntity.fromJson(x as Map<String, dynamic>),
               ),
             )
             : null,
     patternGeometry:
         json[_patternGeometry] != null
-            ? Geometry.fromJson(json[_patternGeometry] as Map<String, dynamic>)
+            ? GeometryEntity.fromJson(json[_patternGeometry] as Map<String, dynamic>)
             : null,
     semanticHash: json[_semanticHash],
     alerts:
         json[_alerts] != null
-            ? List<Alert>.from(
+            ? List<AlertEntity>.from(
               (json[_alerts] as List<dynamic>).map(
-                (x) => Alert.fromJson(x as Map<String, dynamic>),
+                (x) => AlertEntity.fromJson(x as Map<String, dynamic>),
               ),
             )
             : null,

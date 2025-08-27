@@ -1,20 +1,20 @@
 import 'contact_info.dart';
 
-class PickupBookingInfo {
+class PickupBookingInfoEntity {
   final String? message;
-  final ContactInfo? contactInfo;
+  final ContactInfoEntity? contactInfo;
 
-  const PickupBookingInfo({this.message, this.contactInfo});
+  const PickupBookingInfoEntity({this.message, this.contactInfo});
 
   static const String _message = 'message';
   static const String _contactInfo = 'contactInfo';
 
-  factory PickupBookingInfo.fromJson(Map<String, dynamic> map) =>
-      PickupBookingInfo(
+  factory PickupBookingInfoEntity.fromJson(Map<String, dynamic> map) =>
+      PickupBookingInfoEntity(
         message: map[_message],
         contactInfo:
             map[_contactInfo] != null
-                ? ContactInfo.fromJson(
+                ? ContactInfoEntity.fromJson(
                   map[_contactInfo] as Map<String, dynamic>,
                 )
                 : null,

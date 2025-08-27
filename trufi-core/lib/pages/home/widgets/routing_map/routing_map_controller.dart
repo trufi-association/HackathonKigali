@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart' as latlng;
 
 import 'package:trufi_core/pages/home/repository/hive_local_repository.dart';
+import 'package:trufi_core/pages/home/service/routing_service/otp_stadtnavi/graphql_plan_data_source.dart';
 import 'package:trufi_core/widgets/utils.dart';
 import 'package:trufi_core/consts.dart';
 import 'package:trufi_core/models/enums/transport_mode.dart';
 import 'package:trufi_core/models/plan_entity.dart';
 import 'package:trufi_core/pages/home/service/i_plan_repository.dart';
-import 'package:trufi_core/pages/home/service/routing_service/otp_2_7/graphql_plan_data_source.dart';
 import 'package:trufi_core/screens/route_navigation/maps/trufi_map_controller.dart';
 
 class RoutingMapComponent extends TrufiLayer {
@@ -72,7 +72,10 @@ class RoutingMapComponent extends TrufiLayer {
 
   final MapRouteHiveLocalRepository mapRouteHiveLocal =
       MapRouteHiveLocalRepository();
-  final IPlanRepository service = GraphQLPlanDataSource(
+  // final IPlanRepository service = GraphQLPlanDataSource(
+  //   ApiConfig().openTripPlannerUrl,
+  // );
+  final IPlanRepository service = StadtnaviGraphQLPlanDataSource(
     ApiConfig().openTripPlannerUrl,
   );
 

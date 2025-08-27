@@ -1,4 +1,4 @@
-enum AlertCauseType {
+enum AlertCauseTypeTrufi {
   unknowncause,
   othercause,
   technicalproblem,
@@ -13,27 +13,27 @@ enum AlertCauseType {
   medicalemergency
 }
 
-AlertCauseType getAlertCauseTypeByString(String alertCauseType) {
+AlertCauseTypeTrufi getAlertCauseTypeByString(String alertCauseType) {
   return AlertCauseTypeExtension.names.keys.firstWhere(
     (key) => key.name == alertCauseType,
-    orElse: () => AlertCauseType.unknowncause,
+    orElse: () => AlertCauseTypeTrufi.unknowncause,
   );
 }
 
-extension AlertCauseTypeExtension on AlertCauseType {
-  static const names = <AlertCauseType, String>{
-    AlertCauseType.unknowncause: 'UNKNOWN_CAUSE',
-    AlertCauseType.othercause: 'OTHER_CAUSE',
-    AlertCauseType.technicalproblem: 'TECHNICAL_PROBLEM',
-    AlertCauseType.strike: 'STRIKE',
-    AlertCauseType.demonstration: 'DEMONSTRATION',
-    AlertCauseType.accident: 'ACCIDENT',
-    AlertCauseType.holiday: 'HOLIDAY',
-    AlertCauseType.weather: 'WEATHER',
-    AlertCauseType.maintenance: 'MAINTENANCE',
-    AlertCauseType.construction: 'CONSTRUCTION',
-    AlertCauseType.policeactivity: 'POLICE_ACTIVITY',
-    AlertCauseType.medicalemergency: 'MEDICAL_EMERGENCY'
+extension AlertCauseTypeExtension on AlertCauseTypeTrufi {
+  static const names = <AlertCauseTypeTrufi, String>{
+    AlertCauseTypeTrufi.unknowncause: 'UNKNOWN_CAUSE',
+    AlertCauseTypeTrufi.othercause: 'OTHER_CAUSE',
+    AlertCauseTypeTrufi.technicalproblem: 'TECHNICAL_PROBLEM',
+    AlertCauseTypeTrufi.strike: 'STRIKE',
+    AlertCauseTypeTrufi.demonstration: 'DEMONSTRATION',
+    AlertCauseTypeTrufi.accident: 'ACCIDENT',
+    AlertCauseTypeTrufi.holiday: 'HOLIDAY',
+    AlertCauseTypeTrufi.weather: 'WEATHER',
+    AlertCauseTypeTrufi.maintenance: 'MAINTENANCE',
+    AlertCauseTypeTrufi.construction: 'CONSTRUCTION',
+    AlertCauseTypeTrufi.policeactivity: 'POLICE_ACTIVITY',
+    AlertCauseTypeTrufi.medicalemergency: 'MEDICAL_EMERGENCY'
   };
   String get name => names[this] ?? 'UNKNOWN_CAUSE';
 }

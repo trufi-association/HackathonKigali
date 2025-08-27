@@ -7,7 +7,7 @@ import 'geometry.dart';
 import 'pattern.dart';
 import 'stoptime.dart';
 
-class Trip {
+class TripEntity {
   final String? id;
   final String? gtfsId;
   final RouteEntity? route;
@@ -21,7 +21,7 @@ class Trip {
   final String? shapeId;
   final WheelchairBoarding? wheelchairAccessible;
   final BikesAllowed? bikesAllowed;
-  final PatternOtp? pattern;
+  final PatternOtpEntity? pattern;
   final List<StopEntity>? stops;
   final String? semanticHash;
   final List<Stoptime>? stoptimes;
@@ -29,10 +29,10 @@ class Trip {
   final Stoptime? arrivalStoptime;
   final List<Stoptime>? stoptimesForDate;
   final List<double>? geometry;
-  final Geometry? tripGeometry;
-  final List<Alert>? alerts;
+  final GeometryEntity? tripGeometry;
+  final List<AlertEntity>? alerts;
 
-  const Trip({
+  const TripEntity({
     this.id,
     this.gtfsId,
     this.route,
@@ -82,7 +82,7 @@ class Trip {
   static const String _tripGeometry = 'tripGeometry';
   static const String _alerts = 'alerts';
 
-  factory Trip.fromJson(Map<String, dynamic> json) => Trip(
+  factory TripEntity.fromJson(Map<String, dynamic> json) => TripEntity(
     id: json[_id],
     gtfsId: json[_gtfsId],
     route:
@@ -106,7 +106,7 @@ class Trip {
     bikesAllowed: getBikesAllowedByString(json[_bikesAllowed]),
     pattern:
         json[_pattern] != null
-            ? PatternOtp.fromJson(json[_pattern] as Map<String, dynamic>)
+            ? PatternOtpEntity.fromJson(json[_pattern] as Map<String, dynamic>)
             : null,
     stops:
         json[_stops] != null
@@ -147,13 +147,13 @@ class Trip {
         json[_geometry] != null ? (json[_geometry] as List<double>) : null,
     tripGeometry:
         json[_tripGeometry] != null
-            ? Geometry.fromJson(json[_tripGeometry] as Map<String, dynamic>)
+            ? GeometryEntity.fromJson(json[_tripGeometry] as Map<String, dynamic>)
             : null,
     alerts:
         json[_alerts] != null
-            ? List<Alert>.from(
+            ? List<AlertEntity>.from(
               (json[_alerts] as List<dynamic>).map(
-                (x) => Alert.fromJson(x as Map<String, dynamic>),
+                (x) => AlertEntity.fromJson(x as Map<String, dynamic>),
               ),
             )
             : null,

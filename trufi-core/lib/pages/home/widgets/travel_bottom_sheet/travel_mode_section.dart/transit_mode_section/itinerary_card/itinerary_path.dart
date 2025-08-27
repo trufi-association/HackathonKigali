@@ -15,13 +15,14 @@ class ItineraryPath extends StatelessWidget {
       children: itinerary.legs.asMap().entries.map((entry) {
         final index = entry.key;
         final leg = entry.value;
-
         return Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            leg.transportMode != TransportMode.walk
-                ? TransitIcon(leg: leg)
-                : WalkIcon(leg: leg),
+            Container(
+              child: leg.transitLeg
+                  ? TransitIcon(leg: leg)
+                  : WalkIcon(leg: leg),
+            ),
             if (index != itinerary.legs.length - 1)
               Container(
                 margin: EdgeInsets.symmetric(horizontal: 4),
@@ -62,7 +63,9 @@ class TransitIcon extends StatelessWidget {
           ),
           child: Text(
             leg.route?.shortName ?? '',
-            style: TextStyle(color: hexToColor(leg.route?.textColor)),
+            style: TextStyle(
+              color: hexToColor(leg.route?.textColor ?? 'ffffff'),
+            ),
           ),
         ),
       ],

@@ -1,15 +1,17 @@
 import 'package:trufi_core/models/enums/mode.dart';
 import 'package:trufi_core/models/plan_entity.dart';
-import 'package:trufi_core/pages/home/service/routing_service/otp_2_7/graphql_plan_data_source.dart';
+import 'package:trufi_core/pages/home/service/routing_service/otp_stadtnavi/graphql_plan_data_source.dart';
 import 'package:trufi_core/screens/route_navigation/maps/trufi_map_controller.dart';
 
 class OnlineGraphQLRepository {
   final String graphQLEndPoint;
-  final GraphQLPlanDataSource _graphQLPlanRepository;
+  // final GraphQLPlanDataSource _graphQLPlanRepository;
+  final StadtnaviGraphQLPlanDataSource _graphQLPlanRepository;
 
   OnlineGraphQLRepository({
     required this.graphQLEndPoint,
-  }) : _graphQLPlanRepository = GraphQLPlanDataSource(graphQLEndPoint);
+    // }) : _graphQLPlanRepository = GraphQLPlanDataSource(graphQLEndPoint);
+  }) : _graphQLPlanRepository = StadtnaviGraphQLPlanDataSource(graphQLEndPoint);
 
   Future<PlanEntity> fetchAdvancedPlan({
     required TrufiLocation from,

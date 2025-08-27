@@ -336,16 +336,16 @@ enum TransportSubmode {
 enum VertexType27 { normal, transit, bikePark, bikeShare }
 
 extension VertexTypeToLegacy on VertexType27 {
-  VertexType toVertexType() {
+  VertexTypeTrufi toVertexType() {
     switch (this) {
       case VertexType27.normal:
-        return VertexType.normal;
+        return VertexTypeTrufi.normal;
       case VertexType27.transit:
-        return VertexType.transit;
+        return VertexTypeTrufi.transit;
       case VertexType27.bikePark:
-        return VertexType.bikepark;
+        return VertexTypeTrufi.bikepark;
       case VertexType27.bikeShare:
-        return VertexType.bikeshare;
+        return VertexTypeTrufi.bikeshare;
     }
   }
 }
@@ -1283,7 +1283,7 @@ class Leg {
           ?.map(
             (e) => PlaceEntity(
               name: e.name ?? '',
-              vertexType: VertexType.normal,
+              vertexType: VertexTypeTrufi.normal,
               lat: e.latitude ?? 0,
               lon: e.longitude ?? 0,
               arrivalTime: DateTime(2000),
@@ -1665,7 +1665,7 @@ class Place {
     return PlaceEntity(
       name: name ?? '',
       // TODO review default value VertexType.normal
-      vertexType: vertexType?.toVertexType() ?? VertexType.normal,
+      vertexType: vertexType?.toVertexType() ?? VertexTypeTrufi.normal,
       lat: latitude ?? 0,
       lon: longitude ?? 0,
       arrivalTime:

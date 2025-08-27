@@ -13,11 +13,11 @@ class Stoptime {
   final int? departureDelay;
   final bool? timepoint;
   final bool? realtime;
-  final RealtimeState? realtimeState;
+  final RealtimeStateTrufi? realtimeState;
   final PickupDropoffType? pickupType;
   final PickupDropoffType? dropoffType;
   final double? serviceDay;
-  final Trip? trip;
+  final TripEntity? trip;
   final String? headsign;
 
   const Stoptime({
@@ -73,7 +73,7 @@ class Stoptime {
     serviceDay: json[_serviceDay],
     trip:
         json[_trip] != null
-            ? Trip.fromJson(json[_trip] as Map<String, dynamic>)
+            ? TripEntity.fromJson(json[_trip] as Map<String, dynamic>)
             : null,
     headsign: json[_headsign],
   );

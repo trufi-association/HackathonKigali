@@ -20,7 +20,7 @@ class _RouteNavigationScreenState extends State<RouteNavigationScreen> {
 
   final mapController = TrufiMapController(
     initialCameraPosition: TrufiCameraPosition(
-      target: latlng.LatLng(-1.949516, 30.069619),
+      target: latlng.LatLng(48.5950, 8.8672),
       zoom: 17,
       bearing: 0,
     ),
@@ -71,7 +71,7 @@ class _RouteNavigationScreenState extends State<RouteNavigationScreen> {
                 }
               },
             ),
-          if (showMapLibre)
+          // if (showMapLibre)
             TrufiFlutterMap(
               controller: mapController,
               tileUrl: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',

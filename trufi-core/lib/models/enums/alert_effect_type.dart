@@ -1,4 +1,4 @@
-enum AlertEffectType {
+enum AlertEffectTypeTrufi {
   noService,
   reducedService,
   significantDelays,
@@ -11,25 +11,25 @@ enum AlertEffectType {
   noEffect,
 }
 
-AlertEffectType getAlertEffectTypeByString(String alertEffectType) {
+AlertEffectTypeTrufi getAlertEffectTypeByString(String alertEffectType) {
   return AlertEffectTypeExtension.names.keys.firstWhere(
     (key) => key.name == alertEffectType,
-    orElse: () => AlertEffectType.noService,
+    orElse: () => AlertEffectTypeTrufi.noService,
   );
 }
 
-extension AlertEffectTypeExtension on AlertEffectType {
-  static const names = <AlertEffectType, String>{
-    AlertEffectType.noService: 'NO_SERVICE',
-    AlertEffectType.reducedService: 'REDUCED_SERVICE',
-    AlertEffectType.significantDelays: 'SIGNIFICANT_DELAYS',
-    AlertEffectType.detour: 'DETOUR',
-    AlertEffectType.additionalService: 'ADDITIONAL_SERVICE',
-    AlertEffectType.modifiedService: 'MODIFIED_SERVICE',
-    AlertEffectType.otherEffect: 'OTHER_EFFECT',
-    AlertEffectType.unknownEffect: 'UNKNOWN_EFFECT',
-    AlertEffectType.stopMoved: 'STOP_MOVED',
-    AlertEffectType.noEffect: 'NO_EFFECT',
+extension AlertEffectTypeExtension on AlertEffectTypeTrufi {
+  static const names = <AlertEffectTypeTrufi, String>{
+    AlertEffectTypeTrufi.noService: 'NO_SERVICE',
+    AlertEffectTypeTrufi.reducedService: 'REDUCED_SERVICE',
+    AlertEffectTypeTrufi.significantDelays: 'SIGNIFICANT_DELAYS',
+    AlertEffectTypeTrufi.detour: 'DETOUR',
+    AlertEffectTypeTrufi.additionalService: 'ADDITIONAL_SERVICE',
+    AlertEffectTypeTrufi.modifiedService: 'MODIFIED_SERVICE',
+    AlertEffectTypeTrufi.otherEffect: 'OTHER_EFFECT',
+    AlertEffectTypeTrufi.unknownEffect: 'UNKNOWN_EFFECT',
+    AlertEffectTypeTrufi.stopMoved: 'STOP_MOVED',
+    AlertEffectTypeTrufi.noEffect: 'NO_EFFECT',
   };
   String get name => names[this] ?? 'NO_SERVICE';
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-enum AbsoluteDirection {
+enum AbsoluteDirectionTrufi {
   north,
   northeast,
   east,
@@ -11,34 +11,34 @@ enum AbsoluteDirection {
   northwest,
 }
 
-AbsoluteDirection getAbsoluteDirectionByString(String direction) {
+AbsoluteDirectionTrufi getAbsoluteDirectionByString(String direction) {
   return CompassDirectionExtension.names.keys.firstWhere(
     (key) => key.name == direction,
-    orElse: () => AbsoluteDirection.north,
+    orElse: () => AbsoluteDirectionTrufi.north,
   );
 }
 
-extension CompassDirectionExtension on AbsoluteDirection {
-  static const names = <AbsoluteDirection, String>{
-    AbsoluteDirection.north: 'NORTH',
-    AbsoluteDirection.northeast: 'NORTHEAST',
-    AbsoluteDirection.east: 'EAST',
-    AbsoluteDirection.southeast: 'SOUTHEAST',
-    AbsoluteDirection.south: 'SOUTH',
-    AbsoluteDirection.southwest: 'SOUTHWEST',
-    AbsoluteDirection.west: 'WEST',
-    AbsoluteDirection.northwest: 'NORTHWEST',
+extension CompassDirectionExtension on AbsoluteDirectionTrufi {
+  static const names = <AbsoluteDirectionTrufi, String>{
+    AbsoluteDirectionTrufi.north: 'NORTH',
+    AbsoluteDirectionTrufi.northeast: 'NORTHEAST',
+    AbsoluteDirectionTrufi.east: 'EAST',
+    AbsoluteDirectionTrufi.southeast: 'SOUTHEAST',
+    AbsoluteDirectionTrufi.south: 'SOUTH',
+    AbsoluteDirectionTrufi.southwest: 'SOUTHWEST',
+    AbsoluteDirectionTrufi.west: 'WEST',
+    AbsoluteDirectionTrufi.northwest: 'NORTHWEST',
   };
 
-  static const icons = <AbsoluteDirection, IconData>{
-    AbsoluteDirection.north: Icons.north,
-    AbsoluteDirection.northeast: Icons.north_east,
-    AbsoluteDirection.east: Icons.east,
-    AbsoluteDirection.southeast: Icons.south_east,
-    AbsoluteDirection.south: Icons.south,
-    AbsoluteDirection.southwest: Icons.south_west,
-    AbsoluteDirection.west: Icons.west,
-    AbsoluteDirection.northwest: Icons.north_west,
+  static const icons = <AbsoluteDirectionTrufi, IconData>{
+    AbsoluteDirectionTrufi.north: Icons.north,
+    AbsoluteDirectionTrufi.northeast: Icons.north_east,
+    AbsoluteDirectionTrufi.east: Icons.east,
+    AbsoluteDirectionTrufi.southeast: Icons.south_east,
+    AbsoluteDirectionTrufi.south: Icons.south,
+    AbsoluteDirectionTrufi.southwest: Icons.south_west,
+    AbsoluteDirectionTrufi.west: Icons.west,
+    AbsoluteDirectionTrufi.northwest: Icons.north_west,
   };
 
   String get name => names[this] ?? 'NORTH';

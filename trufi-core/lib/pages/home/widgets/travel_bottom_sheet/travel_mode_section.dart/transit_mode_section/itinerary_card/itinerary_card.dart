@@ -26,8 +26,7 @@ class ItineraryCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  ItineraryPath(itinerary: itinerary),
-                  Spacer(),
+                  Expanded(child: ItineraryPath(itinerary: itinerary)),
                   Text(
                     DateTimeUtils.durationToStringTime(itinerary.duration),
                     style: theme.textTheme.titleLarge?.copyWith(

@@ -10,7 +10,7 @@ class StopEntity {
   final String? platformCode;
   final String? zoneId;
   final String? id;
-  final List<Alert>? alerts;
+  final List<AlertEntity>? alerts;
 
   const StopEntity({
     this.gtfsId,
@@ -49,9 +49,9 @@ class StopEntity {
       vehicleMode: getTransportMode(mode: map[_vehicleMode]),
       alerts:
           map[_alerts] != null
-              ? List<Alert>.from(
+              ? List<AlertEntity>.from(
                 (map[_alerts] as List<dynamic>).map(
-                  (x) => Alert.fromJson(x as Map<String, dynamic>),
+                  (x) => AlertEntity.fromJson(x as Map<String, dynamic>),
                 ),
               )
               : null,

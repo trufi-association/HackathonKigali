@@ -1,19 +1,19 @@
-enum RealtimeState { scheduled, updated, canceled, added, modified }
+enum RealtimeStateTrufi { scheduled, updated, canceled, added, modified }
 
-RealtimeState getRealtimeStateByString(String? realtimeState) {
+RealtimeStateTrufi getRealtimeStateByString(String? realtimeState) {
   return RealtimeStateExtension.names.keys.firstWhere(
     (key) => key.name == realtimeState,
-    orElse: () => RealtimeState.scheduled,
+    orElse: () => RealtimeStateTrufi.scheduled,
   );
 }
 
-extension RealtimeStateExtension on RealtimeState {
-  static const names = <RealtimeState, String>{
-    RealtimeState.scheduled: 'SCHEDULED',
-    RealtimeState.updated: 'UPDATED',
-    RealtimeState.canceled: 'CANCELED',
-    RealtimeState.added: 'ADDED',
-    RealtimeState.modified: 'MODIFIED'
+extension RealtimeStateExtension on RealtimeStateTrufi {
+  static const names = <RealtimeStateTrufi, String>{
+    RealtimeStateTrufi.scheduled: 'SCHEDULED',
+    RealtimeStateTrufi.updated: 'UPDATED',
+    RealtimeStateTrufi.canceled: 'CANCELED',
+    RealtimeStateTrufi.added: 'ADDED',
+    RealtimeStateTrufi.modified: 'MODIFIED'
   };
   String get name => names[this] ?? 'SCHEDULED';
 }

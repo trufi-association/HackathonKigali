@@ -1,11 +1,11 @@
 import 'vehicle_parking.dart';
 
-class VehicleParkingWithEntrance {
-  final VehicleParking? vehicleParking;
+class VehicleParkingWithEntranceEntity {
+  final VehicleParkingEntity? vehicleParking;
   final bool? closesSoon;
   final bool? realtime;
 
-  const VehicleParkingWithEntrance({
+  const VehicleParkingWithEntranceEntity({
     this.vehicleParking,
     this.closesSoon,
     this.realtime,
@@ -15,11 +15,11 @@ class VehicleParkingWithEntrance {
   static const String _closesSoon = 'closesSoon';
   static const String _realtime = 'realtime';
 
-  factory VehicleParkingWithEntrance.fromMap(Map<String, dynamic> json) =>
-      VehicleParkingWithEntrance(
+  factory VehicleParkingWithEntranceEntity.fromMap(Map<String, dynamic> json) =>
+      VehicleParkingWithEntranceEntity(
         vehicleParking:
             json[_vehicleParking] != null
-                ? VehicleParking.fromMap(
+                ? VehicleParkingEntity.fromMap(
                   json[_vehicleParking] as Map<String, dynamic>,
                 )
                 : null,

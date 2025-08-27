@@ -2,7 +2,7 @@ part of 'plan_entity.dart';
 
 class PlaceEntity {
   final String name;
-  final VertexType vertexType;
+  final VertexTypeTrufi vertexType;
   final double lat;
   final double lon;
   final DateTime? arrivalTime;
@@ -11,7 +11,7 @@ class PlaceEntity {
   final BikeRentalStationEntity? bikeRentalStation;
   final BikeParkEntity? bikeParkEntity;
   final CarParkEntity? carParkEntity;
-  final VehicleParkingWithEntrance? vehicleParkingWithEntrance;
+  final VehicleParkingWithEntranceEntity? vehicleParkingWithEntrance;
 
   const PlaceEntity({
     required this.name,
@@ -78,7 +78,7 @@ class PlaceEntity {
               : null,
       vehicleParkingWithEntrance:
           map[_vehicleParkingWithEntrance] != null
-              ? VehicleParkingWithEntrance.fromMap(
+              ? VehicleParkingWithEntranceEntity.fromMap(
                 map[_vehicleParkingWithEntrance] as Map<String, dynamic>,
               )
               : null,

@@ -31,8 +31,7 @@ class ItineraryDetailsCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              ItineraryPath(itinerary: itinerary),
-              Spacer(),
+              Expanded(child: ItineraryPath(itinerary: itinerary)),
               SizedBox(width: 4),
               TrufiIconButton(
                 onPressed: () {
@@ -272,7 +271,7 @@ class TransitDetailsIcon extends StatelessWidget {
                         leg.route?.shortName ?? '',
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w600,
-                          color: hexToColor(leg.route?.textColor),
+                          color: hexToColor(leg.route?.textColor??'ffffff'),
                         ),
                       ),
                     ),

@@ -1,4 +1,4 @@
-enum RelativeDirection {
+enum RelativeDirectionTrufi {
   depart,
   hardLeft,
   left,
@@ -17,31 +17,31 @@ enum RelativeDirection {
   followSigns,
 }
 
-RelativeDirection getRelativeDirectionByString(String direction) {
+RelativeDirectionTrufi getRelativeDirectionByString(String direction) {
   return RelativeDirectionExtension.names.keys.firstWhere(
     (key) => key.name == direction,
-    orElse: () => RelativeDirection.continue_,
+    orElse: () => RelativeDirectionTrufi.continue_,
   );
 }
 
-extension RelativeDirectionExtension on RelativeDirection {
-  static const names = <RelativeDirection, String>{
-    RelativeDirection.depart: 'DEPART',
-    RelativeDirection.hardLeft: 'HARD_LEFT',
-    RelativeDirection.left: 'LEFT',
-    RelativeDirection.slightlyLeft: 'SLIGHTLY_LEFT',
-    RelativeDirection.continue_: 'CONTINUE',
-    RelativeDirection.slightlyRight: 'SLIGHTLY_RIGHT',
-    RelativeDirection.right: 'RIGHT',
-    RelativeDirection.hardRight: 'HARD_RIGHT',
-    RelativeDirection.circleClockwise: 'CIRCLE_CLOCKWISE',
-    RelativeDirection.circleCounterclockwise: 'CIRCLE_COUNTERCLOCKWISE',
-    RelativeDirection.elevator: 'ELEVATOR',
-    RelativeDirection.uturnLeft: 'UTURN_LEFT',
-    RelativeDirection.uturnRight: 'UTURN_RIGHT',
-    RelativeDirection.enterStation: 'ENTER_STATION',
-    RelativeDirection.exitStation: 'EXIT_STATION',
-    RelativeDirection.followSigns: 'FOLLOW_SIGNS',
+extension RelativeDirectionExtension on RelativeDirectionTrufi {
+  static const names = <RelativeDirectionTrufi, String>{
+    RelativeDirectionTrufi.depart: 'DEPART',
+    RelativeDirectionTrufi.hardLeft: 'HARD_LEFT',
+    RelativeDirectionTrufi.left: 'LEFT',
+    RelativeDirectionTrufi.slightlyLeft: 'SLIGHTLY_LEFT',
+    RelativeDirectionTrufi.continue_: 'CONTINUE',
+    RelativeDirectionTrufi.slightlyRight: 'SLIGHTLY_RIGHT',
+    RelativeDirectionTrufi.right: 'RIGHT',
+    RelativeDirectionTrufi.hardRight: 'HARD_RIGHT',
+    RelativeDirectionTrufi.circleClockwise: 'CIRCLE_CLOCKWISE',
+    RelativeDirectionTrufi.circleCounterclockwise: 'CIRCLE_COUNTERCLOCKWISE',
+    RelativeDirectionTrufi.elevator: 'ELEVATOR',
+    RelativeDirectionTrufi.uturnLeft: 'UTURN_LEFT',
+    RelativeDirectionTrufi.uturnRight: 'UTURN_RIGHT',
+    RelativeDirectionTrufi.enterStation: 'ENTER_STATION',
+    RelativeDirectionTrufi.exitStation: 'EXIT_STATION',
+    RelativeDirectionTrufi.followSigns: 'FOLLOW_SIGNS',
   };
 
   String get name => names[this] ?? 'CONTINUE';

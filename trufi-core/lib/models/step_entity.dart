@@ -6,9 +6,9 @@ class StepEntity {
   final double? distance;
   final double? lon;
   final double? lat;
-  final List<ElevationProfileComponent>? elevationProfile;
-  final RelativeDirection? relativeDirection;
-  final AbsoluteDirection? absoluteDirection;
+  final List<ElevationProfileComponentEntity>? elevationProfile;
+  final RelativeDirectionTrufi? relativeDirection;
+  final AbsoluteDirectionTrufi? absoluteDirection;
   final String? streetName;
   final String? exit;
   final bool? stayOn;

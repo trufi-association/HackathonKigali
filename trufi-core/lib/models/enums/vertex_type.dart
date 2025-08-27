@@ -1,19 +1,19 @@
-enum VertexType { normal, transit, bikepark, bikeshare, parkandride }
+enum VertexTypeTrufi { normal, transit, bikepark, bikeshare, parkandride }
 
-VertexType getVertexTypeByString(String vertexType) {
+VertexTypeTrufi getVertexTypeByString(String vertexType) {
   return VertexTypeExtension.names.keys.firstWhere(
     (key) => key.name == vertexType,
-    orElse: () => VertexType.normal,
+    orElse: () => VertexTypeTrufi.normal,
   );
 }
 
-extension VertexTypeExtension on VertexType {
-  static const names = <VertexType, String>{
-    VertexType.normal: 'NORMAL',
-    VertexType.transit: 'TRANSIT',
-    VertexType.bikepark: 'BIKEPARK',
-    VertexType.bikeshare: 'BIKESHARE',
-    VertexType.parkandride: 'PARKANDRIDE'
+extension VertexTypeExtension on VertexTypeTrufi {
+  static const names = <VertexTypeTrufi, String>{
+    VertexTypeTrufi.normal: 'NORMAL',
+    VertexTypeTrufi.transit: 'TRANSIT',
+    VertexTypeTrufi.bikepark: 'BIKEPARK',
+    VertexTypeTrufi.bikeshare: 'BIKESHARE',
+    VertexTypeTrufi.parkandride: 'PARKANDRIDE'
   };
   String get name => names[this]!;
 }

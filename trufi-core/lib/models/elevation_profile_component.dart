@@ -1,14 +1,14 @@
-class ElevationProfileComponent {
+class ElevationProfileComponentEntity {
   final double? distance;
   final double? elevation;
 
-  const ElevationProfileComponent({this.distance, this.elevation});
+  const ElevationProfileComponentEntity({this.distance, this.elevation});
 
   static const String _distance = 'distance';
   static const String _elevation = 'elevation';
 
-  factory ElevationProfileComponent.fromJson(Map<String, dynamic> json) =>
-      ElevationProfileComponent(
+  factory ElevationProfileComponentEntity.fromJson(Map<String, dynamic> json) =>
+      ElevationProfileComponentEntity(
         distance: json[_distance],
         elevation: json[_elevation],
       );

@@ -1,22 +1,22 @@
 import 'contact_info.dart';
 
-class BookingInfo {
+class BookingInfoEntity {
   final String? message;
   final String? dropOffMessage;
-  final ContactInfo? contactInfo;
+  final ContactInfoEntity? contactInfo;
 
-  const BookingInfo({this.message, this.dropOffMessage, this.contactInfo});
+  const BookingInfoEntity({this.message, this.dropOffMessage, this.contactInfo});
 
   static const String _message = 'message';
   static const String _dropOffMessage = 'dropOffMessage';
   static const String _contactInfo = 'contactInfo';
 
-  factory BookingInfo.fromJson(Map<String, dynamic> map) => BookingInfo(
+  factory BookingInfoEntity.fromJson(Map<String, dynamic> map) => BookingInfoEntity(
     message: map[_message],
     dropOffMessage: map[_dropOffMessage],
     contactInfo:
         map[_contactInfo] != null
-            ? ContactInfo.fromJson(map[_contactInfo] as Map<String, dynamic>)
+            ? ContactInfoEntity.fromJson(map[_contactInfo] as Map<String, dynamic>)
             : null,
   );
 

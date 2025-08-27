@@ -12,7 +12,7 @@ class RouteEntity {
   final String? url;
   final String? color;
   final String? textColor;
-  final List<Alert>? alerts;
+  final List<AlertEntity>? alerts;
 
   const RouteEntity({
     this.id,
@@ -59,9 +59,9 @@ class RouteEntity {
     textColor: json[_textColor],
     alerts:
         json[_alerts] != null
-            ? List<Alert>.from(
+            ? List<AlertEntity>.from(
               (json[_alerts] as List<dynamic>).map(
-                (x) => Alert.fromJson(x as Map<String, dynamic>),
+                (x) => AlertEntity.fromJson(x as Map<String, dynamic>),
               ),
             )
             : null,

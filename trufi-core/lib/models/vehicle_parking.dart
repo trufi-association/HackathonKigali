@@ -1,11 +1,11 @@
 import 'package:trufi_core/models/vehicle_places.dart';
 
-class VehicleParking {
+class VehicleParkingEntity {
   final String? name;
   final double? lat;
   final double? lon;
-  final VehiclePlaces? capacity;
-  final VehiclePlaces? availability;
+  final VehiclePlacesEntity? capacity;
+  final VehiclePlacesEntity? availability;
   final String? imageUrl;
   final List<String>? tags;
   final bool? anyCarPlaces;
@@ -14,7 +14,7 @@ class VehicleParking {
   final String? note;
   final String? openingHours;
 
-  const VehicleParking({
+  const VehicleParkingEntity({
     this.name,
     this.lat,
     this.lon,
@@ -43,17 +43,17 @@ class VehicleParking {
   static const String _openingHours = 'openingHours';
   static const String _osm = 'osm';
 
-  factory VehicleParking.fromMap(Map<String, dynamic> json) => VehicleParking(
+  factory VehicleParkingEntity.fromMap(Map<String, dynamic> json) => VehicleParkingEntity(
     name: json[_name],
     lat: json[_lat],
     lon: json[_lon],
     capacity:
         json[_capacity] != null
-            ? VehiclePlaces.fromMap(json[_capacity] as Map<String, dynamic>)
+            ? VehiclePlacesEntity.fromMap(json[_capacity] as Map<String, dynamic>)
             : null,
     availability:
         json[_availability] != null
-            ? VehiclePlaces.fromMap(json[_availability] as Map<String, dynamic>)
+            ? VehiclePlacesEntity.fromMap(json[_availability] as Map<String, dynamic>)
             : null,
     imageUrl: json[_imageUrl],
     tags:

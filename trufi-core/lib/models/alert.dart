@@ -6,25 +6,25 @@ import 'pattern.dart';
 import 'translated_string.dart';
 import 'trip.dart';
 
-class Alert {
+class AlertEntity {
   final String? id;
   final String? alertId;
   final int? alertHash;
   final String? feed;
   final AgencyEntity? agency;
   final RouteEntity? route;
-  final Trip? trip;
+  final TripEntity? trip;
   final StopEntity? stop;
-  final List<PatternOtp>? patterns;
+  final List<PatternOtpEntity>? patterns;
   final String? alertHeaderText;
-  final List<TranslatedString>? alertHeaderTextTranslations;
+  final List<TranslatedStringEntity>? alertHeaderTextTranslations;
   final String? alertDescriptionText;
-  final List<TranslatedString>? alertDescriptionTextTranslations;
+  final List<TranslatedStringEntity>? alertDescriptionTextTranslations;
   final String? alertUrl;
-  final List<TranslatedString>? alertUrlTranslations;
-  final AlertEffectType? alertEffect;
-  final AlertCauseType? alertCause;
-  final AlertSeverityLevelType? alertSeverityLevel;
+  final List<TranslatedStringEntity>? alertUrlTranslations;
+  final AlertEffectTypeTrufi? alertEffect;
+  final AlertCauseTypeTrufi? alertCause;
+  final AlertSeverityLevelTypeTrufi? alertSeverityLevel;
   final double? effectiveStartDate;
   final double? effectiveEndDate;
   final List<String>? entities;
@@ -32,7 +32,7 @@ class Alert {
   // Custom field
   final String? sourceAlert;
 
-  const Alert({
+  const AlertEntity({
     this.id,
     this.alertId,
     this.alertHash,
@@ -83,7 +83,7 @@ class Alert {
   static const String _sourceAlert = 'sourceAlert';
   static const String _typeName = '__typename';
 
-  factory Alert.fromJson(Map<String, dynamic> json) => Alert(
+  factory AlertEntity.fromJson(Map<String, dynamic> json) => AlertEntity(
     id: json[_id],
     alertId: json[_alertId],
     alertHash: json[_alertHash],
@@ -98,7 +98,7 @@ class Alert {
             : null,
     trip:
         json[_trip] != null
-            ? Trip.fromJson(json[_trip] as Map<String, dynamic>)
+            ? TripEntity.fromJson(json[_trip] as Map<String, dynamic>)
             : null,
     stop:
         json[_stop] != null
@@ -106,36 +106,36 @@ class Alert {
             : null,
     patterns:
         json[_patterns] != null
-            ? List<PatternOtp>.from(
+            ? List<PatternOtpEntity>.from(
               (json[_patterns] as List<dynamic>).map(
-                (x) => PatternOtp.fromJson(x as Map<String, dynamic>),
+                (x) => PatternOtpEntity.fromJson(x as Map<String, dynamic>),
               ),
             )
             : null,
     alertHeaderText: json[_alertHeaderText],
     alertHeaderTextTranslations:
         json[_alertHeaderTextTranslations] != null
-            ? List<TranslatedString>.from(
+            ? List<TranslatedStringEntity>.from(
               (json[_alertHeaderTextTranslations] as List<dynamic>).map(
-                (x) => TranslatedString.fromJson(x as Map<String, dynamic>),
+                (x) => TranslatedStringEntity.fromJson(x as Map<String, dynamic>),
               ),
             )
             : null,
     alertDescriptionText: json[_alertDescriptionText],
     alertDescriptionTextTranslations:
         json[_alertDescriptionTextTranslations] != null
-            ? List<TranslatedString>.from(
+            ? List<TranslatedStringEntity>.from(
               (json[_alertDescriptionTextTranslations] as List<dynamic>).map(
-                (x) => TranslatedString.fromJson(x as Map<String, dynamic>),
+                (x) => TranslatedStringEntity.fromJson(x as Map<String, dynamic>),
               ),
             )
             : null,
     alertUrl: json[_alertUrl],
     alertUrlTranslations:
         json[_alertUrlTranslations] != null
-            ? List<TranslatedString>.from(
+            ? List<TranslatedStringEntity>.from(
               (json[_alertUrlTranslations] as List<dynamic>).map(
-                (x) => TranslatedString.fromJson(x as Map<String, dynamic>),
+                (x) => TranslatedStringEntity.fromJson(x as Map<String, dynamic>),
               ),
             )
             : null,

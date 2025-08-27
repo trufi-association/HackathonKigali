@@ -140,7 +140,7 @@ class PlanItineraryLeg {
   final double distance;
   final Duration duration;
   final AgencyEntity? agency;
-  final RealtimeState? realtimeState;
+  final RealtimeStateTrufi? realtimeState;
   final PlaceEntity? toPlace;
   final PlaceEntity? fromPlace;
   final DateTime startTime;
@@ -149,11 +149,11 @@ class PlanItineraryLeg {
   final bool? intermediatePlace;
   final bool? rentedBike;
   final bool? interlineWithPreviousLeg;
-  final PickupBookingInfo? pickupBookingInfo;
-  final BookingInfo? dropOffBookingInfo;
+  final PickupBookingInfoEntity? pickupBookingInfo;
+  final BookingInfoEntity? dropOffBookingInfo;
   final List<StepEntity>? steps;
   final List<PlaceEntity>? intermediatePlaces;
-  final Trip? trip;
+  final TripEntity? trip;
 
   late TransportMode transportMode;
   final List<LatLng> accumulatedPoints;
@@ -204,12 +204,12 @@ class PlanItineraryLeg {
             )
           : null,
       pickupBookingInfo: json[_pickupBookingInfo] != null
-          ? PickupBookingInfo.fromJson(
+          ? PickupBookingInfoEntity.fromJson(
               json[_pickupBookingInfo] as Map<String, dynamic>,
             )
           : null,
       dropOffBookingInfo: json[_dropOffBookingInfo] != null
-          ? BookingInfo.fromJson(
+          ? BookingInfoEntity.fromJson(
               json[_dropOffBookingInfo] as Map<String, dynamic>,
             )
           : null,
@@ -221,7 +221,7 @@ class PlanItineraryLeg {
         json[_legGeometry][_points],
       ),
       trip: json[_trip] != null
-          ? Trip.fromJson(json[_trip] as Map<String, dynamic>)
+          ? TripEntity.fromJson(json[_trip] as Map<String, dynamic>)
           : null,
     );
   }

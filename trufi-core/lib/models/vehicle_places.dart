@@ -1,9 +1,9 @@
-class VehiclePlaces {
+class VehiclePlacesEntity {
   final int? bicycleSpaces;
   final int? carSpaces;
   final int? wheelchairAccessibleCarSpaces;
 
-  const VehiclePlaces({
+  const VehiclePlacesEntity({
     this.bicycleSpaces,
     this.carSpaces,
     this.wheelchairAccessibleCarSpaces,
@@ -14,7 +14,7 @@ class VehiclePlaces {
   static const String _wheelchairAccessibleCarSpaces =
       'wheelchairAccessibleCarSpaces';
 
-  factory VehiclePlaces.fromMap(Map<String, dynamic> json) => VehiclePlaces(
+  factory VehiclePlacesEntity.fromMap(Map<String, dynamic> json) => VehiclePlacesEntity(
     bicycleSpaces: json[_bicycleSpaces],
     carSpaces: json[_carSpaces],
     wheelchairAccessibleCarSpaces: json[_wheelchairAccessibleCarSpaces],
