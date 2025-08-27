@@ -49,7 +49,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  bool showMapLibre = true;
+  bool showMapLibre = false;
   final mapController = TrufiMapController(
     initialCameraPosition: TrufiCameraPosition(
       target: latlng.LatLng(48.5950, 8.8672),
