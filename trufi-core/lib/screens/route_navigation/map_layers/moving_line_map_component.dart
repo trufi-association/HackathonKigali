@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart' as latlng;
-import 'package:trufi_core/trufi_map_controller.dart';
+import 'package:trufi_core/screens/route_navigation/maps/trufi_map_controller.dart';
 
-class MovingLineMapComponent extends TrufiLayer {
-  static const String layerId = 'moving-line-map-component';
+class MovingManyLinesLayer extends TrufiLayer {
+  static const String layerId = 'moving-many-lines-layer';
 
   final Random _random = Random();
   final int nMarkers;
@@ -26,7 +26,7 @@ class MovingLineMapComponent extends TrufiLayer {
 
   Timer? _timer;
 
-  MovingLineMapComponent(
+  MovingManyLinesLayer(
     super.controller, {
     this.nMarkers = 100,
     this.nLines = 10,

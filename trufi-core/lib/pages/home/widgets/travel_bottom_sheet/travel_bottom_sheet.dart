@@ -3,7 +3,7 @@ import 'package:trufi_core/pages/home/widgets/routing_map/routing_map_controller
 import 'package:trufi_core/pages/home/widgets/travel_bottom_sheet/header_bottom_sheet.dart';
 import 'package:trufi_core/pages/home/widgets/travel_bottom_sheet/travel_mode_section.dart/transit_mode_section/itinarary_details_card/itinarary_details_card.dart';
 import 'package:trufi_core/pages/home/widgets/travel_bottom_sheet/travel_mode_section.dart/transit_mode_section/transit_mode_section.dart';
-import 'package:trufi_core/trufi_map_controller.dart';
+import 'package:trufi_core/screens/route_navigation/maps/trufi_map_controller.dart';
 import 'package:trufi_core/widgets/bottom_sheet/trufi_bottom_sheet.dart';
 
 class TransitBottomSheet extends StatefulWidget {

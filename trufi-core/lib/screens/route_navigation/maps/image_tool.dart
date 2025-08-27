@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/widgets.dart';
-import 'package:trufi_core/trufi_map_controller.dart';
+import 'package:trufi_core/screens/route_navigation/maps/trufi_map_controller.dart';
 
 abstract class ImageTool {
   static Future<Uint8List> svgToPng(String svgString) async {

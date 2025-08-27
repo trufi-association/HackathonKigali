@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 import 'package:dio/dio.dart';
 
-// final Map<String, bool> _cache = {};
 final Dio _dio = Dio();
 final Map<String, CancelToken> _activeRequests = {};
 
@@ -13,7 +12,6 @@ Future<Uint8List> cachedFirstFetch(Uri uri, int z, int x, int y) async {
   if (_lastZ != null) {
     final zoomChanged = z != _lastZ;
     final movedFar = (x - _lastX!).abs() > 2 || (y - _lastY!).abs() > 2;
-
     if (zoomChanged || movedFar) {
       _cancelFarTiles(z, x, y);
     }
@@ -23,13 +21,8 @@ Future<Uint8List> cachedFirstFetch(Uri uri, int z, int x, int y) async {
   _lastX = x;
   _lastY = y;
 
-  // if (_cache.containsKey(key)) {
-  //   throw Exception("already fetched");
-  // }
-
   final cancelToken = CancelToken();
   _activeRequests[key] = cancelToken;
-  // _cache[key] = true;
 
   try {
     final response = await _dio.get<List<int>>(
@@ -38,12 +31,15 @@ Future<Uint8List> cachedFirstFetch(Uri uri, int z, int x, int y) async {
       cancelToken: cancelToken,
     );
 
-    return Uint8List.fromList(response.data!);
+    final data = response.data;
+    if (data == null) {
+      throw Exception("Empty response for $key");
+    }
+    return Uint8List.fromList(data);
   } on DioException catch (e) {
     if (CancelToken.isCancel(e)) {
       throw Exception("Request to $key was cancelled.");
     } else {
-      // _cache[key] = false;
       throw Exception("Fetch failed for $key: ${e.message}");
     }
   } finally {
@@ -73,7 +69,6 @@ void _cancelFarTiles(int z, int x, int y) {
 
     if ((zoomChanged || movedFar) && !token.isCancelled) {
       token.cancel("Tile $key out of focus or zoom");
-      print("Cancelled $key");
     }
   }
 }

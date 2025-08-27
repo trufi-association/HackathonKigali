@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:trufi_core/weather/weather_feature_model.dart';
+import 'package:trufi_core/screens/route_navigation/map_layers/weather/weather_feature_model.dart';
 
 import 'package:intl/intl.dart';
 

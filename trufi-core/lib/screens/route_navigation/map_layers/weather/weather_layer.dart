@@ -2,13 +2,13 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:trufi_core/cached_first_fetch.dart';
+import 'package:trufi_core/screens/route_navigation/map_layers/cached_first_fetch.dart';
 import 'package:trufi_core/sorted_list.dart';
-import 'package:trufi_core/tile_utils.dart';
-import 'package:trufi_core/trufi_map_controller.dart';
-import 'package:trufi_core/weather/image.dart';
-import 'package:trufi_core/weather/weather_feature_model.dart';
-import 'package:trufi_core/weather/weather_marker_modal.dart';
+import 'package:trufi_core/screens/route_navigation/map_layers/tile_utils.dart';
+import 'package:trufi_core/screens/route_navigation/maps/trufi_map_controller.dart';
+import 'package:trufi_core/screens/route_navigation/map_layers/weather/image.dart';
+import 'package:trufi_core/screens/route_navigation/map_layers/weather/weather_feature_model.dart';
+import 'package:trufi_core/screens/route_navigation/map_layers/weather/weather_marker_modal.dart';
 import 'package:vector_tile/vector_tile.dart';
 
 class WeatherLayer extends TrufiLayer {

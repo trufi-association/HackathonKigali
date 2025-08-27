@@ -1,12 +1,6 @@
-import 'dart:async';
 import 'dart:math' as math;
-import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart' as latlng;
-import 'package:trufi_core/trufi_map_controller.dart';
-
-/// ==============================
-/// Tipos auxiliares
-/// ==============================
+import 'package:trufi_core/screens/route_navigation/maps/trufi_map_controller.dart';
 
 class TileRange {
   final int minX, maxX, minY, maxY;
@@ -24,18 +18,15 @@ class TileCoord {
   String get key => '$z/$x/$y';
 }
 
-/// ==============================
-/// TileUtils (con granularidad)
-/// ==============================
 class TileUtils {
   static math.Point<int> latLonToTileXY(double lat, double lon, int z) {
     final latRad = lat * math.pi / 180.0;
     final n = math.pow(2.0, z).toDouble();
-    final x = ((lon + 180.0) / 360.0 * n);
+    final x = ((lon + 180.0) / 360.0) * n;
     final y =
         ((1.0 - math.log(math.tan(latRad) + 1.0 / math.cos(latRad)) / math.pi) /
-        2.0 *
-        n);
+            2.0) *
+        n;
     return math.Point(x.floor(), y.floor());
   }
 
@@ -76,27 +67,26 @@ class TileUtils {
   }) {
     final zUsed = coarsenZoom(zoom, granularityLevels);
     final range = tileRangeForBounds(
-     southWest: bounds.southWest,
+      southWest: bounds.southWest,
       northEast: bounds.northEast,
       z: zUsed,
     );
     final out = <TileCoord>[];
-    for (int x = range.minX; x <= range.maxX; x++) {
-      for (int y = range.minY; y <= range.maxY; y++) {
+    for (var x = range.minX; x <= range.maxX; x++) {
+      for (var y = range.minY; y <= range.maxY; y++) {
         out.add(TileCoord(x, y, zUsed));
       }
     }
     return out;
   }
 
-  /// Fallback pequeño para no abarcar fuera de pantalla si no hay visibleRegion aún.
   static LatLngBounds approxBoundsAround(
     latlng.LatLng center, {
-    double meters = 800, // reducido
+    double meters = 800,
   }) {
-    final dLat = (meters / 111000.0);
+    final dLat = meters / 111000.0;
     final dLon =
-        (meters / (111000.0 * math.cos(center.latitude * math.pi / 180.0)));
+        meters / (111000.0 * math.cos(center.latitude * math.pi / 180.0));
     return LatLngBounds(
       latlng.LatLng(center.latitude - dLat, center.longitude - dLon),
       latlng.LatLng(center.latitude + dLat, center.longitude + dLon),

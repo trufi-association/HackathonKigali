@@ -1,8 +1,7 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart' as fm;
 import 'package:latlong2/latlong.dart' as latlng;
-import 'package:trufi_core/trufi_map_controller.dart' as trufi;
+import 'package:trufi_core/screens/route_navigation/maps/trufi_map_controller.dart' as trufi;
 
 class TrufiFlutterMap extends StatefulWidget {
   const TrufiFlutterMap({
@@ -10,13 +9,13 @@ class TrufiFlutterMap extends StatefulWidget {
     required this.controller,
     required this.tileUrl,
     this.onMapClick,
-    this.onMapLongClick, // ← nuevo (opcional)
+    this.onMapLongClick,
   });
 
   final trufi.TrufiMapController controller;
   final String tileUrl;
   final void Function(latlng.LatLng)? onMapClick;
-  final void Function(latlng.LatLng)? onMapLongClick; // ← nuevo
+  final void Function(latlng.LatLng)? onMapLongClick;
 
   @override
   State<TrufiFlutterMap> createState() => _TrufiFlutterMapState();
@@ -43,7 +42,6 @@ class _TrufiFlutterMapState extends State<TrufiFlutterMap> {
     super.dispose();
   }
 
-  // Controller → FlutterMap
   void _cameraListener() {
     if (!_mapReady) return;
     final camera = widget.controller.cameraPositionNotifier.value;
@@ -55,16 +53,13 @@ class _TrufiFlutterMapState extends State<TrufiFlutterMap> {
     setState(() {});
   }
 
-  // FlutterMap → Controller (incluye visibleRegion convertido)
   void _onPositionChanged(fm.MapCamera pos, bool hasGesture) {
     if (_suppressSync) {
       _suppressSync = false;
       return;
     }
-
     final fb = pos.visibleBounds;
-    trufi.LatLngBounds? vr = trufi.LatLngBounds(fb.southWest, fb.northEast);
-
+    final vr = trufi.LatLngBounds(fb.southWest, fb.northEast);
     widget.controller.updateCamera(
       target: pos.center,
       zoom: pos.zoom,
@@ -90,18 +85,15 @@ class _TrufiFlutterMapState extends State<TrufiFlutterMap> {
         ),
         onMapReady: () {
           setState(() => _mapReady = true);
+          _suppressSync = true;
           _mapCtl.moveAndRotate(camera.target, camera.zoom, camera.bearing);
         },
         onPositionChanged: _onPositionChanged,
-
         onTap: (_, position) => widget.onMapClick?.call(position),
-
         onLongPress: (_, position) => widget.onMapLongClick?.call(position),
       ),
       children: [
         Opacity(opacity: 1, child: fm.TileLayer(urlTemplate: widget.tileUrl)),
-
-        // Markers de cada TrufiLayer
         for (final layer in visibleLayers)
           fm.MarkerLayer(
             markers: [
@@ -116,8 +108,6 @@ class _TrufiFlutterMapState extends State<TrufiFlutterMap> {
                 ),
             ],
           ),
-
-        // (Opcional) líneas
         fm.PolylineLayer(
           polylines: [
             for (final layer in visibleLayers)
