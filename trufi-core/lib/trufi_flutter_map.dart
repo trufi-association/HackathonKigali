@@ -111,7 +111,7 @@ class _TrufiFlutterMapState extends State<TrufiFlutterMap> {
                   width: marker.size.width,
                   height: marker.size.height,
                   rotate: true,
-                  alignment: Alignment.center,
+                  alignment:marker.alignment,
                   child: marker.widget,
                 ),
             ],

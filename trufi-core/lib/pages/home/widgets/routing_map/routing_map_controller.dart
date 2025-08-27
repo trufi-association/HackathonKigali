@@ -132,7 +132,7 @@ class RoutingMapComponent extends TrufiLayer {
       id: "destination",
       position: position,
       widget: toMarker,
-      alignment: "top",
+      alignment: Alignment.topCenter,
     );
     _rebuildGraphics();
 

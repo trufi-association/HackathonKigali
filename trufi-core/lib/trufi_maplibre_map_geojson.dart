@@ -40,7 +40,7 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
   final Set<String> _loadedImages = {};
   final Map<String, Future<void>> _imageLoaders = {};
 
-  // NUEVO: índice espacial por layer (dos listas: lat/lng)
+  // Índice espacial por layer (dos listas: lat/lng)
   final MarkersContainer _markers = MarkersContainer();
 
   @override
@@ -179,6 +179,7 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
         iconSize: 1.0,
         iconAllowOverlap: true,
         iconOffset: ["get", "offset"],
+        iconRotate: ["get", "rotate"],
         symbolSortKey: ["get", "layerLevel"],
       ),
       enableInteraction: false,
@@ -193,12 +194,18 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
     final geojson = await _buildGeoJsonForLayer(layer, ctl);
     await ctl.setGeoJsonSource(layer.id, geojson);
 
-    // >>> NUEVO: al finalizar, actualizamos el índice por layer
+    // Actualizamos el índice por layer
     _markers.setLayerMarkers(layer.id, layer.markers);
 
     if (Platform.isAndroid) {
       await ctl.moveCamera(CameraUpdate.zoomBy(0.0001));
     }
+  }
+
+  List<double> _alignmentOffsetPx(Alignment a, Size s) {
+    final dx = (a.x) * (s.width / 2.0);
+    final dy = (a.y) * (s.height / 2.0);
+    return [dx, dy];
   }
 
   /// Arma FeatureCollection para el layer (marcadores y líneas).
@@ -219,10 +226,9 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
             await ImageTool.widgetToBytes(marker, context);
         await ctl.addImage(imageId, bytes);
       });
-
+      final offset = _alignmentOffsetPx(marker.alignment, marker.size);
       features.add({
         "type": "Feature",
-        // IMPORTANTE: usa el id REAL del marker para poder mapearlo luego
         "id": marker.id,
         "geometry": {
           "type": "Point",
@@ -232,8 +238,8 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
           "type": "marker",
           "icon": imageId,
           "markerId": marker.id,
-          if (marker.alignment == "top")
-            "offset": [0.0, -marker.size.height / 2],
+          "offset": offset,
+          "rotate": marker.rotation,
           "layerLevel": marker.layerLevel,
         },
       });
@@ -296,11 +302,19 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
       trackCameraPosition: true,
       rotateGesturesEnabled: false,
       compassEnabled: false,
+
+      // SOLO fijamos el controller acá. NO sincronizamos aún.
       onMapCreated: (ctl) async {
         _mapCtl = ctl;
+        // _mapReady se habilita cuando cargue el estilo
+      },
+
+      // ← FIX: sincronizar capas recién cuando el estilo esté listo
+      onStyleLoadedCallback: () async {
         _mapReady = true;
         await _syncLayers(widget.controller.visibleLayers);
       },
+
       onCameraIdle: _handleCameraIdle,
       onMapLongClick: (point, coordinates) {
         widget.onMapLongClick?.call(

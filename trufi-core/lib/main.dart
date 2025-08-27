@@ -59,7 +59,7 @@ class _HomeScreenState extends State<HomeScreen> {
   );
   late RoutingMapComponent routingMapComponent;
   // late MovingLineMapComponent movingLineComponent;
-  late TileGridLayer tileGridLayer;
+  // late TileGridLayer tileGridLayer;
   late WeatherLayer weatherLayer;
   @override
   void initState() {
@@ -106,7 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
               trufiLayer: routingMapComponent,
               // routingMapComponent:routingMapComponent,
               styleString:
-                  'https://tiles-eu.stadtnavi.eu/styles/streets/style.json',
+                  'https://tiles.openfreemap.org/styles/liberty',
               onMapClick: (mapLatLng) {
                 final nearest = mapController.pickNearestMarkerAt(
                   mapLatLng,

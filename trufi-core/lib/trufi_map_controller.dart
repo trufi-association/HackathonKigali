@@ -256,7 +256,7 @@ class TrufiMarker {
     this.size = const Size(30, 30),
     this.rotation = 0,
     // this.visible = true,
-    this.alignment,
+    this.alignment=Alignment.center,
   });
 
   final String id;
@@ -268,7 +268,7 @@ class TrufiMarker {
   final Size size;
   final double rotation;
   // final bool visible;
-  final String? alignment;
+  final Alignment alignment;
 
   Future<void> generateBytes(BuildContext context) async {
     try {
