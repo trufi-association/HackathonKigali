@@ -271,7 +271,7 @@ class TransitDetailsIcon extends StatelessWidget {
                         leg.route?.shortName ?? '',
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w600,
-                          color: hexToColor(leg.route?.textColor??'ffffff'),
+                          color: hexToColor(leg.route?.textColor ?? 'ffffff'),
                         ),
                       ),
                     ),
@@ -350,14 +350,16 @@ class IntermediatePlacesList extends StatelessWidget {
                 child: Material(
                   child: InkWell(
                     onTap: () {
-                      moveTo(LatLng(e.lat, e.lon));
+                      moveTo(LatLng(e.stopEntity!.lat!, e.stopEntity!.lon!));
                     },
                     child: Row(
                       children: [
                         Expanded(
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [Flexible(child: Text(e.name))],
+                            children: [
+                              Flexible(child: Text(e.stopEntity?.name ?? '')),
+                            ],
                           ),
                         ),
                         const SizedBox(width: 5),
