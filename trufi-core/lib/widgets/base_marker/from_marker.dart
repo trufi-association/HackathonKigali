@@ -8,9 +8,8 @@ class FromMarker extends StatelessWidget {
   });
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: height,
-      color: Colors.amber,
       child: FittedBox(
         child: Stack(
           alignment: AlignmentDirectional.center,

@@ -5,6 +5,8 @@ import 'package:trufi_core/models/enums/transport_mode.dart';
 import 'package:trufi_core/models/plan_entity.dart';
 import 'package:trufi_core/pages/home/widgets/routing_map/routing_map_controller.dart';
 import 'package:trufi_core/pages/home/widgets/travel_bottom_sheet/travel_mode_section.dart/transit_mode_section/itinerary_card/itinerary_path.dart';
+import 'package:trufi_core/widgets/base_marker/from_marker.dart';
+import 'package:trufi_core/widgets/base_marker/to_marker.dart';
 import 'package:trufi_core/widgets/buttons/trufi_icon_button.dart';
 import 'package:trufi_core/widgets/utils.dart';
 import 'package:trufi_core/widgets/utils/date_time_utils.dart';
@@ -45,7 +47,7 @@ class ItineraryDetailsCard extends StatelessWidget {
           SizedBox(height: 24),
           ItineraryLocationTile(
             text: plan.from?.name ?? '',
-            icon: RoutingMapComponent.fromMarker,
+            icon: FromMarker(),
             moveTo: () {
               routingMapComponent.controller.updateCamera(
                 target: LatLng(plan.from!.latitude!, plan.from!.longitude!),
@@ -86,7 +88,7 @@ class ItineraryDetailsCard extends StatelessWidget {
                 child: SizedBox(
                   width: 30,
                   height: 30,
-                  child: RoutingMapComponent.toMarker,
+                  child: ToMarker()
                 ),
               ),
             ),
