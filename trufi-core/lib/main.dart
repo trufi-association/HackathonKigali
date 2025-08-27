@@ -49,7 +49,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  bool showMapLibre = false;
+  bool showMapLibre = true;
   final mapController = TrufiMapController(
     initialCameraPosition: TrufiCameraPosition(
       target: latlng.LatLng(48.5950, 8.8672),
@@ -105,8 +105,7 @@ class _HomeScreenState extends State<HomeScreen> {
               controller: mapController,
               trufiLayer: routingMapComponent,
               // routingMapComponent:routingMapComponent,
-              styleString:
-                  'https://tiles.openfreemap.org/styles/liberty',
+              styleString: 'https://tiles.openfreemap.org/styles/liberty',
               onMapClick: (mapLatLng) {
                 final nearest = mapController.pickNearestMarkerAt(
                   mapLatLng,
@@ -137,12 +136,22 @@ class _HomeScreenState extends State<HomeScreen> {
             TrufiFlutterMap(
               controller: mapController,
               tileUrl: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-              onMapClick: (position) {
-                setState(() {});
+              onMapClick: (mapLatLng) {
+                final nearest = mapController.pickNearestMarkerAt(
+                  mapLatLng,
+                  hitboxPx: 24.0,
+                );
+                print(nearest);
+                setState(() {
+                  selectedMarker = nearest;
+                });
+              },
+
+              onMapLongClick: (coord) {
                 if (routingMapComponent.origin == null) {
-                  // routingMapComponent.addOrigin(position, "description");
+                  routingMapComponent.addOrigin(coord, context);
                 } else if (routingMapComponent.destination == null) {
-                  // routingMapComponent.addDestination(position, "description");
+                  routingMapComponent.addDestination(coord, context);
                 } else {
                   routingMapComponent.cleanOriginAndDestination();
                 }

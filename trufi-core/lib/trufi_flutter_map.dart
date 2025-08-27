@@ -9,12 +9,14 @@ class TrufiFlutterMap extends StatefulWidget {
     super.key,
     required this.controller,
     required this.tileUrl,
-    required this.onMapClick,
+    this.onMapClick,
+    this.onMapLongClick, // ← nuevo (opcional)
   });
 
   final trufi.TrufiMapController controller;
   final String tileUrl;
-  final void Function(latlng.LatLng) onMapClick;
+  final void Function(latlng.LatLng)? onMapClick;
+  final void Function(latlng.LatLng)? onMapLongClick; // ← nuevo
 
   @override
   State<TrufiFlutterMap> createState() => _TrufiFlutterMapState();
@@ -60,13 +62,8 @@ class _TrufiFlutterMapState extends State<TrufiFlutterMap> {
       return;
     }
 
-    // visible bounds del viewport (flutter_map)
-    final fb = pos.visibleBounds; // puede ser null en los primeros frames
-    trufi.LatLngBounds? vr;
-    vr = trufi.LatLngBounds(
-      fb.southWest, // ya es latlng.LatLng
-      fb.northEast,
-    );
+    final fb = pos.visibleBounds;
+    trufi.LatLngBounds? vr = trufi.LatLngBounds(fb.southWest, fb.northEast);
 
     widget.controller.updateCamera(
       target: pos.center,
@@ -96,7 +93,10 @@ class _TrufiFlutterMapState extends State<TrufiFlutterMap> {
           _mapCtl.moveAndRotate(camera.target, camera.zoom, camera.bearing);
         },
         onPositionChanged: _onPositionChanged,
-        onTap: (_, position) => widget.onMapClick(position),
+
+        onTap: (_, position) => widget.onMapClick?.call(position),
+
+        onLongPress: (_, position) => widget.onMapLongClick?.call(position),
       ),
       children: [
         Opacity(opacity: 1, child: fm.TileLayer(urlTemplate: widget.tileUrl)),
@@ -111,13 +111,13 @@ class _TrufiFlutterMapState extends State<TrufiFlutterMap> {
                   width: marker.size.width,
                   height: marker.size.height,
                   rotate: true,
-                  alignment:marker.alignment,
+                  alignment: marker.alignment,
                   child: marker.widget,
                 ),
             ],
           ),
 
-        // (Opcional) Si quieres líneas también en FlutterMap:
+        // (Opcional) líneas
         fm.PolylineLayer(
           polylines: [
             for (final layer in visibleLayers)
