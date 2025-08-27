@@ -100,10 +100,10 @@ class TripEntity {
     directionId: json[_directionId],
     blockId: json[_blockId],
     shapeId: json[_shapeId],
-    wheelchairAccessible: getWheelchairBoardingByString(
+    wheelchairAccessible: WheelchairBoardingExtension.getWheelchairBoardingByString(
       json[_wheelchairAccessible],
     ),
-    bikesAllowed: getBikesAllowedByString(json[_bikesAllowed]),
+    bikesAllowed: BikesAllowedExtension.getBikesAllowedByString(json[_bikesAllowed]),
     pattern:
         json[_pattern] != null
             ? PatternOtpEntity.fromJson(json[_pattern] as Map<String, dynamic>)

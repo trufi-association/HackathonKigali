@@ -1,17 +1,14 @@
-enum BikesAllowed {
-  noInformation,
-  allowed,
-  notAllowed,
-}
+import 'package:collection/collection.dart';
 
-BikesAllowed getBikesAllowedByString(String bikesAllowed) {
-  return BikesAllowedExtension.names.keys.firstWhere(
-    (key) => key.name == bikesAllowed,
-    orElse: () => BikesAllowed.noInformation,
-  );
-}
+enum BikesAllowed { noInformation, allowed, notAllowed }
 
 extension BikesAllowedExtension on BikesAllowed {
+  static BikesAllowed? getBikesAllowedByString(String? bikesAllowed) {
+    return BikesAllowedExtension.names.keys.firstWhereOrNull(
+      (key) => key.name == bikesAllowed,
+    );
+  }
+
   static const names = <BikesAllowed, String>{
     BikesAllowed.noInformation: 'NO_INFORMATION',
     BikesAllowed.allowed: 'ALLOWED',
