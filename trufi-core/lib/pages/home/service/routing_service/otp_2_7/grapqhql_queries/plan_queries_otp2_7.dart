@@ -108,6 +108,7 @@ query trip($accessEgressPenalty: [PenaltyForStreetMode!],
         expectedStartTime
         realtime
         distance
+        ride
         duration
         fromPlace {
           name
@@ -118,6 +119,19 @@ query trip($accessEgressPenalty: [PenaltyForStreetMode!],
         toPlace {
           name
           quay {
+            id
+          }
+        }
+        intermediateQuays {
+          id
+          name
+          latitude
+          longitude
+          description
+          stopPlace {
+            latitude
+            longitude
+            name
             id
           }
         }

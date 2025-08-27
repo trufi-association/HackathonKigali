@@ -12,6 +12,8 @@ import 'package:trufi_core/models/trip.dart';
 import 'package:trufi_core/models/trufi_map_utils.dart';
 import 'package:trufi_core/trufi_map_controller.dart';
 import 'package:trufi_core/widgets/utils.dart';
+import 'package:collection/collection.dart';
+
 
 part 'bike_park_entity.dart';
 part 'stop_entity.dart';

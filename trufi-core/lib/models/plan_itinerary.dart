@@ -71,4 +71,29 @@ class PlanItinerary {
       _emissionsPerPerson: {_emissionsPerPersonCo2: emissionsPerPerson},
     };
   }
+
+  String getFirstLegDepartureMessage() {
+    final firstTransport = getFirstDeparture;
+    String legStartTime = '';
+    if (firstTransport != null) {
+      final String firstDepartureStopType =
+          firstTransport.transportMode == TransportMode.rail ||
+              firstTransport.transportMode == TransportMode.subway
+          ? "from station"
+          : "from stop";
+      legStartTime =
+          "Leaves $firstDepartureStopType ${firstTransport.fromPlace?.name ?? ''}";
+    } else {
+      legStartTime = "Leave when it suits you";
+    }
+
+    return legStartTime;
+  }
+
+  PlanItineraryLeg? get getFirstDeparture {
+    final firstDeparture = legs.firstWhereOrNull(
+      (element) => element.transitLeg,
+    );
+    return firstDeparture;
+  }
 }

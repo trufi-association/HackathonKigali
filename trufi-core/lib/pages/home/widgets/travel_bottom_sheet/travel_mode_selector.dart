@@ -20,7 +20,7 @@ class TravelModeSelector extends StatelessWidget {
       children: [
         Container(color: Colors.orange, height: 60),
         Container(color: Colors.amber, height: 60),
-        TransitModeSection(routingMapComponent: routingMapComponent),
+        // TransitModeSection(routingMapComponent: routingMapComponent),
         Container(color: Colors.red, height: 60),
         Container(color: Colors.purple, height: 60),
       ],

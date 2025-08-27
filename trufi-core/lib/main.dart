@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart' as latlng;
+import 'package:provider/provider.dart';
+import 'package:trufi_core/localization/app_localization.dart';
+import 'package:trufi_core/localization/language_bloc.dart';
 import 'package:trufi_core/tile_grid_layer.dart';
 import 'package:trufi_core/default_theme.dart';
 import 'package:trufi_core/hive_init.dart';
@@ -30,13 +33,24 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Custom Draggable Sheet',
-      theme: lightTheme,
-      darkTheme: darkTheme,
-      // themeMode: ThemeMode.dark,
-      home: HomeScreen(),
+    return ChangeNotifierProvider(
+      create: (_) => LanguageProvider(),
+      child: MaterialApp(
+        localizationsDelegates: AppLocalization.localizationsDelegates,
+        debugShowCheckedModeBanner: false,
+        title: 'Custom Draggable Sheet',
+        supportedLocales: [
+          const Locale('es', 'ES'),
+          const Locale('pt', 'PT'),
+          const Locale('pt', 'BR'),
+          const Locale('de', 'DE'),
+          const Locale('fr', 'FR'),
+        ],
+        theme: lightTheme,
+        darkTheme: darkTheme,
+        // themeMode: ThemeMode.dark,
+        home: HomeScreen(),
+      ),
     );
   }
 }
@@ -52,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool showMapLibre = false;
   final mapController = TrufiMapController(
     initialCameraPosition: TrufiCameraPosition(
-      target: latlng.LatLng(48.5950, 8.8672),
+      target: latlng.LatLng(-1.949516, 30.069619),
       zoom: 17,
       bearing: 0,
     ),
@@ -163,10 +177,10 @@ class _HomeScreenState extends State<HomeScreen> {
           LocationSearchBar(),
           if (selectedMarker?.buildPanel != null)
             TrufiBottomSheet(child: selectedMarker!.buildPanel!(context)),
-          // TransitBottomSheet(
-          //   routingMapComponent: routingMapComponent,
-          //   trufiMapController: mapController,
-          // ),
+          TransitBottomSheet(
+            routingMapComponent: routingMapComponent,
+            trufiMapController: mapController,
+          ),
           // Positioned(
           //   bottom: 100,
           //   child: GestureDetector(

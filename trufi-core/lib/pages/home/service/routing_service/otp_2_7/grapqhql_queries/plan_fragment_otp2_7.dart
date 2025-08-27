@@ -48,6 +48,7 @@ fragment planFragment on Plan {
       endTime
       interlineWithPreviousLeg
       distance
+      ride
       duration
       intermediatePlace
       dropOffBookingInfo {

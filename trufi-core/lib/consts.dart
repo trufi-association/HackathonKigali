@@ -10,7 +10,7 @@ class ApiConfig {
   String baseDomain = "otp.kigali.trufi.dev"; // For dev
   // String baseDomain = "api.stadtnavi.de"; // For PROD
 
-  String get openTripPlannerUrl => "https://$baseDomain/otp/transmodel/v3";
+  String get openTripPlannerUrl => "https://otp.kigali.trufi.dev/otp/transmodel/v3";
   String get faresURL => "https://$baseDomain/fares";
   
   String get carpoolOffers =>

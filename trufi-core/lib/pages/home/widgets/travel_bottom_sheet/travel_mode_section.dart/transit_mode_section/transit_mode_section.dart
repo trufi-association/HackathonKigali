@@ -4,7 +4,12 @@ import 'package:trufi_core/pages/home/widgets/travel_bottom_sheet/travel_mode_se
 
 class TransitModeSection extends StatelessWidget {
   final RoutingMapComponent routingMapComponent;
-  const TransitModeSection({super.key, required this.routingMapComponent});
+  final void Function(bool) onRouteDetailsViewChanged;
+  const TransitModeSection({
+    super.key,
+    required this.routingMapComponent,
+    required this.onRouteDetailsViewChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -13,9 +18,17 @@ class TransitModeSection extends StatelessWidget {
       children: [
         Row(children: []),
         ...itineraries.map((itinerary) {
-          return Container(
-            margin: EdgeInsets.symmetric(vertical: 8, horizontal: 20),
-            child: ItineraryCard(itinerary:itinerary)
+          return Column(
+            children: [
+              ItineraryCard(
+                itinerary: itinerary,
+                onTap: () {
+                  routingMapComponent.changeItinerary(itinerary);
+                  onRouteDetailsViewChanged.call(true);
+                },
+              ),
+              Divider(height: 0),
+            ],
           );
         }),
       ],
