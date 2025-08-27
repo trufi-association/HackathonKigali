@@ -1277,8 +1277,8 @@ class Leg {
       duration: Duration(seconds: duration ?? 0),
       routeLongName: line?.operator?.name ?? '', // route?.longName ?? '',
       agency: null, //agency?.toAgencyEntity(),
-      toPlace: fromPlace?.toPlaceEntity(),
-      fromPlace: toPlace?.toPlaceEntity(),
+      toPlace: toPlace?.toPlaceEntity(),
+      fromPlace: fromPlace?.toPlaceEntity(),
       intermediatePlaces: intermediateQuays
           ?.map(
             (e) => PlaceEntity(

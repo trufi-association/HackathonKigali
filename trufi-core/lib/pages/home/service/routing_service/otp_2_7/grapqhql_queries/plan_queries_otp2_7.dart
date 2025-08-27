@@ -112,12 +112,16 @@ query trip($accessEgressPenalty: [PenaltyForStreetMode!],
         duration
         fromPlace {
           name
+          latitude
+          longitude
           quay {
             id
           }
         }
         toPlace {
           name
+          latitude
+          longitude
           quay {
             id
           }

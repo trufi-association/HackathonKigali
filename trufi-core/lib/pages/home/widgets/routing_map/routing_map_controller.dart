@@ -1,10 +1,9 @@
 import 'dart:async';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart' as latlng;
 
 import 'package:trufi_core/pages/home/repository/hive_local_repository.dart';
-import 'package:trufi_core/widgets/utils.dart'; // hexToColor
+import 'package:trufi_core/widgets/utils.dart';
 import 'package:trufi_core/consts.dart';
 import 'package:trufi_core/models/enums/transport_mode.dart';
 import 'package:trufi_core/models/plan_entity.dart';
@@ -15,9 +14,8 @@ import 'package:trufi_core/trufi_map_controller.dart';
 class RoutingMapComponent extends TrufiLayer {
   static const String layerId = 'routing-map-component';
 
-  static final Widget fromMarker = Container(
+  static final Widget fromMarker = SizedBox(
     height: 24,
-    color: Colors.amber,
     child: FittedBox(
       child: Stack(
         alignment: AlignmentDirectional.center,

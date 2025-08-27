@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:maplibre_gl/maplibre_gl.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:trufi_core/localization/app_localization.dart';
 import 'package:trufi_core/models/enums/transport_mode.dart';
 import 'package:trufi_core/models/plan_entity.dart';
@@ -21,6 +21,7 @@ class ItineraryDetailsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final plan = routingMapComponent.plan!;
     final itinerary = routingMapComponent.selectedItinerary!;
     return Container(
       padding: EdgeInsets.only(left: 20, right: 16),
@@ -42,15 +43,99 @@ class ItineraryDetailsCard extends StatelessWidget {
               ),
             ],
           ),
-
-          SizedBox(height: 50),
+          SizedBox(height: 24),
+          ItineraryLocationTile(
+            text: plan.from?.name ?? '',
+            icon: RoutingMapComponent.fromMarker,
+            moveTo: () {
+              routingMapComponent.controller.updateCamera(
+                target: LatLng(plan.from!.latitude!, plan.from!.longitude!),
+                zoom: 18,
+              );
+            },
+          ),
+          SizedBox(height: 10),
           ...itinerary.legs.map((leg) {
             return leg.transitLeg
-                ? TransitDetailsIcon(leg: leg, moveTo: (p0) {})
-                : WalkDetailsIcon(leg: leg, moveTo: (p0) {});
+                ? TransitDetailsIcon(
+                    leg: leg,
+                    moveTo: (p0) {
+                      routingMapComponent.controller.updateCamera(
+                        target: p0,
+                        zoom: 18,
+                      );
+                    },
+                  )
+                : WalkDetailsIcon(
+                    leg: leg,
+                    moveTo: (p0) {
+                      routingMapComponent.controller.updateCamera(
+                        target: p0,
+                        zoom: 18,
+                      );
+                    },
+                  );
           }),
+          SizedBox(height: 10),
+          ItineraryLocationTile(
+            text: plan.to?.name ?? '',
+            icon: SizedBox(
+              width: 24,
+              height: 30,
+              child: FittedBox(
+                fit: BoxFit.none,
+                child: SizedBox(
+                  width: 30,
+                  height: 30,
+                  child: RoutingMapComponent.toMarker,
+                ),
+              ),
+            ),
+            moveTo: () {
+              routingMapComponent.controller.updateCamera(
+                target: LatLng(plan.to!.latitude!, plan.to!.longitude!),
+                zoom: 18,
+              );
+            },
+          ),
         ],
       ),
+    );
+  }
+}
+
+class ItineraryLocationTile extends StatelessWidget {
+  final String text;
+  final VoidCallback moveTo;
+  final Widget icon;
+  const ItineraryLocationTile({
+    super.key,
+    required this.text,
+    required this.moveTo,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Row(
+      children: [
+        icon,
+        Expanded(
+          child: Container(
+            margin: EdgeInsets.symmetric(horizontal: 16),
+            child: InkWell(
+              onTap: moveTo,
+              child: Text(
+                text,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -72,7 +157,7 @@ class WalkDetailsIcon extends StatelessWidget {
             Column(
               children: [
                 DotWalkIcon(),
-                SizedBox(height: 8),
+                SizedBox(height: 10),
                 DotWalkIcon(),
                 SizedBox(height: 8),
                 leg.transportMode.getImage(),
@@ -80,7 +165,6 @@ class WalkDetailsIcon extends StatelessWidget {
                 DotWalkIcon(),
                 SizedBox(height: 8),
                 DotWalkIcon(),
-                SizedBox(height: 8),
               ],
             ),
             Expanded(
@@ -89,15 +173,22 @@ class WalkDetailsIcon extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Divider(height: 10, thickness: 1),
+                    Divider(height: 1, thickness: 1),
                     InkWell(
                       onTap: () {
-                        // moveTo(TrufiLatLng(leg.fromPlace.lat, leg.fromPlace.lon));
+                        moveTo(LatLng(leg.fromPlace!.lat, leg.fromPlace!.lon));
                       },
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 3, 3, 5),
-                        child: Text(
-                          "Walk ${DateTimeUtils.durationToStringTime(leg.duration)} (${ItineraryLegUtils.distanceWithTranslation(leg.distance, localization)})",
+                        padding: const EdgeInsets.fromLTRB(0, 16, 3, 16),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                "Walk ${DateTimeUtils.durationToStringTime(leg.duration)} (${ItineraryLegUtils.distanceWithTranslation(leg.distance, localization)})",
+                              ),
+                            ),
+                            Icon(Icons.keyboard_arrow_right),
+                          ],
                         ),
                       ),
                     ),
@@ -143,60 +234,83 @@ class TransitDetailsIcon extends StatelessWidget {
     final theme = Theme.of(context);
     final localization = AppLocalization.of(context);
     final color = hexToColor(leg.route?.color);
-    return TransitLineSpace(
-      icon: leg.transportMode.getImage(color: Colors.black),
-      color: color,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            leg.fromPlace?.name ?? '',
-            style: theme.textTheme.bodyLarge?.copyWith(
-              fontWeight: FontWeight.w500,
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 10),
+      child: TransitLineSpace(
+        icon: leg.transportMode.getImage(color: Colors.black),
+        color: color,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            InkWell(
+              onTap: () {
+                moveTo(LatLng(leg.fromPlace!.lat, leg.fromPlace!.lon));
+              },
+              child: Text(
+                leg.fromPlace?.name ?? '',
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ),
-          ),
-          SizedBox(height: 16),
-          Row(
-            children: [
+            SizedBox(height: 4),
+            InkWell(
+              onTap: () {
+                moveTo(LatLng(leg.fromPlace!.lat, leg.fromPlace!.lon));
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(4),
+                        color: hexToColor(leg.route?.color),
+                      ),
+                      child: Text(
+                        leg.route?.shortName ?? '',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: hexToColor(leg.route?.textColor),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 8),
+                    Text(
+                      '${DateTimeUtils.durationToStringTime(leg.duration)} (${ItineraryLegUtils.distanceWithTranslation(leg.distance, localization)})',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.dividerColor,
+                      ),
+                    ),
+                    Spacer(),
+                    Icon(Icons.keyboard_arrow_right),
+                  ],
+                ),
+              ),
+            ),
+            if (leg.intermediatePlaces != null &&
+                leg.intermediatePlaces!.isNotEmpty)
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(4),
-                  color: hexToColor(leg.route?.color),
-                ),
-                child: Text(
-                  leg.route?.shortName ?? '',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: hexToColor(leg.route?.textColor),
-                  ),
+                margin: EdgeInsets.only(bottom: 16, top: 4),
+                child: IntermediatePlacesList(
+                  intermediatePlaces: leg.intermediatePlaces!,
+                  moveTo: moveTo,
                 ),
               ),
-              SizedBox(width: 8),
-              Text(
-                '${DateTimeUtils.durationToStringTime(leg.duration)} (${ItineraryLegUtils.distanceWithTranslation(leg.distance, localization)})',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.dividerColor,
+            InkWell(
+              onTap: () {
+                moveTo(LatLng(leg.toPlace!.lat, leg.toPlace!.lon));
+              },
+              child: Text(
+                leg.toPlace?.name ?? '',
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.w500,
                 ),
-              ),
-            ],
-          ),
-          if (leg.intermediatePlaces != null &&
-              leg.intermediatePlaces!.isNotEmpty)
-            Container(
-              margin: EdgeInsets.symmetric(vertical: 8),
-              child: IntermediatePlacesList(
-                intermediatePlaces: leg.intermediatePlaces!,
-                moveTo: moveTo,
               ),
             ),
-          Text(
-            leg.toPlace?.name ?? '',
-            style: theme.textTheme.bodyLarge?.copyWith(
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -227,8 +341,6 @@ class IntermediatePlacesList extends StatelessWidget {
             ],
           ),
           tilePadding: const EdgeInsets.only(right: 7),
-          // textColor: theme.primaryColor,
-          // collapsedTextColor: theme.primaryColor,
           iconColor: Colors.transparent,
           collapsedIconColor: Colors.transparent,
           childrenPadding: const EdgeInsets.symmetric(horizontal: 10),
@@ -246,14 +358,7 @@ class IntermediatePlacesList extends StatelessWidget {
                         Expanded(
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Text(
-                              //   DateFormat('HH:mm')
-                              //       .format(DateTime.now()),
-                              // ),
-                              // const SizedBox(width: 5),
-                              Flexible(child: Text(e.name)),
-                            ],
+                            children: [Flexible(child: Text(e.name))],
                           ),
                         ),
                         const SizedBox(width: 5),
