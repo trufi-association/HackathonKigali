@@ -99,6 +99,7 @@ class TrufiMapController {
       return false;
     }
     cameraPositionNotifier.value = position;
+    
     return true;
   }
 

@@ -6,7 +6,7 @@ import 'package:trufi_core/pages/home/widgets/travel_bottom_sheet/travel_bottom_
 import 'package:trufi_core/screens/route_navigation/maps/flutter_map.dart';
 import 'package:trufi_core/screens/route_navigation/maps/trufi_map_controller.dart';
 import 'package:trufi_core/screens/route_navigation/maps/maplibre_gl.dart';
-import 'package:trufi_core/screens/route_navigation/map_layers/weather/weather_layer.dart';
+import 'package:trufi_core/screens/route_navigation/map_layers/weather_stations/weather_stations_layer.dart';
 import 'package:trufi_core/widgets/bottom_sheet/trufi_bottom_sheet.dart';
 class RouteNavigationScreen extends StatefulWidget {
   const RouteNavigationScreen({super.key});
@@ -27,14 +27,14 @@ class _RouteNavigationScreenState extends State<RouteNavigationScreen> {
   );
 
   late final RoutingMapComponent routingMapComponent;
-  late final WeatherLayer weatherLayer;
+  late final WeatherStationsLayer weatherLayer;
   TrufiMarker? selectedMarker;
 
   @override
   void initState() {
     super.initState();
     routingMapComponent = RoutingMapComponent(mapController);
-    weatherLayer = WeatherLayer(mapController);
+    weatherLayer = WeatherStationsLayer(mapController);
   }
 
   @override

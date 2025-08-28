@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:trufi_core/screens/route_navigation/map_layers/weather/weather_feature_model.dart';
+import 'package:trufi_core/screens/route_navigation/map_layers/weather_stations/weather_feature_model.dart';
 
 import 'package:intl/intl.dart';
 
@@ -8,57 +8,45 @@ class WeatherMarkerModal extends StatelessWidget {
   final Widget icon;
 
   const WeatherMarkerModal({
-    Key? key,
+    super.key,
     required this.weatherFeature,
     required this.icon,
-  }) : super(key: key);
+  });
 
   String _mapRoadCondition(int? value, bool isEnglish) {
-    if (value == null) return isEnglish ? "Unknown" : "Unbekannt";
-    switch (value) {
-      case 10:
-        return isEnglish ? "Dry" : "Trocken";
-      case 15:
-        return isEnglish ? "Humid" : "Feucht";
-      case 20:
-        return isEnglish ? "Wet" : "Nass";
-      case 25:
-        return isEnglish ? "Humid with salt" : "Feucht mit Salz";
-      case 30:
-        return isEnglish ? "Wet with salt" : "Nass mit Salz";
-      case 35:
-        return isEnglish ? "Ice" : "Eis";
-      case 40:
-        return isEnglish ? "Snow" : "Schnee";
-      case 45:
-        return isEnglish ? "Frost" : "Frost / Reif";
-      default:
-        return isEnglish ? "Unknown" : "Unbekannt";
-    }
+    const roadConditions = {
+      10: {'en': "Dry", 'de': "Trocken"},
+      15: {'en': "Humid", 'de': "Feucht"},
+      20: {'en': "Wet", 'de': "Nass"},
+      25: {'en': "Humid with salt", 'de': "Feucht mit Salz"},
+      30: {'en': "Wet with salt", 'de': "Nass mit Salz"},
+      35: {'en': "Ice", 'de': "Eis"},
+      40: {'en': "Snow", 'de': "Schnee"},
+      45: {'en': "Frost", 'de': "Frost / Reif"},
+    };
+    final lang = isEnglish ? 'en' : 'de';
+    return roadConditions[value]?[lang] ??
+        (isEnglish ? "Unknown" : "Unbekannt");
   }
 
   String _mapPrecipitationType(int? value, bool isEnglish) {
-    if (value == null) return isEnglish ? "Unknown" : "Unbekannt";
-    switch (value) {
-      case 0:
-        return isEnglish ? "No precipitation" : "kein Niederschlag";
-      case 60:
-        return isEnglish
-            ? "Liquid precipitation, e.g. rain"
-            : "flüssiger Niederschlag, z.B. Regen";
-      case 70:
-        return isEnglish
-            ? "Solid precipitation, e.g. snow"
-            : "fester Niederschlag, z.B. Schnee";
-      case 67:
-        return isEnglish ? "Freezing rain" : "Eisregen";
-      case 69:
-        return isEnglish ? "Sleet" : "Schneeregen";
-      case 90:
-        return isEnglish ? "Hail" : "Hagel";
-      default:
-        return isEnglish ? "Unknown" : "Unbekannt";
-    }
+    const precipitationTypes = {
+      0: {'en': "No precipitation", 'de': "kein Niederschlag"},
+      60: {
+        'en': "Liquid precipitation, e.g. rain",
+        'de': "flüssiger Niederschlag, z.B. Regen",
+      },
+      70: {
+        'en': "Solid precipitation, e.g. snow",
+        'de': "fester Niederschlag, z.B. Schnee",
+      },
+      67: {'en': "Freezing rain", 'de': "Eisregen"},
+      69: {'en': "Sleet", 'de': "Schneeregen"},
+      90: {'en': "Hail", 'de': "Hagel"},
+    };
+    final lang = isEnglish ? 'en' : 'de';
+    return precipitationTypes[value]?[lang] ??
+        (isEnglish ? "Unknown" : "Unbekannt");
   }
 
   @override
@@ -153,10 +141,7 @@ class WeatherMarkerModal extends StatelessWidget {
               if (weatherFeature.updatedAt != null)
                 _buildRow(
                   isEnglishCode ? 'Last Update' : 'Daten von',
-                  formatDateWithoutSeconds(
-                    weatherFeature.updatedAt!,
-                    "en",
-                  ),
+                  formatDateWithoutSeconds(weatherFeature.updatedAt!, "en"),
                   theme,
                 ),
             ],
