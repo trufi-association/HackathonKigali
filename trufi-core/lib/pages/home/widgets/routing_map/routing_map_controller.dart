@@ -84,6 +84,26 @@ class RoutingMapComponent extends TrufiLayer {
   RoutingMapComponent(super.controller) : super(id: layerId, layerLevel: 2) {
     routingMapSelected = RoutingMapSelected(controller, layerLevel: layerLevel);
     mapRouteHiveLocal.loadRepository().then((_) async {
+      final savedOrigin = await mapRouteHiveLocal.getOriginPosition();
+      if (savedOrigin != null) {
+        origin = TrufiMarker(
+          id: "origin",
+          position: savedOrigin,
+          widget: fromMarker,
+          size: const Size(20, 20),
+        );
+      }
+
+      final savedDestination = await mapRouteHiveLocal.getDestinationPosition();
+      if (savedDestination != null) {
+        destination = TrufiMarker(
+          id: "destination",
+          position: savedDestination,
+          widget: toMarker,
+          alignment: Alignment.topCenter,
+        );
+      }
+
       plan = await mapRouteHiveLocal.getPlan();
       routingMapSelected.changeItinerary(plan?.itineraries?.firstOrNull);
       _rebuildGraphics();
@@ -99,41 +119,33 @@ class RoutingMapComponent extends TrufiLayer {
     origin = null;
     destination = null;
     plan = null;
+    unawaited(mapRouteHiveLocal.saveOriginPosition(null));
+    unawaited(mapRouteHiveLocal.saveDestinationPosition(null));
+    unawaited(mapRouteHiveLocal.savePlan(null));
     routingMapSelected.changeItinerary(null);
     _rebuildGraphics();
   }
 
-  Future<void> addOrigin(latlng.LatLng position, BuildContext context) async {
+  Future<void> addOrigin(latlng.LatLng position) async {
     origin = TrufiMarker(
       id: "origin",
       position: position,
       widget: fromMarker,
       size: const Size(20, 20),
     );
+    mapRouteHiveLocal.saveOriginPosition(position); // NUEVO
     _rebuildGraphics();
-
-    if (destination != null) {
-      await fetchPlan(context);
-      _rebuildGraphics();
-    }
   }
 
-  Future<void> addDestination(
-    latlng.LatLng position,
-    BuildContext context,
-  ) async {
+  Future<void> addDestination(latlng.LatLng position) async {
     destination = TrufiMarker(
       id: "destination",
       position: position,
       widget: toMarker,
       alignment: Alignment.topCenter,
     );
+    mapRouteHiveLocal.saveDestinationPosition(position); // NUEVO
     _rebuildGraphics();
-
-    if (origin != null) {
-      await fetchPlan(context);
-      _rebuildGraphics();
-    }
   }
 
   Future<void> fetchPlan(BuildContext context) async {
@@ -171,6 +183,7 @@ class RoutingMapComponent extends TrufiLayer {
     } else {
       routingMapSelected.changeItinerary(null);
     }
+    _rebuildGraphics();
   }
 
   void selectNextItinerary() {

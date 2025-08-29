@@ -8,6 +8,7 @@ import 'package:trufi_core/screens/route_navigation/maps/trufi_map_controller.da
 import 'package:trufi_core/screens/route_navigation/maps/maplibre_gl.dart';
 import 'package:trufi_core/screens/route_navigation/map_layers/weather_stations/weather_stations_layer.dart';
 import 'package:trufi_core/widgets/bottom_sheet/trufi_bottom_sheet.dart';
+
 class RouteNavigationScreen extends StatefulWidget {
   const RouteNavigationScreen({super.key});
 
@@ -43,6 +44,27 @@ class _RouteNavigationScreenState extends State<RouteNavigationScreen> {
     super.dispose();
   }
 
+  Future<void> _fetchPlanWithLoading() async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const _LoadingDialog(message: 'Calculating route...'),
+    );
+
+    try {
+      await routingMapComponent.fetchPlan(context);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to fetch route: $e')));
+    } finally {
+      if (mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,11 +83,12 @@ class _RouteNavigationScreenState extends State<RouteNavigationScreen> {
                   selectedMarker = nearest;
                 });
               },
-              onMapLongClick: (coord) {
+              onMapLongClick: (coord) async {
                 if (routingMapComponent.origin == null) {
-                  routingMapComponent.addOrigin(coord, context);
+                  routingMapComponent.addOrigin(coord);
                 } else if (routingMapComponent.destination == null) {
-                  routingMapComponent.addDestination(coord, context);
+                  routingMapComponent.addDestination(coord);
+                  await _fetchPlanWithLoading();
                 } else {
                   routingMapComponent.cleanOriginAndDestination();
                 }
@@ -84,11 +107,12 @@ class _RouteNavigationScreenState extends State<RouteNavigationScreen> {
                   selectedMarker = nearest;
                 });
               },
-              onMapLongClick: (coord) {
+              onMapLongClick: (coord) async {
                 if (routingMapComponent.origin == null) {
-                  routingMapComponent.addOrigin(coord, context);
+                  routingMapComponent.addOrigin(coord);
                 } else if (routingMapComponent.destination == null) {
-                  routingMapComponent.addDestination(coord, context);
+                  routingMapComponent.addDestination(coord);
+                  await _fetchPlanWithLoading();
                 } else {
                   routingMapComponent.cleanOriginAndDestination();
                 }
@@ -102,6 +126,37 @@ class _RouteNavigationScreenState extends State<RouteNavigationScreen> {
             trufiMapController: mapController,
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _LoadingDialog extends StatelessWidget {
+  final String message;
+  const _LoadingDialog({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return PopScope(
+      canPop: false,
+      child: Dialog(
+        insetPadding: const EdgeInsets.symmetric(horizontal: 48),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(
+                width: 28,
+                height: 28,
+                child: CircularProgressIndicator(strokeWidth: 3),
+              ),
+              const SizedBox(width: 16),
+              Flexible(child: Text(message)),
+            ],
+          ),
+        ),
       ),
     );
   }
