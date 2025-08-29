@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:trufi_core/screens/route_navigation/map_layers/sorted_list.dart';
 import 'package:trufi_core/screens/route_navigation/map_layers/tile_grid_layer.dart';
-import 'package:trufi_core/sorted_list.dart';
 import 'package:trufi_core/screens/route_navigation/maps/trufi_map_controller.dart';
 import 'package:trufi_core/screens/route_navigation/map_layers/weather_stations/image.dart';
 import 'package:trufi_core/screens/route_navigation/map_layers/weather_stations/weather_feature_model.dart';
@@ -34,7 +34,7 @@ class WeatherStationsLayer extends TrufiLayer {
       onFetchElements: onFetchElements,
       granularityLevels: 3,
       color: Colors.red,
-      showGrid: true,
+      showGrid: false,
     );
   }
 

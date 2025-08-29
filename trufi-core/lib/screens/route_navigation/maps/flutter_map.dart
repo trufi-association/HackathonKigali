@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart' as fm;
 import 'package:latlong2/latlong.dart' as latlng;
-import 'package:trufi_core/screens/route_navigation/maps/trufi_map_controller.dart' as trufi;
+import 'package:trufi_core/screens/route_navigation/maps/trufi_map_controller.dart'
+    as trufi;
 
 class TrufiFlutterMap extends StatefulWidget {
   const TrufiFlutterMap({
@@ -93,7 +94,7 @@ class _TrufiFlutterMapState extends State<TrufiFlutterMap> {
         onLongPress: (_, position) => widget.onMapLongClick?.call(position),
       ),
       children: [
-        Opacity(opacity: 1, child: fm.TileLayer(urlTemplate: widget.tileUrl)),
+        Opacity(opacity: .5, child: fm.TileLayer(urlTemplate: widget.tileUrl)),
         for (final layer in visibleLayers)
           fm.MarkerLayer(
             markers: [
@@ -116,6 +117,9 @@ class _TrufiFlutterMapState extends State<TrufiFlutterMap> {
                   points: line.position,
                   strokeWidth: line.lineWidth.toDouble(),
                   color: line.color,
+                  pattern: line.activeDots
+                      ? fm.StrokePattern.dotted()
+                      : fm.StrokePattern.solid(),
                 ),
           ],
         ),

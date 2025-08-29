@@ -131,9 +131,8 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
         lineColor: ["get", "color"],
         lineWidth: ["get", "width"],
         lineSortKey: ["get", "layerLevel"],
-        lineDasharray: [0.5, 1.5],
+        lineDasharray: [1.5, 1],
         lineJoin: "round",
-        lineCap: "round",
       ),
       filter: [
         "==",
