@@ -7,6 +7,7 @@ import 'package:path/path.dart' show join;
 
 import 'package:graphql/client.dart' show HiveStore;
 import 'package:trufi_core/pages/home/repository/hive_local_repository.dart';
+import 'package:trufi_core/repositories/location/interfaces/i_location_service.dart';
 
 /// Initializes Hive with the path from [getApplicationDocumentsDirectory].
 ///
@@ -35,4 +36,7 @@ Future<void> initHiveForFlutter({
   }
 }
 
-const listPathsHive = <String>[MapRouteHiveLocalRepository.path];
+const listPathsHive = <String>[
+  MapRouteHiveLocalRepository.path,
+  ILocationService.path,
+];

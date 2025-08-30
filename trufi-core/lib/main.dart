@@ -4,6 +4,7 @@ import 'package:trufi_core/localization/app_localization.dart';
 import 'package:trufi_core/localization/language_bloc.dart';
 import 'package:trufi_core/default_theme.dart';
 import 'package:trufi_core/hive_init.dart';
+import 'package:trufi_core/pages/saved_places/saved_places.dart';
 import 'package:trufi_core/screens/route_navigation/route_navigation.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -38,7 +39,7 @@ class MyApp extends StatelessWidget {
         ],
         theme: lightTheme,
         darkTheme: darkTheme,
-        home: const RouteNavigationScreen(),
+        home: const SavedPlacesPage(),
       ),
     );
   }

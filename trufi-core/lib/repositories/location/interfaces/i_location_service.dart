@@ -1,6 +1,7 @@
 import 'package:trufi_core/screens/route_navigation/maps/trufi_map_controller.dart';
 
 abstract class ILocationService {
+  static const String path = "HiveLocationService";
   Future<void> loadRepository();
 
   Future<List<TrufiLocation>> getMyPlaces();

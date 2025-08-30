@@ -5,7 +5,6 @@ import 'package:trufi_core/screens/route_navigation/maps/trufi_map_controller.da
 import 'package:trufi_core/repositories/location/interfaces/i_location_service.dart';
 
 class HiveLocationService implements ILocationService {
-  static const String path = "HiveLocationService";
   static const _favoritePlacesKey = 'HiveLocationService_FavoritePlaces';
   static const _historyPlacesKey = 'HiveLocationService_HistoryPlaces';
   static const _myDefaultPlacesKey = 'HiveLocationService_MyDefaultPlaces';
@@ -14,7 +13,7 @@ class HiveLocationService implements ILocationService {
 
   @override
   Future<void> loadRepository() async {
-    _box = Hive.box(path);
+    _box = Hive.box(ILocationService.path);
   }
 
   @override
