@@ -24,7 +24,9 @@ class ApiConfig {
   //     "https://track.stadtnavi.de/matomo.php"; // For PROD
 
 
-  String searchPhotonEndpoint = "https://kigali.trufi.dev/photon/api/";
+  String searchPhotonEndpoint = "https://photon.komoot.io";
+  // String searchPhotonEndpoint = "https://navigator.trufi.app/photon";
+  
   String reverseGeodecodingPhotonEndpoint =
       "https://kigali.trufi.dev/photon/reverse/";
   String mapEndpoint = "https://kigali.trufi.dev/static-maps/trufi-liberty/";

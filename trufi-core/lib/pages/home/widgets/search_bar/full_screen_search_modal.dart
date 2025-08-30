@@ -1,19 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:trufi_core/repositories/location/location_repository.dart';
+import 'package:trufi_core/screens/route_navigation/maps/trufi_map_controller.dart';
+import 'package:trufi_core/utils/icon_utils/icons.dart';
 
-class FullScreenSearchModal extends StatelessWidget {
+class FullScreenSearchModal extends StatefulWidget {
   const FullScreenSearchModal({super.key});
+
+  @override
+  State<FullScreenSearchModal> createState() => _FullScreenSearchModalState();
+}
+
+class _FullScreenSearchModalState extends State<FullScreenSearchModal> {
+  String query = '';
+  final locationRepository = LocationRepository();
+
+  @override
+  void initState() {
+    locationRepository.searchResult.addListener(update);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    locationRepository.searchResult.removeListener(update);
+    super.dispose();
+  }
+
+  void update() {
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
     final divider = Divider(height: 8, thickness: 8, color: Colors.grey[200]);
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Search bar (Hero from your code)
             Hero(
               tag: 'search-bar',
               child: Material(
@@ -39,7 +64,7 @@ class FullScreenSearchModal extends StatelessWidget {
                           ),
                         ),
                       ),
-                      const Expanded(
+                      Expanded(
                         child: TextField(
                           autofocus: true,
                           decoration: InputDecoration(
@@ -47,6 +72,14 @@ class FullScreenSearchModal extends StatelessWidget {
                             border: InputBorder.none,
                           ),
                           textInputAction: TextInputAction.search,
+                          onChanged: (text) {
+                            locationRepository.fetchLocations(
+                              text.trim().toLowerCase(),
+                            );
+                            setState(() {
+                              query = text;
+                            });
+                          },
                         ),
                       ),
                       IconButton(
@@ -59,111 +92,122 @@ class FullScreenSearchModal extends StatelessWidget {
                 ),
               ),
             ),
-
-            // Quick actions row
             Expanded(
               child: CustomScrollView(
                 slivers: [
-                  SliverToBoxAdapter(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        SizedBox(
-                          height: 74,
-                          child: ListView(
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            scrollDirection: Axis.horizontal,
-                            children: const [
-                              _QuickActionPill(
-                                icon: Icons.home_outlined,
-                                title: 'Home',
-                                subtitle: 'Ave Beijing,...',
-                                iconColor: Color(0xFF394041),
-                                iconBackgorundColor: Color(0xFFD9E5EB),
+                  if (query.isEmpty)
+                    SliverToBoxAdapter(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SizedBox(
+                            height: 74,
+                            child: ListView(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
                               ),
-                              _QuickActionPill(
-                                icon: Icons.work_outline,
-                                title: 'Work',
-                                subtitle: 'Set location',
-                                iconColor: Color(0xFF394041),
-                                iconBackgorundColor: Color(0xFFD9E5EB),
-                              ),
-                              _QuickActionPill(
-                                icon: Icons.format_list_bulleted_rounded,
-                                title: 'Shared Lists',
-                                subtitle: '2 places',
-                                iconColor: Colors.white,
-                                iconBackgorundColor: Color(0xFF396872),
-                              ),
-                            ],
+                              scrollDirection: Axis.horizontal,
+                              children: const [
+                                _QuickActionPill(
+                                  icon: Icons.home_outlined,
+                                  title: 'Home',
+                                  subtitle: 'Ave Beijing,...',
+                                  iconColor: Color(0xFF394041),
+                                  iconBackgorundColor: Color(0xFFD9E5EB),
+                                ),
+                                _QuickActionPill(
+                                  icon: Icons.work_outline,
+                                  title: 'Work',
+                                  subtitle: 'Set location',
+                                  iconColor: Color(0xFF394041),
+                                  iconBackgorundColor: Color(0xFFD9E5EB),
+                                ),
+                                _QuickActionPill(
+                                  icon: Icons.format_list_bulleted_rounded,
+                                  title: 'Shared Lists',
+                                  subtitle: '2 places',
+                                  iconColor: Colors.white,
+                                  iconBackgorundColor: Color(0xFF396872),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        divider,
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Recent',
-                                style: Theme.of(context).textTheme.titleSmall!
-                                    .copyWith(fontWeight: FontWeight.w600),
-                              ),
-                              Icon(Icons.info_outline, size: 20),
-                            ],
+                          divider,
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Recent',
+                                  style: Theme.of(context).textTheme.titleSmall!
+                                      .copyWith(fontWeight: FontWeight.w600),
+                                ),
+                                Icon(Icons.info_outline, size: 20),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
                   SliverList.list(
                     children: [
-                      _PlaceTile(
-                        leadingIcon: Icons.access_time,
-                        leadingColor: Colors.black45,
-                        title: 'Chimpu Ojjllu',
-                        subtitle: 'Cochabamba',
-                      ),
-                      _PlaceTile(
-                        leadingIcon: Icons.access_time,
-                        leadingColor: Colors.black45,
-                        title: 'Chimpu Ojjllu',
-                        subtitle: 'Cochabamba',
-                      ),
-                      _PlaceTile(
-                        leadingIcon: Icons.access_time,
-                        leadingColor: Colors.black45,
-                        title: 'Avenida La Paz, Cusco, Peru',
-                        subtitle: '',
-                      ),
-                      _PlaceTile(
-                        leadingIcon: Icons.access_time,
-                        leadingColor: Colors.black45,
-                        title: 'Quito',
-                        subtitle: 'Ecuador',
-                      ),
-                      _PlaceTile(
-                        leadingIcon: Icons.access_time,
-                        leadingColor: Colors.black45,
-                        title: 'Estacion Wanchaq',
-                        subtitle: 'El Sol, Cusco, Peru',
-                      ),
-                      _PlaceTile(
-                        leadingIcon: Icons.access_time,
-                        leadingColor: Colors.black45,
-                        title: 'Avenida El Sol 843',
-                        subtitle: 'Cusco, Peru',
-                      ),
-                      _PlaceTile(
-                        leadingIcon: Icons.favorite,
-                        leadingColor: Colors.white,
-                        backgroundColor: Color(0xFFAF3126),
-                        title: 'Mercado Loreto',
-                        subtitle: 'Saved in Favorites',
-                        metaPrimary: 'Open',
-                        metaPrimaryColor: Color(0xFF188038),
-                        metaSecondary: 'Closes 3 PM',
-                      ),
+                      if (query.isEmpty)
+                        ...locationRepository.historyPlaces.value.reversed.map((
+                          location,
+                        ) {
+                          return PlaceTile2(location: location);
+                        }),
+
+                      ...locationRepository.searchResult.value.map((location) {
+                        return PlaceTile2(location: location);
+                      }),
+                      // _PlaceTile(
+                      //   leadingIcon: Icons.access_time,
+                      //   leadingColor: Colors.black45,
+                      //   title: 'Chimpu Ojjllu',
+                      //   subtitle: 'Cochabamba',
+                      // ),
+                      // _PlaceTile(
+                      //   leadingIcon: Icons.access_time,
+                      //   leadingColor: Colors.black45,
+                      //   title: 'Chimpu Ojjllu',
+                      //   subtitle: 'Cochabamba',
+                      // ),
+                      // _PlaceTile(
+                      //   leadingIcon: Icons.access_time,
+                      //   leadingColor: Colors.black45,
+                      //   title: 'Avenida La Paz, Cusco, Peru',
+                      //   subtitle: '',
+                      // ),
+                      // _PlaceTile(
+                      //   leadingIcon: Icons.access_time,
+                      //   leadingColor: Colors.black45,
+                      //   title: 'Quito',
+                      //   subtitle: 'Ecuador',
+                      // ),
+                      // _PlaceTile(
+                      //   leadingIcon: Icons.access_time,
+                      //   leadingColor: Colors.black45,
+                      //   title: 'Estacion Wanchaq',
+                      //   subtitle: 'El Sol, Cusco, Peru',
+                      // ),
+                      // _PlaceTile(
+                      //   leadingIcon: Icons.access_time,
+                      //   leadingColor: Colors.black45,
+                      //   title: 'Avenida El Sol 843',
+                      //   subtitle: 'Cusco, Peru',
+                      // ),
+                      // _PlaceTile(
+                      //   leadingIcon: Icons.favorite,
+                      //   leadingColor: Colors.white,
+                      //   backgroundColor: Color(0xFFAF3126),
+                      //   title: 'Mercado Loreto',
+                      //   subtitle: 'Saved in Favorites',
+                      //   metaPrimary: 'Open',
+                      //   metaPrimaryColor: Color(0xFF188038),
+                      //   metaSecondary: 'Closes 3 PM',
+                      // ),
                       _MoreFromHistory(),
                       divider,
                       _ContactsCard(),
@@ -356,6 +400,120 @@ class _PlaceTile extends StatelessWidget {
                         ],
                       ),
                     ],
+                  ],
+                )
+              : null,
+          onTap: () {},
+        ),
+        Divider(height: 0.5, thickness: 0.5, indent: 60),
+      ],
+    );
+  }
+}
+
+class PlaceTile2 extends StatelessWidget {
+  final TrufiLocation location;
+  final IconData? leadingIcon;
+  final Color? leadingColor;
+
+  const PlaceTile2({
+    super.key,
+    required this.location,
+    this.leadingIcon,
+    this.leadingColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final title = location.description;
+    final subtitle = location.address;
+    final metaPrimary = null;
+    final metaPrimaryColor = null;
+    final metaSecondary = null;
+    return Column(
+      children: [
+        ListTile(
+          dense: false,
+          visualDensity: VisualDensity.compact,
+          horizontalTitleGap: 12,
+          minVerticalPadding: (subtitle != null && subtitle.isNotEmpty)
+              ? 12
+              : (subtitle != null && subtitle.isNotEmpty)
+              ? 8
+              : 20,
+          leading: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                height: (subtitle != null && subtitle.isNotEmpty) ? 0 : 6,
+              ),
+              CircleAvatar(
+                backgroundColor: Colors.grey[200],
+                radius: 18,
+                child: leadingIcon != null
+                    ? Icon(leadingIcon, color: leadingColor, size: 20)
+                    : typeToIconData(
+                        location.type,
+                        color: theme.iconTheme.color,
+                      ),
+              ),
+            ],
+          ),
+          title: Text(
+            title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.titleMedium,
+          ),
+          subtitle: subtitle != null && subtitle.isNotEmpty
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      subtitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+
+                      style: theme.textTheme.bodyMedium!.copyWith(
+                        color: Colors.black54,
+                        height: 1,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        if (metaPrimary != null)
+                          Text(
+                            metaPrimary!,
+                            style: theme.textTheme.bodyMedium!.copyWith(
+                              color: metaPrimaryColor ?? Colors.black87,
+                              fontWeight: FontWeight.w600,
+                              height: 1,
+                            ),
+                          ),
+                        if (metaPrimary != null && metaSecondary != null)
+                          const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 6),
+                            child: Text(
+                              '·',
+                              style: TextStyle(
+                                color: Colors.black45,
+                                height: 1,
+                              ),
+                            ),
+                          ),
+                        if (metaSecondary != null)
+                          Text(
+                            metaSecondary!,
+                            style: theme.textTheme.bodyMedium!.copyWith(
+                              color: Colors.black54,
+                              height: 1,
+                            ),
+                          ),
+                      ],
+                    ),
                   ],
                 )
               : null,

@@ -8,6 +8,7 @@ class LocationSearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return SafeArea(
       child: GestureDetector(
         onTap: () => Navigator.of(context).push(
@@ -20,26 +21,37 @@ class LocationSearchBar extends StatelessWidget {
         child: Hero(
           tag: 'search-bar',
           child: Material(
+            color: Colors.transparent,
             child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 12),
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+              margin: const EdgeInsets.symmetric(horizontal: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.7),
+                color: theme.colorScheme.surface,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withAlpha(120),
+                    spreadRadius: 0.2,
+                    blurRadius: 2,
+                    offset: Offset(0, 0),
+                  ),
+                ],
                 borderRadius: BorderRadius.circular(24),
               ),
               height: 48,
               child: Row(
                 children: [
-                  const Icon(Icons.search, color: Colors.white),
+                  const Icon(Icons.search),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: const Text(
+                    child: Text(
                       'Search here',
-                      style: TextStyle(color: Colors.white70, fontSize: 16),
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: theme.colorScheme.onSurface,
+                      ),
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.menu, color: Colors.white),
+                    icon: const Icon(Icons.menu),
                     onPressed: () => _showMenuOptions(context),
                   ),
                 ],

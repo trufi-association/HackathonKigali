@@ -51,18 +51,18 @@ final ThemeData lightTheme = ThemeData(
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
   ),
   // Campos de texto (InputDecoration)
-  inputDecorationTheme: InputDecorationTheme(
-    filled: true,
-    fillColor: lightColorScheme.surfaceContainerLow,
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8),
-      borderSide: BorderSide(color: lightColorScheme.outline),
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8),
-      borderSide: BorderSide(color: lightColorScheme.primary),
-    ),
-  ),
+  // inputDecorationTheme: InputDecorationTheme(
+  //   filled: true,
+  //   fillColor: lightColorScheme.surfaceContainerLow,
+  //   border: OutlineInputBorder(
+  //     borderRadius: BorderRadius.circular(8),
+  //     borderSide: BorderSide(color: lightColorScheme.outline),
+  //   ),
+  //   focusedBorder: OutlineInputBorder(
+  //     borderRadius: BorderRadius.circular(8),
+  //     borderSide: BorderSide(color: lightColorScheme.primary),
+  //   ),
+  // ),
   // Botones elevados conforme a Material 3
   elevatedButtonTheme: ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
