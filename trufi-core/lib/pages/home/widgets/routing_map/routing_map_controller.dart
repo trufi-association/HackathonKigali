@@ -113,6 +113,10 @@ class RoutingMapComponent extends TrufiLayer {
   void changeItinerary(PlanItinerary itinerary) {
     routingMapSelected.changeItinerary(itinerary);
     _rebuildGraphics();
+    final allPositions = itinerary.legs
+        .expand((leg) => leg.accumulatedPoints)
+        .toList();
+    final visibleRegion = controller.cameraPositionNotifier.value.visibleRegion;
     // TODO fit camera, from itinerary get target and zoom
     controller.updateCamera(target: latlng.LatLng(0, 0), zoom: 14, bearing: 0);
   }
