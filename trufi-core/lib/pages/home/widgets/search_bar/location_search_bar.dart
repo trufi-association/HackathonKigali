@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:trufi_core/pages/home/widgets/search_bar/full_screen_search_modal.dart';
-// import 'package:trufi_core/pages/home/widgets/search_bar/full_screen_search_modal_gpt-5.dart';
-// import 'package:trufi_core/pages/home/widgets/search_bar/full_screen_search_modal_gpt-5-thin.dart';
 
 class LocationSearchBar extends StatelessWidget {
   const LocationSearchBar({super.key});
@@ -10,41 +8,47 @@ class LocationSearchBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return SafeArea(
-      child: GestureDetector(
-        onTap: () => Navigator.of(context).push(
-          PageRouteBuilder(
-            opaque: false,
-            transitionDuration: const Duration(milliseconds: 300),
-            pageBuilder: (_, __, ___) => const FullScreenSearchModal(),
-          ),
-        ),
-        child: Hero(
-          tag: 'search-bar',
-          child: Material(
-            color: Colors.transparent,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(24),
+          onTap: () {
+            Navigator.of(context).push(
+              PageRouteBuilder(
+                opaque: false,
+                transitionDuration: const Duration(milliseconds: 300),
+                pageBuilder: (_, __, ___) => const FullScreenSearchModal(),
+              ),
+            );
+          },
+          child: Hero(
+            tag: 'search-bar',
             child: Container(
               margin: const EdgeInsets.symmetric(horizontal: 12),
               padding: const EdgeInsets.symmetric(horizontal: 16),
+              height: 48,
               decoration: BoxDecoration(
                 color: theme.colorScheme.surface,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withAlpha(120),
-                    spreadRadius: 0.2,
-                    blurRadius: 2,
-                    offset: Offset(0, 0),
+                    color: Colors.black.withAlpha(80),
+                    spreadRadius: 0,
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
                   ),
                 ],
                 borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: theme.colorScheme.outlineVariant),
               ),
-              height: 48,
               child: Row(
                 children: [
-                  const Icon(Icons.search),
+                  Icon(Icons.search, color: theme.colorScheme.onSurface),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Search here',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodyLarge?.copyWith(
                         color: theme.colorScheme.onSurface,
                       ),
@@ -52,7 +56,9 @@ class LocationSearchBar extends StatelessWidget {
                   ),
                   IconButton(
                     icon: const Icon(Icons.menu),
+                    color: theme.colorScheme.onSurface,
                     onPressed: () => _showMenuOptions(context),
+                    tooltip: 'Menú',
                   ),
                 ],
               ),
@@ -64,12 +70,15 @@ class LocationSearchBar extends StatelessWidget {
   }
 
   void _showMenuOptions(BuildContext context) {
+    final theme = Theme.of(context);
     showModalBottomSheet(
       context: context,
+      useSafeArea: true,
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: theme.colorScheme.surface,
       builder: (context) {
         return SingleChildScrollView(
           child: Column(
@@ -94,21 +103,21 @@ class LocationSearchBar extends StatelessWidget {
                       borderRadius: const BorderRadius.vertical(
                         top: Radius.circular(24),
                       ),
-                      color: Colors.black.withOpacity(0.4),
+                      color: Colors.black.withOpacity(0.35),
                     ),
                   ),
                   Positioned.fill(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const CircleAvatar(
+                      children: const [
+                        CircleAvatar(
                           radius: 40,
                           backgroundImage: NetworkImage(
                             'https://trufi.app/wp-content/uploads/2019/02/48.png',
                           ),
                         ),
-                        const SizedBox(height: 12),
-                        const Text(
+                        SizedBox(height: 12),
+                        Text(
                           'Trufi Transit',
                           style: TextStyle(
                             fontSize: 20,

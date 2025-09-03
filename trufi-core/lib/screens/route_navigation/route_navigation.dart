@@ -94,7 +94,7 @@ class _RouteNavigationScreenState extends State<RouteNavigationScreen> {
                 }
               },
             ),
-          // if (showMapLibre)
+          if (showMapLibre)
             TrufiFlutterMap(
               controller: mapController,
               tileUrl: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',

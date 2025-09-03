@@ -94,7 +94,7 @@ class _TrufiFlutterMapState extends State<TrufiFlutterMap> {
         onLongPress: (_, position) => widget.onMapLongClick?.call(position),
       ),
       children: [
-        Opacity(opacity: .5, child: fm.TileLayer(urlTemplate: widget.tileUrl)),
+        Opacity(opacity: 1, child: fm.TileLayer(urlTemplate: widget.tileUrl)),
         for (final layer in visibleLayers)
           fm.MarkerLayer(
             markers: [

@@ -16,30 +16,42 @@ class _FullScreenSearchModalState extends State<FullScreenSearchModal> {
 
   @override
   void initState() {
-    locationRepository.searchResult.addListener(update);
-    locationRepository.myDefaultPlaces.addListener(update);
-    WidgetsBinding.instance.addPostFrameCallback((duration) async {
+    super.initState();
+    locationRepository.searchResult.addListener(_update);
+    locationRepository.myDefaultPlaces.addListener(_update);
+    locationRepository.myPlaces.addListener(_update);
+    locationRepository.historyPlaces.addListener(_update);
+    locationRepository.favoritePlaces.addListener(_update);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       await locationRepository.initLoad();
     });
-    super.initState();
   }
 
   @override
   void dispose() {
-    locationRepository.searchResult.removeListener(update);
-    locationRepository.myDefaultPlaces.removeListener(update);
+    locationRepository.searchResult.removeListener(_update);
+    locationRepository.myDefaultPlaces.removeListener(_update);
+    locationRepository.myPlaces.removeListener(_update);
+    locationRepository.historyPlaces.removeListener(_update);
+    locationRepository.favoritePlaces.removeListener(_update);
     super.dispose();
   }
 
-  void update() {
-    setState(() {});
+  void _update() {
+    if (mounted) setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    final divider = Divider(height: 8, thickness: 8, color: Colors.grey[200]);
+    final theme = Theme.of(context);
+    final divider = Divider(
+      height: 8,
+      thickness: 8,
+      color: theme.colorScheme.surfaceVariant,
+    );
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.colorScheme.surface,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -51,20 +63,29 @@ class _FullScreenSearchModalState extends State<FullScreenSearchModal> {
                 child: Container(
                   margin: const EdgeInsets.fromLTRB(12, 4, 12, 8),
                   padding: const EdgeInsets.symmetric(horizontal: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(32),
-                  ),
                   height: 48,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surface,
+                    borderRadius: BorderRadius.circular(32),
+                    border: Border.all(color: theme.colorScheme.outlineVariant),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
                   child: Row(
                     children: [
                       InkWell(
+                        borderRadius: BorderRadius.circular(24),
                         onTap: () => Navigator.of(context).pop(),
-                        child: const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 4),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
                           child: Icon(
                             Icons.arrow_back_ios_new,
-                            color: Colors.black,
+                            color: theme.colorScheme.onSurface,
                             size: 20,
                           ),
                         ),
@@ -72,24 +93,32 @@ class _FullScreenSearchModalState extends State<FullScreenSearchModal> {
                       Expanded(
                         child: TextField(
                           autofocus: true,
+                          cursorColor: theme.colorScheme.primary,
                           decoration: InputDecoration(
                             hintText: 'Search here',
+                            hintStyle: theme.textTheme.bodyLarge?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
                             border: InputBorder.none,
                           ),
                           textInputAction: TextInputAction.search,
                           onChanged: (text) {
-                            locationRepository.fetchLocations(
-                              text.trim().toLowerCase(),
-                            );
-                            setState(() {
-                              query = text;
-                            });
+                            final t = text.trim();
+                            setState(() => query = t);
+                            // IMPORTANTE: ya tienes debounce en el repo
+                            locationRepository.fetchLocations(t.toLowerCase());
+                          },
+                          onSubmitted: (text) {
+                            final t = text.trim();
+                            setState(() => query = t);
+                            locationRepository.fetchLocations(t.toLowerCase());
                           },
                         ),
                       ),
                       IconButton(
                         onPressed: () {},
-                        icon: const Icon(Icons.mic, color: Colors.black87),
+                        icon: const Icon(Icons.mic),
+                        color: theme.colorScheme.onSurface,
                         tooltip: 'Voice search',
                       ),
                     ],
@@ -97,6 +126,23 @@ class _FullScreenSearchModalState extends State<FullScreenSearchModal> {
                 ),
               ),
             ),
+
+            // Progress controlado por isLoading del repositorio
+            ValueListenableBuilder<bool>(
+              valueListenable: locationRepository.isLoading,
+              builder: (context, loading, _) {
+                return AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 200),
+                  child: loading
+                      ? const LinearProgressIndicator(
+                          key: ValueKey('progress'),
+                          minHeight: 4,
+                        )
+                      : const SizedBox(key: ValueKey('noprog'), height: 4),
+                );
+              },
+            ),
+
             Expanded(
               child: CustomScrollView(
                 slivers: [
@@ -114,21 +160,25 @@ class _FullScreenSearchModalState extends State<FullScreenSearchModal> {
                               scrollDirection: Axis.horizontal,
                               children: [
                                 ...locationRepository.myDefaultPlaces.value.map(
-                                  (e) {
-                                    return _QuickActionPill(
-                                      icon: typeToIconData(e.type),
-                                      title: e.description,
-                                      subtitle: e.address ?? '',
-                                    );
-                                  },
-                                ),
-                                ...locationRepository.myPlaces.value.map((e) {
-                                  return _QuickActionPill(
-                                    icon: typeToIconData(e.type),
+                                  (e) => _QuickActionPill(
+                                    icon: typeToIconData(
+                                      e.type,
+                                      color: theme.colorScheme.onSurface,
+                                    ),
                                     title: e.description,
                                     subtitle: e.address ?? '',
-                                  );
-                                }),
+                                  ),
+                                ),
+                                ...locationRepository.myPlaces.value.map(
+                                  (e) => _QuickActionPill(
+                                    icon: typeToIconData(
+                                      e.type,
+                                      color: theme.colorScheme.onSurface,
+                                    ),
+                                    title: e.description,
+                                    subtitle: e.address ?? '',
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -140,10 +190,15 @@ class _FullScreenSearchModalState extends State<FullScreenSearchModal> {
                               children: [
                                 Text(
                                   'Recent',
-                                  style: Theme.of(context).textTheme.titleSmall!
-                                      .copyWith(fontWeight: FontWeight.w600),
+                                  style: theme.textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
-                                Icon(Icons.info_outline, size: 20),
+                                Icon(
+                                  Icons.info_outline,
+                                  size: 20,
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
                               ],
                             ),
                           ),
@@ -153,28 +208,21 @@ class _FullScreenSearchModalState extends State<FullScreenSearchModal> {
                   SliverList.list(
                     children: [
                       if (query.isEmpty)
-                        ...locationRepository.historyPlaces.value.reversed.map((
-                          location,
-                        ) {
-                          return PlaceTile2(location: location);
-                        }),
+                        ...locationRepository.historyPlaces.value.reversed.map(
+                          (location) => PlaceTile2(location: location),
+                        ),
                       if (query.isEmpty)
                         ...locationRepository.favoritePlaces.value.reversed.map(
-                          (location) {
-                            return PlaceTile2(location: location);
-                          },
+                          (location) => PlaceTile2(location: location),
                         ),
-
                       if (query.isNotEmpty)
-                        ...locationRepository.searchResult.value.map((
-                          location,
-                        ) {
-                          return PlaceTile2(location: location);
-                        }),
-                      _MoreFromHistory(),
+                        ...locationRepository.searchResult.value.map(
+                          (location) => PlaceTile2(location: location),
+                        ),
+                      const _MoreFromHistory(),
                       divider,
-                      _ContactsCard(),
-                      SizedBox(height: 24),
+                      const _ContactsCard(),
+                      const SizedBox(height: 24),
                     ],
                   ),
                 ],
@@ -186,8 +234,6 @@ class _FullScreenSearchModalState extends State<FullScreenSearchModal> {
     );
   }
 }
-
-/// ---------- UI pieces ----------
 
 class _QuickActionPill extends StatelessWidget {
   final Widget icon;
@@ -206,10 +252,12 @@ class _QuickActionPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return InkWell(
+      borderRadius: BorderRadius.circular(12),
       onTap: () {},
       child: SizedBox(
-        width: 140,
+        width: 160,
         child: Row(
           children: [
             CircleAvatar(
@@ -233,18 +281,16 @@ class _QuickActionPill extends StatelessWidget {
                       title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w400,
-                        fontSize: 15,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                     Text(
                       subtitle,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: Colors.grey[700],
-                        fontSize: 13,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
                         height: 1,
                       ),
                     ),
@@ -274,40 +320,33 @@ class PlaceTile2 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final title = location.description;
-    final subtitle = location.address;
-    final metaPrimary = null;
-    final metaPrimaryColor = null;
-    final metaSecondary = null;
+    final String title = location.description;
+    final String? subtitle = location.address;
+    final String? metaPrimary = null;
+    final Color? metaPrimaryColor = null;
+    final String? metaSecondary = null;
+
     return Column(
       children: [
         ListTile(
-          dense: false,
           visualDensity: VisualDensity.compact,
           horizontalTitleGap: 12,
           minVerticalPadding: (subtitle != null && subtitle.isNotEmpty)
               ? 12
-              : (subtitle != null && subtitle.isNotEmpty)
-              ? 8
               : 20,
-          leading: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                height: (subtitle != null && subtitle.isNotEmpty) ? 0 : 6,
-              ),
-              CircleAvatar(
-                backgroundColor: Colors.grey[200],
-                radius: 18,
-                child: leadingIcon != null
-                    ? Icon(leadingIcon, color: leadingColor, size: 20)
-                    : typeToIconData(
-                        location.type,
-                        color: theme.iconTheme.color,
-                      ),
-              ),
-            ],
+          leading: CircleAvatar(
+            backgroundColor: theme.colorScheme.surfaceVariant,
+            radius: 18,
+            child: leadingIcon != null
+                ? Icon(
+                    leadingIcon,
+                    color: leadingColor ?? theme.colorScheme.onSurface,
+                    size: 20,
+                  )
+                : typeToIconData(
+                    location.type,
+                    color: theme.iconTheme.color ?? theme.colorScheme.onSurface,
+                  ),
           ),
           title: Text(
             title,
@@ -315,7 +354,7 @@ class PlaceTile2 extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.titleMedium,
           ),
-          subtitle: subtitle != null && subtitle.isNotEmpty
+          subtitle: (subtitle != null && subtitle.isNotEmpty)
               ? Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -323,9 +362,8 @@ class PlaceTile2 extends StatelessWidget {
                       subtitle,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-
-                      style: theme.textTheme.bodyMedium!.copyWith(
-                        color: Colors.black54,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
                         height: 1,
                       ),
                     ),
@@ -334,9 +372,11 @@ class PlaceTile2 extends StatelessWidget {
                       children: [
                         if (metaPrimary != null)
                           Text(
-                            metaPrimary!,
-                            style: theme.textTheme.bodyMedium!.copyWith(
-                              color: metaPrimaryColor ?? Colors.black87,
+                            metaPrimary,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color:
+                                  metaPrimaryColor ??
+                                  theme.colorScheme.onSurface,
                               fontWeight: FontWeight.w600,
                               height: 1,
                             ),
@@ -344,19 +384,13 @@ class PlaceTile2 extends StatelessWidget {
                         if (metaPrimary != null && metaSecondary != null)
                           const Padding(
                             padding: EdgeInsets.symmetric(horizontal: 6),
-                            child: Text(
-                              '·',
-                              style: TextStyle(
-                                color: Colors.black45,
-                                height: 1,
-                              ),
-                            ),
+                            child: Text('·'),
                           ),
                         if (metaSecondary != null)
                           Text(
-                            metaSecondary!,
-                            style: theme.textTheme.bodyMedium!.copyWith(
-                              color: Colors.black54,
+                            metaSecondary,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
                               height: 1,
                             ),
                           ),
@@ -367,7 +401,12 @@ class PlaceTile2 extends StatelessWidget {
               : null,
           onTap: () {},
         ),
-        Divider(height: 0.5, thickness: 0.5, indent: 60),
+        Divider(
+          height: 0.5,
+          thickness: 0.5,
+          indent: 60,
+          color: theme.dividerColor,
+        ),
       ],
     );
   }
@@ -378,15 +417,15 @@ class _MoreFromHistory extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
     return ListTile(
       title: Container(
         alignment: Alignment.center,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Text(
           'More from recent history',
-          style: textTheme.bodyMedium?.copyWith(
-            color: Color(0xFF008080),
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: const Color(0xFF008080),
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -401,23 +440,19 @@ class _ContactsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
     return Container(
-      // margin: const EdgeInsets.fromLTRB(12, 8, 12, 0),
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        // color: const Color(0xFFF1F3F4),
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(
+          SizedBox(
             width: 40,
             child: Icon(
               Icons.contacts_outlined,
               size: 28,
-              color: Colors.black54,
+              color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(width: 8),
@@ -427,15 +462,15 @@ class _ContactsCard extends StatelessWidget {
               children: [
                 Text(
                   'Searching for a friend?',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleSmall!.copyWith(fontWeight: FontWeight.w600),
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 const SizedBox(height: 6),
                 Text(
                   'Add your phone contacts so you can search for their addresses on Maps.',
-                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                    color: Colors.black87,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurface,
                     height: 1.2,
                   ),
                 ),
@@ -443,8 +478,8 @@ class _ContactsCard extends StatelessWidget {
                 Text(
                   'Add contacts',
                   textAlign: TextAlign.center,
-                  style: textTheme.bodyMedium?.copyWith(
-                    color: Color(0xFF008080),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: const Color(0xFF008080),
                     fontWeight: FontWeight.w600,
                   ),
                 ),

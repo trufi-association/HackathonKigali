@@ -34,7 +34,7 @@ class WeatherStationsLayer extends TrufiLayer {
       onFetchElements: onFetchElements,
       granularityLevels: 3,
       color: Colors.red,
-      showGrid: false,
+      showGrid: true,
     );
   }
 

@@ -39,7 +39,8 @@ class MyApp extends StatelessWidget {
         ],
         theme: lightTheme,
         darkTheme: darkTheme,
-        home: const SavedPlacesPage(),
+        themeMode: ThemeMode.system,
+        home: const RouteNavigationScreen(),
       ),
     );
   }
