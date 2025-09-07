@@ -11,8 +11,11 @@ class FitCameraLayer extends TrufiLayer {
   /// Tile size (MapLibre modern = 512).
   final double tileSize;
 
-  /// UI padding in logical px (scaled by DPR).
+  /// Extra UI padding (logical px). Added on top of safe inset.
   EdgeInsets insetPx;
+
+  /// Safe-area padding (from MediaQuery.viewPadding).
+  EdgeInsets _safeInset = EdgeInsets.zero;
 
   /// Corner dots (only when debugFlag = true).
   bool showCornerDots;
@@ -31,14 +34,9 @@ class FitCameraLayer extends TrufiLayer {
   FitCameraLayer(
     super.controller, {
     this.tileSize = 512,
-    this.insetPx = const EdgeInsets.only(
-      top: 200,
-      right: 70,
-      bottom: 150,
-      left: 70,
-    ),
-    this.showCornerDots = false,
-    this.debugFlag = false,
+    this.insetPx = const EdgeInsets.all(50),
+    this.showCornerDots = true,
+    this.debugFlag = true,
   }) : super(id: layerId, layerLevel: 9) {
     _cameraListener = _computeAndRender;
     controller.cameraPositionNotifier.addListener(_cameraListener);
@@ -57,18 +55,34 @@ class FitCameraLayer extends TrufiLayer {
     _computeAndRender();
   }
 
-  /// Update viewport logical size and DPR. Syncs controller with CSS px.
-  void updateViewport(Size logicalSize, double dpr) {
+  /// Update viewport logical size and DPR.
+  /// Optionally provide safeInset (device padding) and uiInset (extra UI padding).
+  void updateViewport(
+    Size logicalSize,
+    double dpr, {
+    EdgeInsets? safeInset,
+    EdgeInsets? uiInset,
+  }) {
     if (logicalSize.width <= 0 || logicalSize.height <= 0 || dpr <= 0) return;
     _viewportLogical = logicalSize;
     _dpr = dpr;
+
+    if (safeInset != null) _safeInset = safeInset;
+    if (uiInset != null) insetPx = uiInset;
+
     controller.setViewportSize(logicalSize * dpr); // CSS px for MapLibre
     _computeAndRender();
   }
 
-  /// Update padding (logical px).
+  /// Update only UI padding.
   void updateInset(EdgeInsets inset) {
     insetPx = inset;
+    _computeAndRender();
+  }
+
+  /// Update only safe-area padding.
+  void updateSafeInset(EdgeInsets safe) {
+    _safeInset = safe;
     _computeAndRender();
   }
 
@@ -143,11 +157,19 @@ class FitCameraLayer extends TrufiLayer {
   void _computeAndRender() {
     final cam = controller.cameraPositionNotifier.value;
     if (_viewportLogical == Size.zero) {
-      // Ensure nothing is rendered if size is unknown.
+      // Nothing rendered if viewport size is unknown.
       setLines(const []);
       setMarkers(const []);
       return;
     }
+
+    // Combine safe-area padding + custom UI padding.
+    final combinedInset = EdgeInsets.only(
+      top: _safeInset.top + insetPx.top,
+      right: _safeInset.right + insetPx.right,
+      bottom: _safeInset.bottom + insetPx.bottom,
+      left: _safeInset.left + insetPx.left,
+    );
 
     final center = cam.target;
     final zoom = cam.zoom;
@@ -155,14 +177,16 @@ class FitCameraLayer extends TrufiLayer {
     final cosT = math.cos(theta);
     final sinT = math.sin(theta);
 
-    // 1) Effective viewport in CSS px (minus padding).
+    // 1) Effective viewport in CSS px (minus combined padding).
     final Wcss = math.max(
       1.0,
-      (_viewportLogical.width - insetPx.left - insetPx.right) * _dpr,
+      (_viewportLogical.width - combinedInset.left - combinedInset.right) *
+          _dpr,
     );
     final Hcss = math.max(
       1.0,
-      (_viewportLogical.height - insetPx.top - insetPx.bottom) * _dpr,
+      (_viewportLogical.height - combinedInset.top - combinedInset.bottom) *
+          _dpr,
     );
 
     // 2) Center in Mercator (raw).
@@ -175,11 +199,13 @@ class FitCameraLayer extends TrufiLayer {
 
     // 4) Shift center for asymmetric padding (screen axes).
     final shiftMercXLocal =
-        ((insetPx.left - insetPx.right) * 0.5 * _dpr) * mercPerCssPx;
+        ((combinedInset.left - combinedInset.right) * 0.5 * _dpr) *
+        mercPerCssPx;
     final shiftMercYLocal =
-        ((insetPx.top - insetPx.bottom) * 0.5 * _dpr) * mercPerCssPx;
+        ((combinedInset.top - combinedInset.bottom) * 0.5 * _dpr) *
+        mercPerCssPx;
 
-    // Rotate the shift by bearing (clockwise on screen).
+    // Rotate shift by bearing (clockwise on screen).
     final shiftMercX = shiftMercXLocal * cosT - shiftMercYLocal * sinT;
     final shiftMercY = shiftMercXLocal * sinT + shiftMercYLocal * cosT;
 
@@ -187,7 +213,7 @@ class FitCameraLayer extends TrufiLayer {
     final cx = cx0 + shiftMercX;
     final cy = cy0 + shiftMercY;
 
-    // 5) Half extents (with padding applied).
+    // 5) Half extents (with combined padding applied).
     final halfW = (Wcss / 2.0) * mercPerCssPx;
     final halfH = (Hcss / 2.0) * mercPerCssPx;
 
@@ -200,7 +226,6 @@ class FitCameraLayer extends TrufiLayer {
     ];
 
     latlng.LatLng toLatLng(Offset d) {
-      // Rotate by bearing around corrected center.
       final rx = d.dx * cosT - d.dy * sinT;
       final ry = d.dx * sinT + d.dy * cosT;
       final x = cx + rx;
@@ -213,11 +238,10 @@ class FitCameraLayer extends TrufiLayer {
     final br = toLatLng(cornersLocal[2]);
     final bl = toLatLng(cornersLocal[3]);
 
-    // 7) Closed polyline for the viewport rect (padding applied).
+    // 7) Closed polyline for the viewport rect (with combined padding).
     final rect = <latlng.LatLng>[bl, tl, tr, br, bl];
 
     if (debugFlag) {
-      // Build lines
       final lines = <TrufiLine>[
         TrufiLine(
           id: '$id:viewport-rect',
@@ -228,7 +252,6 @@ class FitCameraLayer extends TrufiLayer {
         ),
       ];
 
-      // Build markers
       final markers = <TrufiMarker>[
         // Zoom badge at camera center
         TrufiMarker(
@@ -271,7 +294,7 @@ class FitCameraLayer extends TrufiLayer {
           ),
         ],
 
-        // Fit points (only visible in debug)
+        // Fit points (only visible in debug mode)
         for (int i = 0; i < _fitPoints.length; i++)
           TrufiMarker(
             id: '$id:fit:$i',
@@ -312,7 +335,7 @@ class FitCameraLayer extends TrufiLayer {
       return v;
     }
 
-    // 1) To Mercator.
+    // 1) Convert to Mercator.
     final xs = <double>[];
     final ys = <double>[];
     for (final p in points) {
@@ -320,13 +343,13 @@ class FitCameraLayer extends TrufiLayer {
       ys.add(_latToMercY(p.latitude));
     }
 
-    // 2) X bounds with antimeridian handling.
+    // 2) Handle antimeridian crossing for X bounds.
     double xMin = xs.reduce(math.min);
     double xMax = xs.reduce(math.max);
     double spanX = xMax - xMin;
 
-    double cx; // Mercator X center
-    double dx; // Mercator X width
+    double cx;
+    double dx;
     if (spanX <= 0.5) {
       dx = math.max(spanX, 1e-12);
       cx = (xMin + xMax) / 2.0;
@@ -348,19 +371,28 @@ class FitCameraLayer extends TrufiLayer {
     final dy = math.max(yMax - yMin, 1e-12);
     final cy = (yMin + yMax) / 2.0;
 
-    // 4) Effective viewport with padding (CSS px) + rotation projection.
+    // 4) Effective viewport with combined padding + rotation projection.
     final cam = controller.cameraPositionNotifier.value;
     final theta = cam.bearing * math.pi / 180.0;
     final absCos = math.cos(theta).abs();
     final absSin = math.sin(theta).abs();
 
+    final combinedInset = EdgeInsets.only(
+      top: _safeInset.top + insetPx.top,
+      right: _safeInset.right + insetPx.right,
+      bottom: _safeInset.bottom + insetPx.bottom,
+      left: _safeInset.left + insetPx.left,
+    );
+
     final Wcss = math.max(
       1.0,
-      (_viewportLogical.width - insetPx.left - insetPx.right) * _dpr,
+      (_viewportLogical.width - combinedInset.left - combinedInset.right) *
+          _dpr,
     );
     final Hcss = math.max(
       1.0,
-      (_viewportLogical.height - insetPx.top - insetPx.bottom) * _dpr,
+      (_viewportLogical.height - combinedInset.top - combinedInset.bottom) *
+          _dpr,
     );
 
     // Projected viewport that guarantees bbox fits at current bearing.
@@ -381,9 +413,11 @@ class FitCameraLayer extends TrufiLayer {
     final mercPerCssPx = 1.0 / worldPx;
 
     final shiftXLocal =
-        ((insetPx.left - insetPx.right) * 0.5 * _dpr) * mercPerCssPx;
+        ((combinedInset.left - combinedInset.right) * 0.5 * _dpr) *
+        mercPerCssPx;
     final shiftYLocal =
-        ((insetPx.top - insetPx.bottom) * 0.5 * _dpr) * mercPerCssPx;
+        ((combinedInset.top - combinedInset.bottom) * 0.5 * _dpr) *
+        mercPerCssPx;
 
     final shiftX =
         shiftXLocal * math.cos(theta) - shiftYLocal * math.sin(theta);

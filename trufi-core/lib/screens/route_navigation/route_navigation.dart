@@ -72,10 +72,15 @@ class _RouteNavigationScreenState extends State<RouteNavigationScreen> {
       body: LayoutBuilder(
         builder: (context, constraints) {
           final logicalSize = Size(constraints.maxWidth, constraints.maxHeight);
-          final dpr = MediaQuery.of(context).devicePixelRatio;
+          final mediaQuery = MediaQuery.of(context);
+          final viewPadding = mediaQuery.viewPadding;
+          final devicePixelRatio = mediaQuery.devicePixelRatio;
 
-          // 👉 Actualiza viewport solo vía el layer (no toques el controller aquí)
-          fitCameraLayer.updateViewport(logicalSize, dpr);
+          fitCameraLayer.updateViewport(
+            logicalSize,
+            devicePixelRatio,
+            safeInset: viewPadding,
+          );
           return Stack(
             children: [
               if (!showMapLibre)
@@ -142,7 +147,12 @@ class _RouteNavigationScreenState extends State<RouteNavigationScreen> {
                       fitCameraLayer.fitBoundsOnCamera([
                         latlng.LatLng(48.5940, 8.8665),
                         latlng.LatLng(48.5960, 8.8680),
-                        // ...más puntos
+                        latlng.LatLng(48.5950, 8.8700),
+                        latlng.LatLng(48.5935, 8.8720),
+                        latlng.LatLng(48.5920, 8.8685),
+                        latlng.LatLng(48.5970, 8.8670),
+                        latlng.LatLng(48.5985, 8.8695),
+                        latlng.LatLng(48.5945, 8.8730),
                       ]);
                     },
                   ),
