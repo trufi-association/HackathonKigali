@@ -183,9 +183,9 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
     await ctl.setGeoJsonSource(layer.id, geojson);
     _markers.setLayerMarkers(layer.id, layer.markers);
 
-    if (Platform.isAndroid) {
-      await ctl.moveCamera(CameraUpdate.zoomBy(0.0001));
-    }
+    // if (Platform.isAndroid) {
+    //   await ctl.moveCamera(CameraUpdate.zoomBy(0.0001));
+    // }
   }
 
   List<double> _alignmentOffsetPx(Alignment a, Size s) {

@@ -12,7 +12,23 @@ class LatLngBounds {
   final latlng.LatLng northEast;
 
   const LatLngBounds(this.southWest, this.northEast);
-
+  factory LatLngBounds.fromPoints(List<latlng.LatLng> points) {
+    if (points.isEmpty) {
+      throw ArgumentError('LatLngBounds.fromPoints requires a non-empty list');
+    }
+    double minLat = double.infinity, maxLat = -double.infinity;
+    double minLng = double.infinity, maxLng = -double.infinity;
+    for (final p in points) {
+      if (p.latitude < minLat) minLat = p.latitude;
+      if (p.latitude > maxLat) maxLat = p.latitude;
+      if (p.longitude < minLng) minLng = p.longitude;
+      if (p.longitude > maxLng) maxLng = p.longitude;
+    }
+    return LatLngBounds(
+      latlng.LatLng(minLat, minLng),
+      latlng.LatLng(maxLat, maxLng),
+    );
+  }
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -33,23 +49,27 @@ class TrufiCameraPosition {
     required this.target,
     this.zoom = 0.0,
     this.bearing = 0.0,
+    this.viewportSize,
     this.visibleRegion,
   });
 
   final latlng.LatLng target;
   final double zoom;
   final double bearing;
+  final Size? viewportSize;
   final LatLngBounds? visibleRegion;
 
   TrufiCameraPosition copyWith({
     latlng.LatLng? target,
     double? zoom,
     double? bearing,
+    Size? viewportSize,
     LatLngBounds? visibleRegion,
   }) => TrufiCameraPosition(
     target: target ?? this.target,
     zoom: zoom ?? this.zoom,
     bearing: bearing ?? this.bearing,
+    viewportSize: viewportSize ?? Size(411.4, 923.4),
     visibleRegion: visibleRegion ?? this.visibleRegion,
   );
 
@@ -60,15 +80,21 @@ class TrufiCameraPosition {
           target == other.target &&
           zoom == other.zoom &&
           bearing == other.bearing &&
+          viewportSize == other.viewportSize &&
           visibleRegion == other.visibleRegion;
 
   @override
-  int get hashCode => Object.hash(target, zoom, bearing, visibleRegion);
+  int get hashCode =>
+      Object.hash(target, zoom, bearing, viewportSize, visibleRegion);
 
   @override
   String toString() =>
-      'TrufiCameraPosition(target: ${target.latitude},${target.longitude}, '
-      'zoom: $zoom, bearing: $bearing, visibleRegion: $visibleRegion)';
+      'TrufiCameraPosition('
+      'target: ${target.latitude},${target.longitude}, '
+      'zoom: $zoom, '
+      'bearing: $bearing, '
+      'viewportSize: $viewportSize, '
+      'visibleRegion: $visibleRegion)';
 }
 
 class TrufiMapController {
@@ -99,8 +125,14 @@ class TrufiMapController {
       return false;
     }
     cameraPositionNotifier.value = position;
-    
+
     return true;
+  }
+
+  bool setViewportSize(Size size) {
+    final cur = cameraPositionNotifier.value;
+    if (cur.viewportSize == size) return false;
+    return setCameraPosition(cur.copyWith(viewportSize: size));
   }
 
   bool updateCamera({

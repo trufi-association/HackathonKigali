@@ -9,6 +9,7 @@ import 'package:trufi_core/consts.dart';
 import 'package:trufi_core/models/enums/transport_mode.dart';
 import 'package:trufi_core/models/plan_entity.dart';
 import 'package:trufi_core/pages/home/service/i_plan_repository.dart';
+import 'package:trufi_core/pages/home/widgets/routing_map/trufi_camera_fit.dart';
 import 'package:trufi_core/screens/route_navigation/maps/trufi_map_controller.dart';
 
 class RoutingMapComponent extends TrufiLayer {
@@ -113,12 +114,32 @@ class RoutingMapComponent extends TrufiLayer {
   void changeItinerary(PlanItinerary itinerary) {
     routingMapSelected.changeItinerary(itinerary);
     _rebuildGraphics();
-    final allPositions = itinerary.legs
-        .expand((leg) => leg.accumulatedPoints)
-        .toList();
-    final visibleRegion = controller.cameraPositionNotifier.value.visibleRegion;
-    // TODO fit camera, from itinerary get target and zoom
-    controller.updateCamera(target: latlng.LatLng(0, 0), zoom: 14, bearing: 0);
+
+    final List<latlng.LatLng> allPositions = [
+      latlng.LatLng(48.595958, 8.861031),
+      latlng.LatLng(48.595759, 8.867168),
+    ];
+    if (allPositions.isEmpty) return;
+
+    final LatLngBounds newBounds = LatLngBounds.fromPoints(allPositions);
+
+    final TrufiCameraPosition currentCamera =
+        controller.cameraPositionNotifier.value;
+
+    final TrufiCameraPosition fitted = TrufiCameraFit.fitBoundsOnCamera(
+      camera: currentCamera,
+      bounds: newBounds,
+      padding: const EdgeInsets.fromLTRB(24, 56, 24, 72),
+      minZoom: 2,
+      maxZoom: 18,
+      forceIntZoom: true,
+    );
+
+    controller.updateCamera(
+      target: fitted.target,
+      zoom: fitted.zoom,
+      bearing: currentCamera.bearing,
+    );
   }
 
   void cleanOriginAndDestination() {
