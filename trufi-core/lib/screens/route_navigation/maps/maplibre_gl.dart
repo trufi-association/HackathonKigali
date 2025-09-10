@@ -36,6 +36,11 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
   final Map<String, Future<void>> _imageLoaders = {};
   final MarkersContainer _markers = MarkersContainer();
 
+  // >>> NUEVO: estado local para saber qué sources ya se inicializaron
+  final Set<String> _initializedSources = {};
+  // single-flight por sourceId para evitar carreras al inicializar
+  final Map<String, Future<void>> _sourceInit = {};
+
   @override
   void initState() {
     super.initState();
@@ -56,7 +61,7 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
     final camera = widget.controller.cameraPositionNotifier.value;
     if (_mapReady && _mapCtl != null) {
       _suppressSync = true;
-      _mapCtl!.animateCamera(
+      _mapCtl!.moveCamera(
         CameraUpdate.newCameraPosition(_toCameraPosition(camera)),
       );
     }
@@ -101,9 +106,11 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
 
     final sorted = [...visibleLayers]
       ..sort((a, b) => a.layerLevel.compareTo(b.layerLevel));
+
     for (final layer in sorted) {
       await _ensureLayerInitialized(layer, ctl);
     }
+
     await Future.wait(
       sorted.map((l) => _updateLayerData(l, ctl)),
       eagerError: true,
@@ -115,64 +122,85 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
     MapLibreMapController ctl,
   ) async {
     final sourceId = layer.id;
-    final existingSources = await ctl.getSourceIds();
-    final exists = existingSources.contains(sourceId);
-    if (exists) return;
 
-    await ctl.addGeoJsonSource(sourceId, const {
-      "type": "FeatureCollection",
-      "features": [],
-    });
+    // si ya lo inicializamos en este style, no hacemos nada
+    if (_initializedSources.contains(sourceId)) return;
 
-    await ctl.addLineLayer(
-      sourceId,
-      "${sourceId}_dotted",
-      LineLayerProperties(
-        lineColor: ["get", "color"],
-        lineWidth: ["get", "width"],
-        lineSortKey: ["get", "layerLevel"],
-        lineDasharray: [2, 1],
-        lineJoin: "round",
-      ),
-      filter: [
-        "==",
-        ["get", "dotted"],
-        true,
-      ],
-      enableInteraction: false,
-    );
+    // single-flight: si otro _syncLayers ya lo está montando, esperamos
+    final inFlight = _sourceInit[sourceId];
+    if (inFlight != null) {
+      await inFlight;
+      return;
+    }
 
-    await ctl.addLineLayer(
-      sourceId,
-      "${sourceId}_solid",
-      LineLayerProperties(
-        lineColor: ["get", "color"],
-        lineWidth: ["get", "width"],
-        lineSortKey: ["get", "layerLevel"],
-        lineJoin: "round",
-        lineCap: "round",
-      ),
-      filter: [
-        "==",
-        ["get", "dotted"],
-        false,
-      ],
-      enableInteraction: false,
-    );
+    final future = () async {
+      // IMPORTANTE: aquí ya NO usamos ctl.getSourceIds()
 
-    await ctl.addSymbolLayer(
-      sourceId,
-      "${sourceId}_marker",
-      SymbolLayerProperties(
-        iconImage: ["get", "icon"],
-        iconSize: 1.0,
-        iconAllowOverlap: true,
-        iconOffset: ["get", "offset"],
-        iconRotate: ["get", "rotate"],
-        symbolSortKey: ["get", "layerLevel"],
-      ),
-      enableInteraction: false,
-    );
+      await ctl.addGeoJsonSource(sourceId, const {
+        "type": "FeatureCollection",
+        "features": [],
+      });
+
+      await ctl.addLineLayer(
+        sourceId,
+        "${sourceId}_dotted",
+        LineLayerProperties(
+          lineColor: ["get", "color"],
+          lineWidth: ["get", "width"],
+          lineSortKey: ["get", "layerLevel"],
+          lineDasharray: [2, 1],
+          lineJoin: "round",
+        ),
+        filter: [
+          "==",
+          ["get", "dotted"],
+          true,
+        ],
+        enableInteraction: false,
+      );
+
+      await ctl.addLineLayer(
+        sourceId,
+        "${sourceId}_solid",
+        LineLayerProperties(
+          lineColor: ["get", "color"],
+          lineWidth: ["get", "width"],
+          lineSortKey: ["get", "layerLevel"],
+          lineJoin: "round",
+          lineCap: "round",
+        ),
+        filter: [
+          "==",
+          ["get", "dotted"],
+          false,
+        ],
+        enableInteraction: false,
+      );
+
+      await ctl.addSymbolLayer(
+        sourceId,
+        "${sourceId}_marker",
+        SymbolLayerProperties(
+          iconImage: ["get", "icon"],
+          iconSize: 1.0,
+          iconAllowOverlap: true,
+          iconOffset: ["get", "offset"],
+          iconRotate: ["get", "rotate"],
+          symbolSortKey: ["get", "layerLevel"],
+        ),
+        enableInteraction: false,
+      );
+
+      // marcamos como inicializado localmente
+      _initializedSources.add(sourceId);
+    }();
+
+    _sourceInit[sourceId] = future;
+    try {
+      await future;
+    } finally {
+      _sourceInit.remove(sourceId);
+    }
   }
 
   Future<void> _updateLayerData(
@@ -288,6 +316,13 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
       },
       onStyleLoadedCallback: () async {
         _mapReady = true;
+
+        // >>> IMPORTANTE: al cargar un style nuevo, reseteamos el estado local
+        _initializedSources.clear();
+        _imageLoaders.clear();
+        _loadedImages.clear();
+        _sourceInit.clear();
+
         await _syncLayers(widget.controller.visibleLayers);
       },
       onCameraIdle: _handleCameraIdle,

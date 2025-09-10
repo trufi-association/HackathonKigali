@@ -3,41 +3,28 @@ import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart' as latlng;
 import 'package:trufi_core/screens/route_navigation/maps/trufi_map_controller.dart';
 
-/// Shows viewport rect & fit-point markers when debugFlag is ON.
-/// Always supports fit-to-bounds logic regardless of debugFlag.
 class FitCameraLayer extends TrufiLayer {
   static const String layerId = 'fit-camera-layer';
 
-  /// Tile size (MapLibre modern = 512).
-  final double tileSize;
-
-  /// Extra UI padding (logical px). Added on top of safe inset.
-  EdgeInsets insetPx;
-
-  /// Safe-area padding (from MediaQuery.viewPadding).
-  EdgeInsets _safeInset = EdgeInsets.zero;
-
-  /// Corner dots (only when debugFlag = true).
+  final double tileSize = 256;
+  EdgeInsets _padding;
+  EdgeInsets _viewPadding = EdgeInsets.zero;
   bool showCornerDots;
-
-  /// Visual debug switch: lines/markers render only if true.
   bool debugFlag;
 
-  double _dpr = 1.0; // current devicePixelRatio
+  final double _dpr = 1.0;
   Size _viewportLogical = Size.zero;
-
-  /// Points used for fit; their markers are re-rendered when debugFlag = true.
   List<latlng.LatLng> _fitPoints = const [];
 
   late final VoidCallback _cameraListener;
 
   FitCameraLayer(
     super.controller, {
-    this.tileSize = 512,
-    this.insetPx = const EdgeInsets.all(50),
+    EdgeInsets padding = const EdgeInsets.only(top: 200),
     this.showCornerDots = true,
     this.debugFlag = true,
-  }) : super(id: layerId, layerLevel: 9) {
+  }) : _padding = padding,
+       super(id: layerId, layerLevel: 9) {
     _cameraListener = _computeAndRender;
     controller.cameraPositionNotifier.addListener(_cameraListener);
     _computeAndRender();
@@ -49,56 +36,24 @@ class FitCameraLayer extends TrufiLayer {
     super.dispose();
   }
 
-  /// Toggle visual debug at runtime.
-  void setDebug(bool value) {
-    debugFlag = value;
-    _computeAndRender();
-  }
-
-  /// Update viewport logical size and DPR.
-  /// Optionally provide safeInset (device padding) and uiInset (extra UI padding).
-  void updateViewport(
-    Size logicalSize,
-    double dpr, {
-    EdgeInsets? safeInset,
-    EdgeInsets? uiInset,
-  }) {
-    if (logicalSize.width <= 0 || logicalSize.height <= 0 || dpr <= 0) return;
+  void updateViewport(Size logicalSize, EdgeInsets viewPadding) {
+    if (logicalSize.width <= 0 || logicalSize.height <= 0) return;
     _viewportLogical = logicalSize;
-    _dpr = dpr;
-
-    if (safeInset != null) _safeInset = safeInset;
-    if (uiInset != null) insetPx = uiInset;
-
-    controller.setViewportSize(logicalSize * dpr); // CSS px for MapLibre
+    _viewPadding = viewPadding;
+    controller.setViewportSize(logicalSize);
     _computeAndRender();
   }
 
-  /// Update only UI padding.
-  void updateInset(EdgeInsets inset) {
-    insetPx = inset;
+  void updatePadding(EdgeInsets padding) {
+    _padding = padding;
     _computeAndRender();
   }
 
-  /// Update only safe-area padding.
-  void updateSafeInset(EdgeInsets safe) {
-    _safeInset = safe;
-    _computeAndRender();
-  }
-
-  /// Toggle corner dots (only used when debugFlag = true).
-  void setShowCornerDots(bool value) {
-    showCornerDots = value;
-    _computeAndRender();
-  }
-
-  /// Clear fit points (and markers if debugging).
   void clearFitPoints() {
     _fitPoints = const [];
     _computeAndRender();
   }
 
-  // ---------- Web Mercator helpers ----------
   static const _maxLat = 85.05112878;
 
   double _clamp(double v, double lo, double hi) =>
@@ -119,7 +74,6 @@ class FitCameraLayer extends TrufiLayer {
     return 180.0 / math.pi * math.atan(0.5 * (math.exp(n) - math.exp(-n)));
   }
 
-  // ---------- UI helpers ----------
   Widget _zoomBadge(double z) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
     decoration: BoxDecoration(
@@ -151,24 +105,31 @@ class FitCameraLayer extends TrufiLayer {
     ),
   );
 
-  Widget _fitDot() => _dot(Colors.pinkAccent);
+  final Widget _fitDot = Container(
+    width: 10,
+    height: 10,
+    decoration: const BoxDecoration(
+      color: Colors.pink,
+      shape: BoxShape.circle,
+      boxShadow: [
+        BoxShadow(blurRadius: 4, offset: Offset(0, 1), color: Colors.black26),
+      ],
+    ),
+  );
 
-  // ---------- Main render ----------
   void _computeAndRender() {
     final cam = controller.cameraPositionNotifier.value;
     if (_viewportLogical == Size.zero) {
-      // Nothing rendered if viewport size is unknown.
       setLines(const []);
       setMarkers(const []);
       return;
     }
 
-    // Combine safe-area padding + custom UI padding.
     final combinedInset = EdgeInsets.only(
-      top: _safeInset.top + insetPx.top,
-      right: _safeInset.right + insetPx.right,
-      bottom: _safeInset.bottom + insetPx.bottom,
-      left: _safeInset.left + insetPx.left,
+      top: _viewPadding.top + _padding.top,
+      right: _viewPadding.right + _padding.right,
+      bottom: _viewPadding.bottom + _padding.bottom,
+      left: _viewPadding.left + _padding.left,
     );
 
     final center = cam.target;
@@ -177,7 +138,6 @@ class FitCameraLayer extends TrufiLayer {
     final cosT = math.cos(theta);
     final sinT = math.sin(theta);
 
-    // 1) Effective viewport in CSS px (minus combined padding).
     final Wcss = math.max(
       1.0,
       (_viewportLogical.width - combinedInset.left - combinedInset.right) *
@@ -189,15 +149,12 @@ class FitCameraLayer extends TrufiLayer {
           _dpr,
     );
 
-    // 2) Center in Mercator (raw).
     final cx0 = _lngToMercX(center.longitude);
     final cy0 = _latToMercY(center.latitude);
 
-    // 3) World size in CSS px at zoom.
     final worldPx = tileSize * math.pow(2.0, zoom);
     final mercPerCssPx = 1.0 / worldPx;
 
-    // 4) Shift center for asymmetric padding (screen axes).
     final shiftMercXLocal =
         ((combinedInset.left - combinedInset.right) * 0.5 * _dpr) *
         mercPerCssPx;
@@ -205,19 +162,15 @@ class FitCameraLayer extends TrufiLayer {
         ((combinedInset.top - combinedInset.bottom) * 0.5 * _dpr) *
         mercPerCssPx;
 
-    // Rotate shift by bearing (clockwise on screen).
     final shiftMercX = shiftMercXLocal * cosT - shiftMercYLocal * sinT;
     final shiftMercY = shiftMercXLocal * sinT + shiftMercYLocal * cosT;
 
-    // Corrected center.
     final cx = cx0 + shiftMercX;
     final cy = cy0 + shiftMercY;
 
-    // 5) Half extents (with combined padding applied).
     final halfW = (Wcss / 2.0) * mercPerCssPx;
     final halfH = (Hcss / 2.0) * mercPerCssPx;
 
-    // 6) Local corners (before rotation) around corrected center.
     final cornersLocal = <Offset>[
       Offset(-halfW, -halfH),
       Offset(halfW, -halfH),
@@ -238,7 +191,6 @@ class FitCameraLayer extends TrufiLayer {
     final br = toLatLng(cornersLocal[2]);
     final bl = toLatLng(cornersLocal[3]);
 
-    // 7) Closed polyline for the viewport rect (with combined padding).
     final rect = <latlng.LatLng>[bl, tl, tr, br, bl];
 
     if (debugFlag) {
@@ -253,7 +205,6 @@ class FitCameraLayer extends TrufiLayer {
       ];
 
       final markers = <TrufiMarker>[
-        // Zoom badge at camera center
         TrufiMarker(
           id: '$id:center-zoom',
           position: center,
@@ -261,8 +212,6 @@ class FitCameraLayer extends TrufiLayer {
           layerLevel: layerLevel,
           size: const Size(52, 28),
         ),
-
-        // Corner dots (optional)
         if (showCornerDots) ...[
           TrufiMarker(
             id: '$id:tl',
@@ -293,13 +242,11 @@ class FitCameraLayer extends TrufiLayer {
             size: const Size(10, 10),
           ),
         ],
-
-        // Fit points (only visible in debug mode)
         for (int i = 0; i < _fitPoints.length; i++)
           TrufiMarker(
             id: '$id:fit:$i',
             position: _fitPoints[i],
-            widget: _fitDot(),
+            widget: _fitDot,
             layerLevel: layerLevel,
             size: const Size(10, 10),
           ),
@@ -308,13 +255,11 @@ class FitCameraLayer extends TrufiLayer {
       setLines(lines);
       setMarkers(markers);
     } else {
-      // Hide visuals when debugFlag is OFF.
       setLines(const []);
       setMarkers(const []);
     }
   }
 
-  // ---------- Fit bounds + point markers ----------
   void fitBoundsOnCamera(
     List<latlng.LatLng> points, {
     double minZoom = 2.0,
@@ -326,7 +271,6 @@ class FitCameraLayer extends TrufiLayer {
       return;
     }
 
-    // Store points so markers can be drawn when debugFlag = true.
     _fitPoints = List<latlng.LatLng>.from(points);
 
     double norm01(double v) {
@@ -335,7 +279,6 @@ class FitCameraLayer extends TrufiLayer {
       return v;
     }
 
-    // 1) Convert to Mercator.
     final xs = <double>[];
     final ys = <double>[];
     for (final p in points) {
@@ -343,7 +286,6 @@ class FitCameraLayer extends TrufiLayer {
       ys.add(_latToMercY(p.latitude));
     }
 
-    // 2) Handle antimeridian crossing for X bounds.
     double xMin = xs.reduce(math.min);
     double xMax = xs.reduce(math.max);
     double spanX = xMax - xMin;
@@ -365,23 +307,21 @@ class FitCameraLayer extends TrufiLayer {
       cx = norm01((xMin2 + xMax2) / 2.0);
     }
 
-    // 3) Y bounds.
     final yMin = ys.reduce(math.min);
     final yMax = ys.reduce(math.max);
     final dy = math.max(yMax - yMin, 1e-12);
     final cy = (yMin + yMax) / 2.0;
 
-    // 4) Effective viewport with combined padding + rotation projection.
     final cam = controller.cameraPositionNotifier.value;
     final theta = cam.bearing * math.pi / 180.0;
     final absCos = math.cos(theta).abs();
     final absSin = math.sin(theta).abs();
 
     final combinedInset = EdgeInsets.only(
-      top: _safeInset.top + insetPx.top,
-      right: _safeInset.right + insetPx.right,
-      bottom: _safeInset.bottom + insetPx.bottom,
-      left: _safeInset.left + insetPx.left,
+      top: _viewPadding.top + _padding.top,
+      right: _viewPadding.right + _padding.right,
+      bottom: _viewPadding.bottom + _padding.bottom,
+      left: _viewPadding.left + _padding.left,
     );
 
     final Wcss = math.max(
@@ -395,11 +335,9 @@ class FitCameraLayer extends TrufiLayer {
           _dpr,
     );
 
-    // Projected viewport that guarantees bbox fits at current bearing.
     final Wproj = Wcss * absCos + Hcss * absSin;
     final Hproj = Wcss * absSin + Hcss * absCos;
 
-    // 5) Required zoom.
     final zX = math.log(Wproj / (tileSize * dx)) / math.ln2;
     final zY = math.log(Hproj / (tileSize * dy)) / math.ln2;
     final zoom = _zoomClamp(
@@ -408,7 +346,6 @@ class FitCameraLayer extends TrufiLayer {
       maxZoom,
     );
 
-    // 6) Center correction for asymmetric padding.
     final worldPx = tileSize * math.pow(2.0, zoom);
     final mercPerCssPx = 1.0 / worldPx;
 
@@ -429,7 +366,6 @@ class FitCameraLayer extends TrufiLayer {
 
     final target = latlng.LatLng(_mercYToLat(cyc), _mercXToLng(cxc));
 
-    // 7) Apply camera (keep bearing) and render.
     controller.updateCamera(target: target, zoom: zoom);
     _computeAndRender();
   }

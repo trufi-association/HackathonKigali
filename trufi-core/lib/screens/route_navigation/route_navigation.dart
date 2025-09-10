@@ -72,15 +72,8 @@ class _RouteNavigationScreenState extends State<RouteNavigationScreen> {
       body: LayoutBuilder(
         builder: (context, constraints) {
           final logicalSize = Size(constraints.maxWidth, constraints.maxHeight);
-          final mediaQuery = MediaQuery.of(context);
-          final viewPadding = mediaQuery.viewPadding;
-          final devicePixelRatio = mediaQuery.devicePixelRatio;
-
-          fitCameraLayer.updateViewport(
-            logicalSize,
-            devicePixelRatio,
-            safeInset: viewPadding,
-          );
+          final viewPadding = MediaQuery.of(context).viewPadding;
+          fitCameraLayer.updateViewport(logicalSize, viewPadding);
           return Stack(
             children: [
               if (!showMapLibre)
