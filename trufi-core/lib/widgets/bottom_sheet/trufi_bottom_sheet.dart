@@ -2,7 +2,12 @@ import 'package:flutter/material.dart';
 
 class TrufiBottomSheet extends StatelessWidget {
   final Widget child;
-  const TrufiBottomSheet({super.key, required this.child});
+  final Function(double)? onHeightChanged;
+  const TrufiBottomSheet({
+    super.key,
+    required this.child,
+    this.onHeightChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -14,27 +19,35 @@ class TrufiBottomSheet extends StatelessWidget {
         minChildSize: 0.18,
         maxChildSize: 1.0,
         builder: (context, scrollController) {
-          return Container(
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surface,
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(10),
-              ),
-              boxShadow: [
-                BoxShadow(color: Colors.black.withAlpha(64), blurRadius: 12),
-              ],
-            ),
-            child: Column(
-              children: [
-                _SheetGrabber(),
-                Expanded(
-                  child: SingleChildScrollView(
-                    controller: scrollController,
-                    child: child,
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              onHeightChanged?.call(constraints.maxHeight);
+              return Container(
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surface,
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(10),
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withAlpha(64),
+                      blurRadius: 12,
+                    ),
+                  ],
                 ),
-              ],
-            ),
+                child: Column(
+                  children: [
+                    _SheetGrabber(),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        controller: scrollController,
+                        child: child,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
           );
         },
       ),

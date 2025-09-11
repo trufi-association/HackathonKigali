@@ -12,11 +12,14 @@ class TransitBottomSheet extends StatefulWidget {
   final RoutingMapComponent routingMapComponent; 
   final void Function(List<latlng.LatLng>) onSelectItinerary;
   
+  final Function(double)? onHeightChanged;  
+  
   const TransitBottomSheet({
     super.key,
     required this.trufiMapController,
     required this.routingMapComponent,
     required this.onSelectItinerary,
+    required this.onHeightChanged,
   });
 
   @override
@@ -29,6 +32,7 @@ class _TransitBottomSheetState extends State<TransitBottomSheet> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return TrufiBottomSheet(
+      onHeightChanged: widget.onHeightChanged,
       child: ValueListenableBuilder(
         valueListenable: widget.trufiMapController.layersNotifier,
         builder: (context, layers, child) {

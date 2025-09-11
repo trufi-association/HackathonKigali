@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart' as latlng;
 import 'package:trufi_core/pages/home/widgets/routing_map/routing_map_controller.dart';
@@ -137,6 +139,17 @@ class _RouteNavigationScreenState extends State<RouteNavigationScreen> {
                 trufiMapController: mapController,
                 onSelectItinerary: (points) {
                   fitCameraLayer.fitBoundsOnCamera(points);
+                },
+                onHeightChanged: (height) {
+                  final currentHeight= constraints.maxHeight/2;
+                  fitCameraLayer.updatePadding(
+                    EdgeInsets.only(
+                      bottom: math.min(currentHeight, height),
+                      right: 30,
+                      left: 30,
+                      top: 80,
+                    ),
+                  );
                 },
               ),
               SafeArea(
