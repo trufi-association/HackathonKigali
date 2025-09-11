@@ -20,9 +20,9 @@ class FitCameraLayer extends TrufiLayer {
 
   FitCameraLayer(
     super.controller, {
-    EdgeInsets padding = const EdgeInsets.only(top: 200),
-    this.showCornerDots = true,
-    this.debugFlag = true,
+    EdgeInsets padding = EdgeInsets.zero,
+    this.showCornerDots = false,
+    this.debugFlag = false,
   }) : _padding = padding,
        super(id: layerId, layerLevel: 9) {
     _cameraListener = _computeAndRender;

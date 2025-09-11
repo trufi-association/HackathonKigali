@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart' as latlng;
 import 'package:trufi_core/pages/home/widgets/routing_map/routing_map_controller.dart';
 import 'package:trufi_core/pages/home/widgets/search_bar/location_search_bar.dart';
+import 'package:trufi_core/pages/home/widgets/travel_bottom_sheet/travel_bottom_sheet.dart';
 import 'package:trufi_core/screens/route_navigation/map_layers/fit_camera_layer.dart';
 import 'package:trufi_core/screens/route_navigation/maps/flutter_map.dart';
 import 'package:trufi_core/screens/route_navigation/maps/trufi_map_controller.dart';
@@ -36,7 +37,11 @@ class _RouteNavigationScreenState extends State<RouteNavigationScreen> {
     super.initState();
     routingMapComponent = RoutingMapComponent(mapController);
     // weatherLayer = WeatherStationsLayer(mapController);
-    fitCameraLayer = FitCameraLayer(mapController);
+    fitCameraLayer = FitCameraLayer(
+      mapController,
+      padding: EdgeInsets.only(bottom: 200, right: 30, left: 30, top: 50),
+      debugFlag: false,
+    );
   }
 
   @override
@@ -127,27 +132,33 @@ class _RouteNavigationScreenState extends State<RouteNavigationScreen> {
               const LocationSearchBar(),
               if (selectedMarker?.buildPanel != null)
                 TrufiBottomSheet(child: selectedMarker!.buildPanel!(context)),
-              // TransitBottomSheet(
-              //   routingMapComponent: routingMapComponent,
-              //   trufiMapController: mapController,
-              // ),
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: SafeArea(
-                  child: IconButton(
-                    icon: const Icon(Icons.swap_horiz),
-                    onPressed: () {
-                      fitCameraLayer.fitBoundsOnCamera([
-                        latlng.LatLng(48.5940, 8.8665),
-                        latlng.LatLng(48.5960, 8.8680),
-                        latlng.LatLng(48.5950, 8.8700),
-                        latlng.LatLng(48.5935, 8.8720),
-                        latlng.LatLng(48.5920, 8.8685),
-                        latlng.LatLng(48.5970, 8.8670),
-                        latlng.LatLng(48.5985, 8.8695),
-                        latlng.LatLng(48.5945, 8.8730),
-                      ]);
-                    },
+              TransitBottomSheet(
+                routingMapComponent: routingMapComponent,
+                trufiMapController: mapController,
+                onSelectItinerary: (points) {
+                  fitCameraLayer.fitBoundsOnCamera(points);
+                },
+              ),
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 100),
+                  child: Align(
+                    alignment: Alignment.topRight,
+                    child: IconButton(
+                      icon: const Icon(Icons.filter_center_focus),
+                      onPressed: () {
+                        fitCameraLayer.fitBoundsOnCamera([
+                          latlng.LatLng(48.5940, 8.8665),
+                          latlng.LatLng(48.5960, 8.8680),
+                          latlng.LatLng(48.5950, 8.8700),
+                          latlng.LatLng(48.5935, 8.8720),
+                          latlng.LatLng(48.5920, 8.8685),
+                          latlng.LatLng(48.5970, 8.8670),
+                          latlng.LatLng(48.5985, 8.8695),
+                          latlng.LatLng(48.5945, 8.8730),
+                        ]);
+                      },
+                    ),
                   ),
                 ),
               ),

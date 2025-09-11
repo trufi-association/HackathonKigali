@@ -114,32 +114,6 @@ class RoutingMapComponent extends TrufiLayer {
   void changeItinerary(PlanItinerary itinerary) {
     routingMapSelected.changeItinerary(itinerary);
     _rebuildGraphics();
-
-    final List<latlng.LatLng> allPositions = [
-      latlng.LatLng(48.595958, 8.861031),
-      latlng.LatLng(48.595759, 8.867168),
-    ];
-    if (allPositions.isEmpty) return;
-
-    final LatLngBounds newBounds = LatLngBounds.fromPoints(allPositions);
-
-    final TrufiCameraPosition currentCamera =
-        controller.cameraPositionNotifier.value;
-
-    final TrufiCameraPosition fitted = TrufiCameraFit.fitBoundsOnCamera(
-      camera: currentCamera,
-      bounds: newBounds,
-      padding: const EdgeInsets.fromLTRB(24, 56, 24, 72),
-      minZoom: 2,
-      maxZoom: 18,
-      forceIntZoom: true,
-    );
-
-    controller.updateCamera(
-      target: fitted.target,
-      zoom: fitted.zoom,
-      bearing: currentCamera.bearing,
-    );
   }
 
   void cleanOriginAndDestination() {
