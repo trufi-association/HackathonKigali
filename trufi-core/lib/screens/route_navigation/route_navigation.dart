@@ -42,7 +42,7 @@ class _RouteNavigationScreenState extends State<RouteNavigationScreen> {
     fitCameraLayer = FitCameraLayer(
       mapController,
       padding: EdgeInsets.only(bottom: 200, right: 30, left: 30, top: 50),
-      debugFlag: true,
+      // debugFlag: true,
     );
   }
 

@@ -13,15 +13,14 @@ class FitCameraLayer extends TrufiLayer {
   bool showCornerDots;
   bool debugFlag;
 
-  /// Device pixel ratio (logical -> CSS px). If you later expose DPR, update here.
+  /// Device pixel ratio (logical -> CSS px). Si luego expones DPR, actualiza aquí.
   final double _dpr = 1.0;
   Size _viewportLogical = Size.zero;
 
-  /// Puntos actuales a encuadrar
-  List<latlng.LatLng> _fitPoints = const [];
-  List<latlng.LatLng> get fitPoints => List.unmodifiable(_fitPoints);
+  /// BBox actual a encuadrar (máximo 4 esquinas).
+  _FitBounds? _fitBounds;
 
-  /// Notificador: ¿algún _fitPoint está fuera del viewport actual?
+  /// Notificador: ¿el bbox (si existe) está parcialmente fuera del viewport?
   final ValueNotifier<bool> outOfFocusNotifier = ValueNotifier<bool>(false);
 
   /// Margen anti-parpadeo en px (CSS) para el test de dentro/fuera
@@ -49,25 +48,25 @@ class FitCameraLayer extends TrufiLayer {
   }
 
   /// === API pública de conveniencia ===
-  /// Reemplaza los puntos y (opcional) re-centra la cámara a ellos
+  /// Reemplaza los puntos y (opcional) re-centra la cámara a su bbox.
   void setFitPoints(
     List<latlng.LatLng> points, {
     bool recenter = true,
     double minZoom = 2.0,
     double maxZoom = 20.0,
   }) {
-    _fitPoints = List<latlng.LatLng>.from(points);
-    if (recenter) {
-      fitBoundsOnCamera(_fitPoints, minZoom: minZoom, maxZoom: maxZoom);
+    _fitBounds = _computeBounds(points);
+    if (recenter && _fitBounds != null) {
+      _applyCameraForBounds(_fitBounds!, minZoom: minZoom, maxZoom: maxZoom);
     } else {
       _computeAndRender();
     }
   }
 
-  /// Re-encuadra la cámara a los puntos actuales (_fitPoints). No guarda estado adicional.
+  /// Re-encuadra la cámara al bbox actual (si existe).
   void reFitCamera({double minZoom = 2.0, double maxZoom = 20.0}) {
-    if (_fitPoints.isEmpty) return;
-    fitBoundsOnCamera(_fitPoints, minZoom: minZoom, maxZoom: maxZoom);
+    if (_fitBounds == null) return;
+    _applyCameraForBounds(_fitBounds!, minZoom: minZoom, maxZoom: maxZoom);
   }
 
   void updateViewport(Size logicalSize, EdgeInsets viewPadding) {
@@ -80,16 +79,17 @@ class FitCameraLayer extends TrufiLayer {
 
   void updatePadding(EdgeInsets padding, {bool recenter = true}) {
     _padding = padding;
-    if (recenter && _fitPoints.isNotEmpty && !outOfFocusNotifier.value) {
+    if (recenter && _fitBounds != null && !outOfFocusNotifier.value) {
       reFitCamera();
     }
   }
 
   void clearFitPoints() {
-    _fitPoints = const [];
+    _fitBounds = null;
     _computeAndRender();
   }
 
+  // ======= Utilidades de proyección WebMercator =======
   static const _maxLat = 85.05112878;
 
   double _clamp(double v, double lo, double hi) =>
@@ -110,24 +110,11 @@ class FitCameraLayer extends TrufiLayer {
     return 180.0 / math.pi * math.atan(0.5 * (math.exp(n) - math.exp(-n)));
   }
 
-  Widget _zoomBadge(double z) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-    decoration: BoxDecoration(
-      color: Colors.black.withOpacity(0.75),
-      borderRadius: BorderRadius.circular(10),
-      boxShadow: const [
-        BoxShadow(blurRadius: 4, offset: Offset(0, 1), color: Colors.black26),
-      ],
-    ),
-    child: Text(
-      'z: ${z.toStringAsFixed(2)}',
-      style: const TextStyle(
-        color: Colors.white,
-        fontSize: 12,
-        fontWeight: FontWeight.w600,
-      ),
-    ),
-  );
+  double _norm01(double v) {
+    v = v % 1.0;
+    if (v < 0) v += 1.0;
+    return v;
+  }
 
   Widget _dot(Color c) => Container(
     width: 10,
@@ -153,6 +140,7 @@ class FitCameraLayer extends TrufiLayer {
     ),
   );
 
+  // ======= Render principal =======
   void _computeAndRender() {
     final cam = controller.cameraPositionNotifier.value;
     if (_viewportLogical == Size.zero) {
@@ -208,7 +196,7 @@ class FitCameraLayer extends TrufiLayer {
     final halfW = (Wcss / 2.0) * mercPerCssPx;
     final halfH = (Hcss / 2.0) * mercPerCssPx;
 
-    // Para debug: esquinas del rectángulo visible
+    // Esquinas del rectángulo visible (para debug)
     final cornersLocal = <Offset>[
       Offset(-halfW, -halfH),
       Offset(halfW, -halfH),
@@ -231,8 +219,8 @@ class FitCameraLayer extends TrufiLayer {
 
     final rect = <latlng.LatLng>[bl, tl, tr, br, bl];
 
-    // Estado de foco
-    final bool anyOutside = _isAnyFitPointOutside(
+    // Estado de foco (si hay bbox activo)
+    final bool anyOutside = _isBBoxOutside(
       cx: cx,
       cy: cy,
       cosT: cosT,
@@ -243,6 +231,7 @@ class FitCameraLayer extends TrufiLayer {
     );
     _updateOutOfFocusAsync(anyOutside);
 
+    // Debug draw
     if (debugFlag) {
       final lines = <TrufiLine>[
         TrufiLine(
@@ -252,16 +241,23 @@ class FitCameraLayer extends TrufiLayer {
           lineWidth: 3,
           layerLevel: layerLevel,
         ),
+        if (_fitBounds != null)
+          TrufiLine(
+            id: '$id:fit-bbox',
+            position: [
+              _fitBounds!.corners[0], // bl
+              _fitBounds!.corners[1], // tl
+              _fitBounds!.corners[2], // tr
+              _fitBounds!.corners[3], // br
+              _fitBounds!.corners[0], // bl
+            ],
+            color: Colors.pink.withOpacity(0.7),
+            lineWidth: 2,
+            layerLevel: layerLevel,
+          ),
       ];
 
       final markers = <TrufiMarker>[
-        TrufiMarker(
-          id: '$id:center-zoom',
-          position: center,
-          widget: _zoomBadge(zoom),
-          layerLevel: layerLevel,
-          size: const Size(52, 28),
-        ),
         if (showCornerDots) ...[
           TrufiMarker(
             id: '$id:tl',
@@ -292,14 +288,15 @@ class FitCameraLayer extends TrufiLayer {
             size: const Size(10, 10),
           ),
         ],
-        for (int i = 0; i < _fitPoints.length; i++)
-          TrufiMarker(
-            id: '$id:fit:$i',
-            position: _fitPoints[i],
-            widget: _fitDot,
-            layerLevel: layerLevel,
-            size: const Size(10, 10),
-          ),
+        if (_fitBounds != null)
+          for (int i = 0; i < 4; i++)
+            TrufiMarker(
+              id: '$id:fitCorner:$i',
+              position: _fitBounds!.corners[i],
+              widget: _fitDot,
+              layerLevel: layerLevel,
+              size: const Size(10, 10),
+            ),
       ];
 
       setLines(lines);
@@ -310,7 +307,8 @@ class FitCameraLayer extends TrufiLayer {
     }
   }
 
-  bool _isAnyFitPointOutside({
+  // ======= Lógica de “fuera de foco” usando solo las 4 esquinas del bbox =======
+  bool _isBBoxOutside({
     required double cx,
     required double cy,
     required double cosT,
@@ -319,11 +317,11 @@ class FitCameraLayer extends TrufiLayer {
     required double halfH,
     required double mercPerCssPx,
   }) {
-    if (_fitPoints.isEmpty) return false; // sin puntos -> en foco
+    if (_fitBounds == null) return false;
 
     final double slackMerc = (focusSlackCss * _dpr) * mercPerCssPx;
 
-    for (final p in _fitPoints) {
+    bool testLatLng(latlng.LatLng p) {
       final x = _lngToMercX(p.longitude);
       final y = _latToMercY(p.latitude);
 
@@ -332,7 +330,7 @@ class FitCameraLayer extends TrufiLayer {
       if (dx < -0.5) dx += 1.0;
       final dy = y - cy;
 
-      // pasar a coords locales (des-rotadas)
+      // coords locales (des-rotadas)
       final localX = dx * cosT + dy * sinT;
       final localY = -dx * sinT + dy * cosT;
 
@@ -340,63 +338,36 @@ class FitCameraLayer extends TrufiLayer {
           (localX >= -halfW - slackMerc) && (localX <= halfW + slackMerc);
       final insideY =
           (localY >= -halfH - slackMerc) && (localY <= halfH + slackMerc);
-      if (!(insideX && insideY)) return true;
+      return insideX && insideY;
+    }
+
+    // Si alguna esquina del bbox está fuera, marcamos fuera de foco.
+    for (final corner in _fitBounds!.corners) {
+      if (!testLatLng(corner)) return true;
     }
     return false;
   }
 
+  // ======= Encadre de cámara usando solo bbox =======
   void fitBoundsOnCamera(
     List<latlng.LatLng> points, {
     double minZoom = 2.0,
     double maxZoom = 20.0,
   }) {
     if (points.isEmpty || _viewportLogical == Size.zero) {
-      _fitPoints = const [];
+      _fitBounds = null;
       _computeAndRender();
       return;
     }
+    _fitBounds = _computeBounds(points);
+    _applyCameraForBounds(_fitBounds!, minZoom: minZoom, maxZoom: maxZoom);
+  }
 
-    _fitPoints = List<latlng.LatLng>.from(points);
-
-    double norm01(double v) {
-      v = v % 1.0;
-      if (v < 0) v += 1.0;
-      return v;
-    }
-
-    final xs = <double>[];
-    final ys = <double>[];
-    for (final p in points) {
-      xs.add(_lngToMercX(p.longitude));
-      ys.add(_latToMercY(p.latitude));
-    }
-
-    double xMin = xs.reduce(math.min);
-    double xMax = xs.reduce(math.max);
-    double spanX = xMax - xMin;
-
-    double cx;
-    double dx;
-    if (spanX <= 0.5) {
-      dx = math.max(spanX, 1e-12);
-      cx = (xMin + xMax) / 2.0;
-    } else {
-      double xMin2 = double.infinity;
-      double xMax2 = -double.infinity;
-      for (final x in xs) {
-        final xx = x < 0.5 ? x + 1.0 : x;
-        if (xx < xMin2) xMin2 = xx;
-        if (xx > xMax2) xMax2 = xx;
-      }
-      dx = math.max(xMax2 - xMin2, 1e-12);
-      cx = norm01((xMin2 + xMax2) / 2.0);
-    }
-
-    final yMin = ys.reduce(math.min);
-    final yMax = ys.reduce(math.max);
-    final dy = math.max(yMax - yMin, 1e-12);
-    final cy = (yMin + yMax) / 2.0;
-
+  void _applyCameraForBounds(
+    _FitBounds fb, {
+    required double minZoom,
+    required double maxZoom,
+  }) {
     final cam = controller.cameraPositionNotifier.value;
     final theta = cam.bearing * math.pi / 180.0;
     final absCos = math.cos(theta).abs();
@@ -420,11 +391,12 @@ class FitCameraLayer extends TrufiLayer {
           _dpr,
     );
 
+    // Proyección del viewport rotado al bbox axis-aligned
     final Wproj = Wcss * absCos + Hcss * absSin;
     final Hproj = Wcss * absSin + Hcss * absCos;
 
-    final zX = math.log(Wproj / (tileSize * dx)) / math.ln2;
-    final zY = math.log(Hproj / (tileSize * dy)) / math.ln2;
+    final zX = math.log(Wproj / (tileSize * fb.dx)) / math.ln2;
+    final zY = math.log(Hproj / (tileSize * fb.dy)) / math.ln2;
     final zoom = _zoomClamp(
       (zX.isFinite && zY.isFinite) ? math.min(zX, zY) : cam.zoom,
       minZoom,
@@ -446,8 +418,8 @@ class FitCameraLayer extends TrufiLayer {
     final shiftY =
         shiftXLocal * math.sin(theta) + shiftYLocal * math.cos(theta);
 
-    final cxc = norm01(cx - shiftX);
-    final cyc = (cy - shiftY).clamp(0.0, 1.0);
+    final cxc = _norm01(fb.cx - shiftX);
+    final cyc = (fb.cy - shiftY).clamp(0.0, 1.0);
 
     final target = latlng.LatLng(_mercYToLat(cyc), _mercXToLng(cxc));
 
@@ -463,11 +435,74 @@ class FitCameraLayer extends TrufiLayer {
 
   void _updateOutOfFocusAsync(bool newValue) {
     if (outOfFocusNotifier.value == newValue) return;
-
     SchedulerBinding.instance.addPostFrameCallback((_) {
       if (outOfFocusNotifier.value != newValue) {
         outOfFocusNotifier.value = newValue;
       }
     });
   }
+
+  // ======= Cálculo de bbox (máximo 4 puntos) =======
+  _FitBounds? _computeBounds(List<latlng.LatLng> points) {
+    if (points.isEmpty) return null;
+
+    double xMin = double.infinity, xMax = -double.infinity;
+    double yMin = double.infinity, yMax = -double.infinity;
+    final xs = <double>[], ys = <double>[];
+
+    for (final p in points) {
+      final x = _lngToMercX(p.longitude);
+      final y = _latToMercY(p.latitude);
+      xs.add(x);
+      ys.add(y);
+      if (x < xMin) xMin = x;
+      if (x > xMax) xMax = x;
+      if (y < yMin) yMin = y;
+      if (y > yMax) yMax = y;
+    }
+
+    // Resolver antimeridiano como en tu implementación original
+    double spanX = xMax - xMin;
+    double cx, dx;
+
+    if (spanX <= 0.5) {
+      dx = math.max(spanX, 1e-12);
+      cx = (xMin + xMax) / 2.0;
+    } else {
+      double xMin2 = double.infinity, xMax2 = -double.infinity;
+      for (final x in xs) {
+        final xx = x < 0.5 ? x + 1.0 : x;
+        if (xx < xMin2) xMin2 = xx;
+        if (xx > xMax2) xMax2 = xx;
+      }
+      dx = math.max(xMax2 - xMin2, 1e-12);
+      cx = _norm01((xMin2 + xMax2) / 2.0);
+    }
+
+    final dy = math.max(yMax - yMin, 1e-12);
+    final cy = (yMin + yMax) / 2.0;
+
+    // Esquinas del bbox axis-aligned en Mercator
+    final double leftX = _norm01(cx - dx / 2.0);
+    final double rightX = _norm01(cx + dx / 2.0);
+    final double botY = cy - dy / 2.0;
+    final double topY = cy + dy / 2.0;
+
+    final corners = <latlng.LatLng>[
+      latlng.LatLng(_mercYToLat(botY), _mercXToLng(leftX)), // bl
+      latlng.LatLng(_mercYToLat(topY), _mercXToLng(leftX)), // tl
+      latlng.LatLng(_mercYToLat(topY), _mercXToLng(rightX)), // tr
+      latlng.LatLng(_mercYToLat(botY), _mercXToLng(rightX)), // br
+    ];
+
+    return _FitBounds(cx, cy, dx, dy, corners);
+  }
+}
+
+/// Contenedor de bbox mínimo (en Mercator) y sus 4 esquinas LatLng.
+class _FitBounds {
+  final double cx, cy; // centro en Mercator (0..1)
+  final double dx, dy; // spans en Mercator
+  final List<latlng.LatLng> corners; // [bl, tl, tr, br]
+  const _FitBounds(this.cx, this.cy, this.dx, this.dy, this.corners);
 }
