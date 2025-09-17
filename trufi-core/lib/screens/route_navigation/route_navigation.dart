@@ -42,7 +42,7 @@ class _RouteNavigationScreenState extends State<RouteNavigationScreen> {
     fitCameraLayer = FitCameraLayer(
       mapController,
       padding: EdgeInsets.only(bottom: 200, right: 30, left: 30, top: 50),
-      debugFlag: false,
+      debugFlag: true,
     );
   }
 
@@ -141,7 +141,7 @@ class _RouteNavigationScreenState extends State<RouteNavigationScreen> {
                   fitCameraLayer.fitBoundsOnCamera(points);
                 },
                 onHeightChanged: (height) {
-                  final currentHeight= constraints.maxHeight/2;
+                  final currentHeight = constraints.maxHeight / 2;
                   fitCameraLayer.updatePadding(
                     EdgeInsets.only(
                       bottom: math.min(currentHeight, height),
@@ -154,22 +154,32 @@ class _RouteNavigationScreenState extends State<RouteNavigationScreen> {
               ),
               SafeArea(
                 child: Padding(
-                  padding: const EdgeInsets.only(top: 100),
+                  padding: const EdgeInsets.only(top: 60, right: 8),
                   child: Align(
                     alignment: Alignment.topRight,
-                    child: IconButton(
-                      icon: const Icon(Icons.filter_center_focus),
-                      onPressed: () {
-                        fitCameraLayer.fitBoundsOnCamera([
-                          latlng.LatLng(48.5940, 8.8665),
-                          latlng.LatLng(48.5960, 8.8680),
-                          latlng.LatLng(48.5950, 8.8700),
-                          latlng.LatLng(48.5935, 8.8720),
-                          latlng.LatLng(48.5920, 8.8685),
-                          latlng.LatLng(48.5970, 8.8670),
-                          latlng.LatLng(48.5985, 8.8695),
-                          latlng.LatLng(48.5945, 8.8730),
-                        ]);
+                    child: ValueListenableBuilder<bool>(
+                      valueListenable: fitCameraLayer.outOfFocusNotifier,
+                      builder: (context, outOfFocus, _) {
+                        if (!outOfFocus) {
+                          // 👇 No muestra nada
+                          return const SizedBox.shrink();
+                        }
+                        return Tooltip(
+                          message: 'Fuera de foco: re-centrar',
+                          child: IconButton(
+                            iconSize: 28,
+                            icon: const Icon(
+                              Icons.crop_free,
+                              color: Colors.redAccent,
+                            ),
+                            style: const ButtonStyle(
+                              backgroundColor: WidgetStatePropertyAll(
+                                Colors.white,
+                              ),
+                            ),
+                            onPressed: fitCameraLayer.reFitCamera,
+                          ),
+                        );
                       },
                     ),
                   ),

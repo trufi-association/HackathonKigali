@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:latlong2/latlong.dart' as latlng;
 import 'package:trufi_core/screens/route_navigation/maps/trufi_map_controller.dart';
 
@@ -12,9 +13,19 @@ class FitCameraLayer extends TrufiLayer {
   bool showCornerDots;
   bool debugFlag;
 
+  /// Device pixel ratio (logical -> CSS px). If you later expose DPR, update here.
   final double _dpr = 1.0;
   Size _viewportLogical = Size.zero;
+
+  /// Puntos actuales a encuadrar
   List<latlng.LatLng> _fitPoints = const [];
+  List<latlng.LatLng> get fitPoints => List.unmodifiable(_fitPoints);
+
+  /// Notificador: ¿algún _fitPoint está fuera del viewport actual?
+  final ValueNotifier<bool> outOfFocusNotifier = ValueNotifier<bool>(false);
+
+  /// Margen anti-parpadeo en px (CSS) para el test de dentro/fuera
+  double focusSlackCss = 4.0;
 
   late final VoidCallback _cameraListener;
 
@@ -33,7 +44,30 @@ class FitCameraLayer extends TrufiLayer {
   @override
   void dispose() {
     controller.cameraPositionNotifier.removeListener(_cameraListener);
+    outOfFocusNotifier.dispose();
     super.dispose();
+  }
+
+  /// === API pública de conveniencia ===
+  /// Reemplaza los puntos y (opcional) re-centra la cámara a ellos
+  void setFitPoints(
+    List<latlng.LatLng> points, {
+    bool recenter = true,
+    double minZoom = 2.0,
+    double maxZoom = 20.0,
+  }) {
+    _fitPoints = List<latlng.LatLng>.from(points);
+    if (recenter) {
+      fitBoundsOnCamera(_fitPoints, minZoom: minZoom, maxZoom: maxZoom);
+    } else {
+      _computeAndRender();
+    }
+  }
+
+  /// Re-encuadra la cámara a los puntos actuales (_fitPoints). No guarda estado adicional.
+  void reFitCamera({double minZoom = 2.0, double maxZoom = 20.0}) {
+    if (_fitPoints.isEmpty) return;
+    fitBoundsOnCamera(_fitPoints, minZoom: minZoom, maxZoom: maxZoom);
   }
 
   void updateViewport(Size logicalSize, EdgeInsets viewPadding) {
@@ -44,9 +78,11 @@ class FitCameraLayer extends TrufiLayer {
     _computeAndRender();
   }
 
-  void updatePadding(EdgeInsets padding) {
+  void updatePadding(EdgeInsets padding, {bool recenter = true}) {
     _padding = padding;
-    _computeAndRender();
+    if (recenter && _fitPoints.isNotEmpty && !outOfFocusNotifier.value) {
+      reFitCamera();
+    }
   }
 
   void clearFitPoints() {
@@ -122,6 +158,7 @@ class FitCameraLayer extends TrufiLayer {
     if (_viewportLogical == Size.zero) {
       setLines(const []);
       setMarkers(const []);
+      _updateOutOfFocusAsync(false);
       return;
     }
 
@@ -171,6 +208,7 @@ class FitCameraLayer extends TrufiLayer {
     final halfW = (Wcss / 2.0) * mercPerCssPx;
     final halfH = (Hcss / 2.0) * mercPerCssPx;
 
+    // Para debug: esquinas del rectángulo visible
     final cornersLocal = <Offset>[
       Offset(-halfW, -halfH),
       Offset(halfW, -halfH),
@@ -192,6 +230,18 @@ class FitCameraLayer extends TrufiLayer {
     final bl = toLatLng(cornersLocal[3]);
 
     final rect = <latlng.LatLng>[bl, tl, tr, br, bl];
+
+    // Estado de foco
+    final bool anyOutside = _isAnyFitPointOutside(
+      cx: cx,
+      cy: cy,
+      cosT: cosT,
+      sinT: sinT,
+      halfW: halfW,
+      halfH: halfH,
+      mercPerCssPx: mercPerCssPx,
+    );
+    _updateOutOfFocusAsync(anyOutside);
 
     if (debugFlag) {
       final lines = <TrufiLine>[
@@ -258,6 +308,41 @@ class FitCameraLayer extends TrufiLayer {
       setLines(const []);
       setMarkers(const []);
     }
+  }
+
+  bool _isAnyFitPointOutside({
+    required double cx,
+    required double cy,
+    required double cosT,
+    required double sinT,
+    required double halfW,
+    required double halfH,
+    required double mercPerCssPx,
+  }) {
+    if (_fitPoints.isEmpty) return false; // sin puntos -> en foco
+
+    final double slackMerc = (focusSlackCss * _dpr) * mercPerCssPx;
+
+    for (final p in _fitPoints) {
+      final x = _lngToMercX(p.longitude);
+      final y = _latToMercY(p.latitude);
+
+      double dx = x - cx;
+      if (dx > 0.5) dx -= 1.0; // wrap antimeridiano
+      if (dx < -0.5) dx += 1.0;
+      final dy = y - cy;
+
+      // pasar a coords locales (des-rotadas)
+      final localX = dx * cosT + dy * sinT;
+      final localY = -dx * sinT + dy * cosT;
+
+      final insideX =
+          (localX >= -halfW - slackMerc) && (localX <= halfW + slackMerc);
+      final insideY =
+          (localY >= -halfH - slackMerc) && (localY <= halfH + slackMerc);
+      if (!(insideX && insideY)) return true;
+    }
+    return false;
   }
 
   void fitBoundsOnCamera(
@@ -374,5 +459,15 @@ class FitCameraLayer extends TrufiLayer {
     if (z < minZ) return minZ;
     if (z > maxZ) return maxZ;
     return z;
+  }
+
+  void _updateOutOfFocusAsync(bool newValue) {
+    if (outOfFocusNotifier.value == newValue) return;
+
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (outOfFocusNotifier.value != newValue) {
+        outOfFocusNotifier.value = newValue;
+      }
+    });
   }
 }
