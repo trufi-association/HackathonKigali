@@ -14,20 +14,11 @@ import 'package:trufi_core/widgets/bottom_sheet/trufi_bottom_sheet.dart';
 class RouteNavigationScreen extends StatefulWidget {
   const RouteNavigationScreen({
     super.key,
-    List<TrufiMapRender> Function(
-      TrufiMapController controller,
-      void Function(latlng.LatLng)? onMapClick,
-      void Function(latlng.LatLng)? onMapLongClick,
-    )?
-    setupMapInteractions,
-    setupMapLayerInteractions,
-    setupRoutingMapComponent,
-    setupFitCameraLayer,
-  }) : mapBuilder = setupMapInteractions ?? defaultMapBuilder,
-       mapLayerBuilder = setupMapLayerInteractions ?? defaultMapLayerBuilder,
-       routingMapComponent =
-           setupRoutingMapComponent ?? defaultRoutingMapComponent,
-       fitCameraLayer = setupFitCameraLayer ?? defaultFitCameraLayer;
+    this.mapBuilder = defaultMapBuilder,
+    this.mapLayerBuilder = defaultMapLayerBuilder,
+    this.routingMapComponent = defaultRoutingMapComponent,
+    this.fitCameraLayer = defaultFitCameraLayer,
+  });
   final List<TrufiMapRender> Function(
     TrufiMapController controller,
     void Function(latlng.LatLng)? onMapClick,
