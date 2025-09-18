@@ -9,7 +9,7 @@ import 'package:trufi_core/widgets/bottom_sheet/trufi_bottom_sheet.dart';
 
 class TransitBottomSheet extends StatefulWidget {
   final TrufiMapController trufiMapController;
-  final RoutingMapComponent routingMapComponent;
+  final IRoutingMapComponent routingMapComponent; 
   final void Function(List<latlng.LatLng>) onSelectItinerary;
 
   final Function(double)? onHeightChanged;

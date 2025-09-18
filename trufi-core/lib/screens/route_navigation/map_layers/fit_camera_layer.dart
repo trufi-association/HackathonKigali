@@ -4,7 +4,23 @@ import 'package:flutter/scheduler.dart';
 import 'package:latlong2/latlong.dart' as latlng;
 import 'package:trufi_core/screens/route_navigation/maps/trufi_map_controller.dart';
 
-class FitCameraLayer extends TrufiLayer {
+abstract class IFitCameraLayer extends TrufiLayer {
+  IFitCameraLayer(
+    super.controller, {
+    required super.id,
+    required super.layerLevel,
+  });
+  void updateViewport(Size logicalSize, EdgeInsets viewPadding);
+  void fitBoundsOnCamera(List<latlng.LatLng> points);
+  void updatePadding(EdgeInsets padding, {bool recenter = true});
+  void reFitCamera();
+
+  final double minZoom = 2.0;
+  final double maxZoom = 20.0;
+  final ValueNotifier<bool> outOfFocusNotifier = ValueNotifier<bool>(false);
+}
+
+class FitCameraLayer extends IFitCameraLayer {
   static const String layerId = 'fit-camera-layer';
 
   final double tileSize = 256;
@@ -19,9 +35,6 @@ class FitCameraLayer extends TrufiLayer {
 
   /// BBox actual a encuadrar (máximo 4 esquinas).
   _FitBounds? _fitBounds;
-
-  /// Notificador: ¿el bbox (si existe) está parcialmente fuera del viewport?
-  final ValueNotifier<bool> outOfFocusNotifier = ValueNotifier<bool>(false);
 
   /// Margen anti-parpadeo en px (CSS) para el test de dentro/fuera
   double focusSlackCss = 4.0;
@@ -64,11 +77,13 @@ class FitCameraLayer extends TrufiLayer {
   }
 
   /// Re-encuadra la cámara al bbox actual (si existe).
+  @override
   void reFitCamera({double minZoom = 2.0, double maxZoom = 20.0}) {
     if (_fitBounds == null) return;
     _applyCameraForBounds(_fitBounds!, minZoom: minZoom, maxZoom: maxZoom);
   }
 
+  @override
   void updateViewport(Size logicalSize, EdgeInsets viewPadding) {
     if (logicalSize.width <= 0 || logicalSize.height <= 0) return;
     _viewportLogical = logicalSize;
@@ -77,6 +92,7 @@ class FitCameraLayer extends TrufiLayer {
     _computeAndRender();
   }
 
+  @override
   void updatePadding(EdgeInsets padding, {bool recenter = true}) {
     _padding = padding;
     if (recenter && _fitBounds != null && !outOfFocusNotifier.value) {
@@ -349,6 +365,7 @@ class FitCameraLayer extends TrufiLayer {
   }
 
   // ======= Encadre de cámara usando solo bbox =======
+  @override
   void fitBoundsOnCamera(
     List<latlng.LatLng> points, {
     double minZoom = 2.0,

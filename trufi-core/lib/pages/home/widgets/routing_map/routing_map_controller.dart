@@ -12,10 +12,26 @@ import 'package:trufi_core/pages/home/service/i_plan_repository.dart';
 import 'package:trufi_core/pages/home/widgets/routing_map/trufi_camera_fit.dart';
 import 'package:trufi_core/screens/route_navigation/maps/trufi_map_controller.dart';
 
-class RoutingMapComponent extends TrufiLayer {
+abstract class IRoutingMapComponent extends TrufiLayer {
+  IRoutingMapComponent(
+    super.controller) : super(id: layerId, layerLevel: 2){
+    routingMapSelected = RoutingMapSelected(controller, layerLevel: layerLevel);}
+
   static const String layerId = 'routing-map-component';
   late final RoutingMapSelected routingMapSelected;
   PlanItinerary? get selectedItinerary => routingMapSelected.selectedItinerary;
+  void changeItinerary(PlanItinerary itinerary);
+  Future<void> addOrigin(latlng.LatLng position);
+  Future<void> addDestination(latlng.LatLng position);
+  Future<void> fetchPlan(BuildContext context);
+  void selectNextItinerary();
+  void cleanOriginAndDestination();
+    TrufiMarker? origin;
+  TrufiMarker? destination;
+  PlanEntity? plan;
+}
+
+class RoutingMapComponent extends IRoutingMapComponent {
   static final Widget fromMarker = SizedBox(
     height: 24,
     child: FittedBox(
@@ -78,12 +94,8 @@ class RoutingMapComponent extends TrufiLayer {
     ApiConfig().openTripPlannerUrl,
   );
 
-  TrufiMarker? origin;
-  TrufiMarker? destination;
-  PlanEntity? plan;
 
-  RoutingMapComponent(super.controller) : super(id: layerId, layerLevel: 2) {
-    routingMapSelected = RoutingMapSelected(controller, layerLevel: layerLevel);
+  RoutingMapComponent(super.controller){
     mapRouteHiveLocal.loadRepository().then((_) async {
       final savedOrigin = await mapRouteHiveLocal.getOriginPosition();
       if (savedOrigin != null) {
@@ -111,11 +123,13 @@ class RoutingMapComponent extends TrufiLayer {
     });
   }
 
+  @override
   void changeItinerary(PlanItinerary itinerary) {
     routingMapSelected.changeItinerary(itinerary);
     _rebuildGraphics();
   }
 
+  @override
   void cleanOriginAndDestination() {
     origin = null;
     destination = null;
@@ -127,6 +141,7 @@ class RoutingMapComponent extends TrufiLayer {
     _rebuildGraphics();
   }
 
+  @override
   Future<void> addOrigin(latlng.LatLng position) async {
     origin = TrufiMarker(
       id: "origin",
@@ -138,6 +153,7 @@ class RoutingMapComponent extends TrufiLayer {
     _rebuildGraphics();
   }
 
+  @override
   Future<void> addDestination(latlng.LatLng position) async {
     destination = TrufiMarker(
       id: "destination",
@@ -149,6 +165,7 @@ class RoutingMapComponent extends TrufiLayer {
     _rebuildGraphics();
   }
 
+  @override
   Future<void> fetchPlan(BuildContext context) async {
     if (origin == null || destination == null) return;
 
@@ -187,6 +204,7 @@ class RoutingMapComponent extends TrufiLayer {
     _rebuildGraphics();
   }
 
+  @override
   void selectNextItinerary() {
     final itineraries = plan?.itineraries;
     if (itineraries == null || itineraries.isEmpty) return;

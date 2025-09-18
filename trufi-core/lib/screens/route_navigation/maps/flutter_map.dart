@@ -1,22 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart' as fm;
 import 'package:latlong2/latlong.dart' as latlng;
+import 'package:trufi_core/screens/route_navigation/maps/maplibre_gl.dart';
 import 'package:trufi_core/screens/route_navigation/maps/trufi_map_controller.dart'
     as trufi;
 
-class TrufiFlutterMap extends StatefulWidget {
+class TrufiFlutterMap extends StatefulWidget implements TrufiMapRender {
   const TrufiFlutterMap({
     super.key,
     required this.controller,
-    required this.tileUrl,
     this.onMapClick,
     this.onMapLongClick,
+    required this.tileUrl,
   });
 
+  @override
   final trufi.TrufiMapController controller;
-  final String tileUrl;
+  @override
   final void Function(latlng.LatLng)? onMapClick;
+  @override
   final void Function(latlng.LatLng)? onMapLongClick;
+
+  final String tileUrl;
 
   @override
   State<TrufiFlutterMap> createState() => _TrufiFlutterMapState();

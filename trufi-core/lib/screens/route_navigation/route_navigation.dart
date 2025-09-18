@@ -12,14 +12,83 @@ import 'package:trufi_core/screens/route_navigation/maps/maplibre_gl.dart';
 import 'package:trufi_core/widgets/bottom_sheet/trufi_bottom_sheet.dart';
 
 class RouteNavigationScreen extends StatefulWidget {
-  const RouteNavigationScreen({super.key});
+  const RouteNavigationScreen({
+    super.key,
+    List<TrufiMapRender> Function(
+      TrufiMapController controller,
+      void Function(latlng.LatLng)? onMapClick,
+      void Function(latlng.LatLng)? onMapLongClick,
+    )?
+    setupMapInteractions,
+    setupMapLayerInteractions,
+    setupRoutingMapComponent,
+    setupFitCameraLayer,
+  }) : mapBuilder = setupMapInteractions ?? defaultMapBuilder,
+       mapLayerBuilder = setupMapLayerInteractions ?? defaultMapLayerBuilder,
+       routingMapComponent =
+           setupRoutingMapComponent ?? defaultRoutingMapComponent,
+       fitCameraLayer = setupFitCameraLayer ?? defaultFitCameraLayer;
+  final List<TrufiMapRender> Function(
+    TrufiMapController controller,
+    void Function(latlng.LatLng)? onMapClick,
+    void Function(latlng.LatLng)? onMapLongClick,
+  )
+  mapBuilder;
+  final List<TrufiLayer> Function(TrufiMapController controller)
+  mapLayerBuilder;
+  final IRoutingMapComponent Function(TrufiMapController controller)
+  routingMapComponent;
+  final IFitCameraLayer Function(TrufiMapController controller) fitCameraLayer;
+
+  static List<TrufiMapRender> defaultMapBuilder(
+    TrufiMapController controller,
+    void Function(latlng.LatLng)? onMapClick,
+    void Function(latlng.LatLng)? onMapLongClick,
+  ) {
+    return [
+      TrufiMapLibreMap(
+        controller: controller,
+        onMapClick: onMapClick,
+        onMapLongClick: onMapLongClick,
+        styleString: 'https://tiles.openfreemap.org/styles/liberty',
+      ),
+      TrufiFlutterMap(
+        controller: controller,
+        tileUrl: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+        onMapClick: onMapClick,
+        onMapLongClick: onMapLongClick,
+      ),
+    ];
+  }
+
+  static List<TrufiLayer> defaultMapLayerBuilder(
+    TrufiMapController controller,
+  ) {
+    return [
+      // WeatherStationsLayer(controller),
+    ];
+  }
+
+  static IRoutingMapComponent defaultRoutingMapComponent(
+    TrufiMapController controller,
+  ) {
+    return RoutingMapComponent(controller);
+  }
+
+  static IFitCameraLayer defaultFitCameraLayer(TrufiMapController controller) {
+    return FitCameraLayer(
+      controller,
+      padding: EdgeInsets.only(bottom: 200, right: 30, left: 30, top: 50),
+      // debugFlag: true,
+    );
+  }
 
   @override
   State<RouteNavigationScreen> createState() => _RouteNavigationScreenState();
 }
 
 class _RouteNavigationScreenState extends State<RouteNavigationScreen> {
-  bool showMapLibre = false;
+  int showMapIndex = 0;
 
   final mapController = TrufiMapController(
     initialCameraPosition: TrufiCameraPosition(
@@ -29,26 +98,49 @@ class _RouteNavigationScreenState extends State<RouteNavigationScreen> {
     ),
   );
 
-  late final RoutingMapComponent routingMapComponent;
-  // late final WeatherStationsLayer weatherLayer;
-  late final FitCameraLayer fitCameraLayer;
+  late final IRoutingMapComponent routingMapComponent;
+  late final IFitCameraLayer fitCameraLayer;
   TrufiMarker? selectedMarker;
-
+  late List<TrufiLayer> mapLayerRenders;
+  late List<TrufiMapRender> mapRenders;
   @override
   void initState() {
     super.initState();
-    routingMapComponent = RoutingMapComponent(mapController);
-    // weatherLayer = WeatherStationsLayer(mapController);
-    fitCameraLayer = FitCameraLayer(
+    mapRenders = widget.mapBuilder(
       mapController,
-      padding: EdgeInsets.only(bottom: 200, right: 30, left: 30, top: 50),
-      // debugFlag: true,
+      (mapLatLng) {
+        final nearest = mapController.pickNearestMarkerAt(
+          mapLatLng,
+          hitboxPx: 24.0,
+        );
+        setState(() {
+          selectedMarker = nearest;
+        });
+      },
+      (coord) async {
+        if (routingMapComponent.origin == null) {
+          routingMapComponent.addOrigin(coord);
+        } else if (routingMapComponent.destination == null) {
+          routingMapComponent.addDestination(coord);
+          await _fetchPlanWithLoading();
+        } else {
+          routingMapComponent.cleanOriginAndDestination();
+        }
+      },
     );
+    mapLayerRenders = widget.mapLayerBuilder(mapController);
+    routingMapComponent = widget.routingMapComponent(mapController);
+    fitCameraLayer = widget.fitCameraLayer(mapController);
   }
 
   @override
   void dispose() {
     mapController.dispose();
+    routingMapComponent.dispose();
+    fitCameraLayer.dispose();
+    for (var layer in mapLayerRenders) {
+      layer.dispose();
+    }
     super.dispose();
   }
 
@@ -94,54 +186,7 @@ class _RouteNavigationScreenState extends State<RouteNavigationScreen> {
           fitCameraLayer.updateViewport(logicalSize, viewPadding);
           return Stack(
             children: [
-              if (!showMapLibre)
-                TrufiMapLibreMap(
-                  controller: mapController,
-                  styleString: 'https://tiles.openfreemap.org/styles/liberty',
-                  onMapClick: (mapLatLng) {
-                    final nearest = mapController.pickNearestMarkerAt(
-                      mapLatLng,
-                      hitboxPx: 24.0,
-                    );
-                    setState(() {
-                      selectedMarker = nearest;
-                    });
-                  },
-                  onMapLongClick: (coord) async {
-                    if (routingMapComponent.origin == null) {
-                      routingMapComponent.addOrigin(coord);
-                    } else if (routingMapComponent.destination == null) {
-                      routingMapComponent.addDestination(coord);
-                      await _fetchPlanWithLoading();
-                    } else {
-                      routingMapComponent.cleanOriginAndDestination();
-                    }
-                  },
-                ),
-              if (showMapLibre)
-                TrufiFlutterMap(
-                  controller: mapController,
-                  tileUrl: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                  onMapClick: (mapLatLng) {
-                    final nearest = mapController.pickNearestMarkerAt(
-                      mapLatLng,
-                      hitboxPx: 24.0,
-                    );
-                    setState(() {
-                      selectedMarker = nearest;
-                    });
-                  },
-                  onMapLongClick: (coord) async {
-                    if (routingMapComponent.origin == null) {
-                      routingMapComponent.addOrigin(coord);
-                    } else if (routingMapComponent.destination == null) {
-                      routingMapComponent.addDestination(coord);
-                      await _fetchPlanWithLoading();
-                    } else {
-                      routingMapComponent.cleanOriginAndDestination();
-                    }
-                  },
-                ),
+              mapRenders[showMapIndex],
               LocationSearchBar(setLocation: _setLocation),
               if (selectedMarker?.buildPanel != null)
                 TrufiBottomSheet(child: selectedMarker!.buildPanel!(context)),

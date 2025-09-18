@@ -4,7 +4,7 @@ import 'package:trufi_core/pages/home/widgets/travel_bottom_sheet/travel_mode_se
 
 import 'package:latlong2/latlong.dart' as latlng;
 class TransitModeSection extends StatelessWidget {
-  final RoutingMapComponent routingMapComponent;
+  final IRoutingMapComponent routingMapComponent;
   final void Function(bool) onRouteDetailsViewChanged;
   final void Function(List<latlng.LatLng>) onSelectItinerary;
   const TransitModeSection({

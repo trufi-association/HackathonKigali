@@ -14,7 +14,7 @@ import 'package:trufi_core/widgets/utils/leg_utils.dart';
 
 class ItineraryDetailsCard extends StatelessWidget {
   final void Function(bool) onRouteDetailsViewChanged;
-  final RoutingMapComponent routingMapComponent;
+  final IRoutingMapComponent routingMapComponent;
   const ItineraryDetailsCard({
     super.key,
     required this.onRouteDetailsViewChanged,

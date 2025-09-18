@@ -9,19 +9,36 @@ import 'package:trufi_core/screens/route_navigation/map_layers/marker_list.dart'
 import 'package:trufi_core/models/enums/custom_icons.dart';
 import 'package:trufi_core/screens/route_navigation/maps/trufi_map_controller.dart';
 
-class TrufiMapLibreMap extends StatefulWidget {
+abstract class TrufiMapRender extends Widget {
+  final TrufiMapController controller;
+  final void Function(latlng.LatLng)? onMapClick;
+  final void Function(latlng.LatLng)? onMapLongClick;
+
+  const TrufiMapRender({
+    super.key,
+    required this.controller,
+    required this.onMapClick,
+    required this.onMapLongClick,
+  });
+}
+
+class TrufiMapLibreMap extends StatefulWidget implements TrufiMapRender {
   const TrufiMapLibreMap({
     super.key,
     required this.controller,
-    required this.styleString,
     this.onMapClick,
     this.onMapLongClick,
+    required this.styleString,
   });
 
+  @override
   final TrufiMapController controller;
-  final String styleString;
+  @override
   final void Function(latlng.LatLng)? onMapClick;
+  @override
   final void Function(latlng.LatLng)? onMapLongClick;
+
+  final String styleString;
 
   @override
   State<TrufiMapLibreMap> createState() => _TrufiMapLibreMapState();
