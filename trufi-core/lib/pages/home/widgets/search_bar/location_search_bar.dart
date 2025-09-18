@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:trufi_core/pages/home/widgets/search_bar/full_screen_search_modal.dart';
+import 'package:trufi_core/screens/route_navigation/maps/trufi_map_controller.dart';
 
 class LocationSearchBar extends StatelessWidget {
-  const LocationSearchBar({super.key});
+  final Future<void> Function(TrufiLocation location) setLocation;
+
+  const LocationSearchBar({super.key, required this.setLocation});
 
   @override
   Widget build(BuildContext context) {
@@ -12,14 +15,12 @@ class LocationSearchBar extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(24),
-          onTap: () {
-            Navigator.of(context).push(
-              PageRouteBuilder(
-                opaque: false,
-                transitionDuration: const Duration(milliseconds: 300),
-                pageBuilder: (_, __, ___) => const FullScreenSearchModal(),
-              ),
-            );
+          onTap: () async {
+            final locationSelected =
+                await FullScreenSearchModal.onLocationSelected(context);
+            if (locationSelected != null) {
+              setLocation(locationSelected);
+            }
           },
           child: Hero(
             tag: 'search-bar',

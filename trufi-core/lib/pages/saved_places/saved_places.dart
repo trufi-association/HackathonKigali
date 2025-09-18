@@ -114,12 +114,12 @@ class _SavedPlacesPageState extends State<SavedPlacesPage> {
   }
 
   Future<void> _addNewPlace(BuildContext context) async {
-    final LocationDetail? locationDetail = await _selectPosition(context);
+    final TrufiLocation? locationDetail = await _selectPosition(context);
     if (locationDetail != null) {
       locationRepository.insertMyPlace(
         TrufiLocation(
           description: locationDetail.description,
-          address: locationDetail.street,
+          address: locationDetail.address,
           position: locationDetail.position,
           type: 'saved_place:map',
         ),
@@ -127,12 +127,12 @@ class _SavedPlacesPageState extends State<SavedPlacesPage> {
     }
   }
 
-  Future<LocationDetail?> _selectPosition(
+  Future<TrufiLocation?> _selectPosition(
     BuildContext context, {
     bool? isOrigin,
     LatLng? position,
   }) async {
-    return await ChooseLocationPage.selectPosition(
+    return await ChooseLocationPage.selectLocation(
       context,
       position: position,
       isOrigin: isOrigin,

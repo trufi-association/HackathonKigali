@@ -9,11 +9,11 @@ import 'package:trufi_core/widgets/bottom_sheet/trufi_bottom_sheet.dart';
 
 class TransitBottomSheet extends StatefulWidget {
   final TrufiMapController trufiMapController;
-  final RoutingMapComponent routingMapComponent; 
+  final RoutingMapComponent routingMapComponent;
   final void Function(List<latlng.LatLng>) onSelectItinerary;
-  
-  final Function(double)? onHeightChanged;  
-  
+
+  final Function(double)? onHeightChanged;
+
   const TransitBottomSheet({
     super.key,
     required this.trufiMapController,
@@ -43,7 +43,11 @@ class _TransitBottomSheetState extends State<TransitBottomSheet> {
                 maintainState: true,
                 child: Column(
                   children: [
-                    HeaderBottomSheet(),
+                    HeaderBottomSheet(
+                      onClose: () {
+                        widget.routingMapComponent.cleanOriginAndDestination();
+                      },
+                    ),
                     TransitModeSection(
                       routingMapComponent: widget.routingMapComponent,
                       onRouteDetailsViewChanged: (value) {
@@ -65,7 +69,7 @@ class _TransitBottomSheetState extends State<TransitBottomSheet> {
                   color: theme.colorScheme.surface,
                   elevation: 0,
                   child: ItineraryDetailsCard(
-                      routingMapComponent: widget.routingMapComponent,
+                    routingMapComponent: widget.routingMapComponent,
                     onRouteDetailsViewChanged: (value) {
                       setState(() {
                         showDetail = value;

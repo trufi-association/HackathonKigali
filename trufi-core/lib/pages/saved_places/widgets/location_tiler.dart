@@ -6,16 +6,10 @@ import 'package:trufi_core/screens/route_navigation/maps/trufi_map_controller.da
 import 'package:trufi_core/utils/icon_utils/icons.dart';
 import 'dialog_select_icon.dart';
 
-class LocationDetail {
-  final String description;
-  final String street;
-  final LatLng position;
 
-  LocationDetail(this.description, this.street, this.position);
-}
 
 typedef SelectLocationData =
-    Future<LocationDetail?> Function(
+    Future<TrufiLocation?> Function(
       BuildContext context, {
       LatLng? position,
       bool? isOrigin,
@@ -170,7 +164,7 @@ class _LocationTilerState extends State<LocationTiler> {
   }
 
   Future<void> _changePosition(BuildContext context) async {
-    final LocationDetail? chooseLocationDetail = await widget
+    final TrufiLocation? chooseLocationDetail = await widget
         .selectPositionOnPage(
           context,
           position: widget.location.isLatLngDefined

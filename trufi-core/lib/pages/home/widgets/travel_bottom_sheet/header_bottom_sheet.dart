@@ -4,7 +4,8 @@ import 'dart:math' as math;
 import 'package:trufi_core/widgets/buttons/trufi_icon_button.dart';
 
 class HeaderBottomSheet extends StatelessWidget {
-  const HeaderBottomSheet({super.key});
+  final VoidCallback onClose;
+  const HeaderBottomSheet({super.key, required this.onClose});
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +35,7 @@ class HeaderBottomSheet extends StatelessWidget {
           ),
           SizedBox(width: 4),
           TrufiIconButton(
-            onPressed: () {},
+            onPressed: onClose,
             icon: Icon(Icons.close),
             isCompact: true,
           ),

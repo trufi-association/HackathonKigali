@@ -52,6 +52,17 @@ class _RouteNavigationScreenState extends State<RouteNavigationScreen> {
     super.dispose();
   }
 
+  Future<void> _setLocation(TrufiLocation location) async {
+    if (routingMapComponent.origin == null) {
+      routingMapComponent.addOrigin(location.position);
+    } else if (routingMapComponent.destination == null) {
+      routingMapComponent.addDestination(location.position);
+      await _fetchPlanWithLoading();
+    } else {
+      routingMapComponent.cleanOriginAndDestination();
+    }
+  }
+
   Future<void> _fetchPlanWithLoading() async {
     showDialog(
       context: context,
@@ -131,7 +142,7 @@ class _RouteNavigationScreenState extends State<RouteNavigationScreen> {
                     }
                   },
                 ),
-              const LocationSearchBar(),
+              LocationSearchBar(setLocation: _setLocation),
               if (selectedMarker?.buildPanel != null)
                 TrufiBottomSheet(child: selectedMarker!.buildPanel!(context)),
               TransitBottomSheet(

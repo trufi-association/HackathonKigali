@@ -114,7 +114,7 @@ class _DialogEditLocationState extends State<DialogEditLocation> {
                 const SizedBox(height: 15),
                 OutlinedButton(
                   onPressed: () async {
-                    final LocationDetail? chooseLocationDetail = await widget
+                    final TrufiLocation? chooseLocationDetail = await widget
                         .selectPositionOnPage(
                           context,
                           position: location.isLatLngDefined

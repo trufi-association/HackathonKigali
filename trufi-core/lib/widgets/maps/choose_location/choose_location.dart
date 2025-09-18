@@ -4,26 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:trufi_core/pages/home/widgets/routing_map/routing_map_controller.dart';
 
-import 'package:trufi_core/pages/saved_places/widgets/location_tiler.dart';
 import 'package:trufi_core/repositories/location/location_repository.dart';
-import 'package:trufi_core/screens/route_navigation/maps/flutter_map.dart';
 import 'package:trufi_core/screens/route_navigation/maps/maplibre_gl.dart';
 import 'package:trufi_core/screens/route_navigation/maps/trufi_map_controller.dart';
 
-typedef SelectLocationData =
-    Future<LocationDetail?> Function(
-      BuildContext context, {
-      LatLng? position,
-      bool? isOrigin,
-    });
-
 class ChooseLocationPage extends StatefulWidget {
-  static Future<LocationDetail?> selectPosition(
+  static Future<TrufiLocation?> selectLocation(
     BuildContext buildContext, {
     LatLng? position,
     bool? isOrigin,
   }) async {
-    return await showDialog<LocationDetail?>(
+    return await showDialog<TrufiLocation?>(
       context: buildContext,
       builder: (BuildContext context) =>
           ChooseLocationPage(position: position, isOrigin: isOrigin ?? false),
@@ -42,7 +33,6 @@ class ChooseLocationPage extends StatefulWidget {
 class _ChooseLocationPageState extends State<ChooseLocationPage>
     with TickerProviderStateMixin {
   final locationRepository = LocationRepository();
-  bool showMapLibre = false;
 
   final mapController = TrufiMapController(
     initialCameraPosition: TrufiCameraPosition(
@@ -69,6 +59,18 @@ class _ChooseLocationPageState extends State<ChooseLocationPage>
       loadData(widget.position ?? LatLng(48.5950, 8.8672));
     });
     routingMapComponent = RoutingMapComponent(mapController);
+
+    mapController.cameraPositionNotifier.addListener(() {
+      debounce(() {
+        if (mounted) {
+          final center = mapController.cameraPositionNotifier.value.target;
+          if (center != position) {
+            position = center;
+            loadData(center);
+          }
+        }
+      });
+    });
   }
 
   Timer? timer;
@@ -94,49 +96,13 @@ class _ChooseLocationPageState extends State<ChooseLocationPage>
     final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        iconTheme: const IconThemeData(color: Colors.white),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            RichText(
-              maxLines: 2,
-              text: TextSpan(
-                text: "Choose Location",
-                style: const TextStyle(color: Colors.white),
-              ),
-            ),
-            RichText(
-              maxLines: 2,
-              text: TextSpan(
-                text: "",
-                style: TextStyle(color: Colors.grey[400], fontSize: 13),
-              ),
-            ),
-          ],
-        ),
+        title: Text('Choose Location', style: theme.textTheme.bodyLarge),
       ),
       body: Stack(
         children: [
-          if (!showMapLibre)
-            TrufiMapLibreMap(
-              controller: mapController,
-              styleString: 'https://tiles.openfreemap.org/styles/liberty',
-              onMapClick: (mapLatLng) {
-                final nearest = mapController.pickNearestMarkerAt(
-                  mapLatLng,
-                  hitboxPx: 24.0,
-                );
-                setState(() {
-                  selectedMarker = nearest;
-                });
-              },
-              onMapLongClick: (coord) async {},
-            ),
-          // if (showMapLibre)
-          TrufiFlutterMap(
+          TrufiMapLibreMap(
             controller: mapController,
-            tileUrl: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+            styleString: 'https://tiles.openfreemap.org/styles/liberty',
             onMapClick: (mapLatLng) {
               final nearest = mapController.pickNearestMarkerAt(
                 mapLatLng,
@@ -203,9 +169,13 @@ class _ChooseLocationPageState extends State<ChooseLocationPage>
                           OutlinedButton(
                             onPressed: () async {
                               if (position != null) {
-                                Navigator.of(
-                                  context,
-                                ).pop(LocationDetail('', '', position!));
+                                Navigator.of(context).pop(
+                                  TrufiLocation(
+                                    description: 'Template Description',
+                                    address: 'Template Address',
+                                    position: position!,
+                                  ),
+                                );
                               }
                             },
                             child: SizedBox(

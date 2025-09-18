@@ -71,6 +71,7 @@ class LocationRepository {
     myPlaces.value = await locationService.getMyPlaces();
     favoritePlaces.value = await locationService.getFavoritePlaces();
     historyPlaces.value = await locationService.getHistoryPlaces();
+    myDefaultPlaces.value = myDefaultPlacesTemp;
     await locationService.saveMyDefaultPlaces(myDefaultPlacesTemp);
   }
 
@@ -84,12 +85,12 @@ class LocationRepository {
       ..._deleteAllItem(historyPlaces.value, location),
       location,
     ];
-    await locationService.saveMyPlaces(historyPlaces.value);
+    await locationService.saveHistoryPlaces(historyPlaces.value);
   }
 
   Future<void> insertFavoritePlace(TrufiLocation location) async {
     favoritePlaces.value = [...favoritePlaces.value, location];
-    await locationService.saveMyPlaces(favoritePlaces.value);
+    await locationService.saveFavoritePlaces(favoritePlaces.value);
   }
 
   Future<void> updateMyPlace(TrufiLocation old, TrufiLocation location) async {

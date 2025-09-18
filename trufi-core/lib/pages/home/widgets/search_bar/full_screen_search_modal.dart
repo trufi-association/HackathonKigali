@@ -2,8 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:trufi_core/repositories/location/location_repository.dart';
 import 'package:trufi_core/screens/route_navigation/maps/trufi_map_controller.dart';
 import 'package:trufi_core/utils/icon_utils/icons.dart';
+import 'package:trufi_core/widgets/maps/choose_location/choose_location.dart';
 
 class FullScreenSearchModal extends StatefulWidget {
+  static Future<TrufiLocation?> onLocationSelected(BuildContext context) async {
+    return await Navigator.of(context).push(
+      PageRouteBuilder(
+        opaque: false,
+        transitionDuration: const Duration(milliseconds: 300),
+        pageBuilder: (_, __, ___) => const FullScreenSearchModal(),
+      ),
+    );
+  }
+
   const FullScreenSearchModal({super.key});
 
   @override
@@ -39,6 +50,11 @@ class _FullScreenSearchModalState extends State<FullScreenSearchModal> {
 
   void _update() {
     if (mounted) setState(() {});
+  }
+
+  Future<void> _setLocation({required TrufiLocation location}) async {
+    await locationRepository.insertHistoryPlace(location);
+    if (mounted) Navigator.of(context).pop(location);
   }
 
   @override
@@ -167,6 +183,23 @@ class _FullScreenSearchModalState extends State<FullScreenSearchModal> {
                                     ),
                                     title: e.description,
                                     subtitle: e.address ?? '',
+                                    onTap: () async {
+                                      if (e.isLatLngDefined) {
+                                        _setLocation(location: e);
+                                      } else {
+                                        final locationSelected =
+                                            await ChooseLocationPage.selectLocation(
+                                              context,
+                                            );
+                                        if (locationSelected != null) {
+                                          await locationRepository
+                                              .updateMyDefaultPlace(
+                                                e,
+                                                locationSelected,
+                                              );
+                                        }
+                                      }
+                                    },
                                   ),
                                 ),
                                 ...locationRepository.myPlaces.value.map(
@@ -177,6 +210,7 @@ class _FullScreenSearchModalState extends State<FullScreenSearchModal> {
                                     ),
                                     title: e.description,
                                     subtitle: e.address ?? '',
+                                    onTap: () => _setLocation(location: e),
                                   ),
                                 ),
                               ],
@@ -209,20 +243,26 @@ class _FullScreenSearchModalState extends State<FullScreenSearchModal> {
                     children: [
                       if (query.isEmpty)
                         ...locationRepository.historyPlaces.value.reversed.map(
-                          (location) => PlaceTile2(location: location),
+                          (location) => PlaceTile2(
+                            location: location,
+                            onTap: () => _setLocation(location: location),
+                          ),
                         ),
                       if (query.isEmpty)
                         ...locationRepository.favoritePlaces.value.reversed.map(
-                          (location) => PlaceTile2(location: location),
+                          (location) => PlaceTile2(
+                            location: location,
+                            onTap: () => _setLocation(location: location),
+                          ),
                         ),
                       if (query.isNotEmpty)
                         ...locationRepository.searchResult.value.map(
-                          (location) => PlaceTile2(location: location),
+                          (location) => PlaceTile2(
+                            location: location,
+                            onTap: () => _setLocation(location: location),
+                          ),
                         ),
                       const _MoreFromHistory(),
-                      divider,
-                      const _ContactsCard(),
-                      const SizedBox(height: 24),
                     ],
                   ),
                 ],
@@ -239,14 +279,14 @@ class _QuickActionPill extends StatelessWidget {
   final Widget icon;
   final String title;
   final String subtitle;
-  final Color iconColor;
+  final VoidCallback onTap;
   final Color iconBackgorundColor;
 
   const _QuickActionPill({
     required this.icon,
     required this.title,
     required this.subtitle,
-    this.iconColor = Colors.black,
+    required this.onTap,
     this.iconBackgorundColor = const Color(0xFFD9E5EB),
   });
 
@@ -255,7 +295,7 @@ class _QuickActionPill extends StatelessWidget {
     final theme = Theme.of(context);
     return InkWell(
       borderRadius: BorderRadius.circular(12),
-      onTap: () {},
+      onTap: onTap,
       child: SizedBox(
         width: 160,
         child: Row(
@@ -307,12 +347,14 @@ class _QuickActionPill extends StatelessWidget {
 
 class PlaceTile2 extends StatelessWidget {
   final TrufiLocation location;
+  final VoidCallback onTap;
   final IconData? leadingIcon;
   final Color? leadingColor;
 
   const PlaceTile2({
     super.key,
     required this.location,
+    required this.onTap,
     this.leadingIcon,
     this.leadingColor,
   });
@@ -331,6 +373,7 @@ class PlaceTile2 extends StatelessWidget {
         ListTile(
           visualDensity: VisualDensity.compact,
           horizontalTitleGap: 12,
+          onTap: onTap,
           minVerticalPadding: (subtitle != null && subtitle.isNotEmpty)
               ? 12
               : 20,
@@ -399,7 +442,6 @@ class PlaceTile2 extends StatelessWidget {
                   ],
                 )
               : null,
-          onTap: () {},
         ),
         Divider(
           height: 0.5,
@@ -431,63 +473,6 @@ class _MoreFromHistory extends StatelessWidget {
         ),
       ),
       onTap: () {},
-    );
-  }
-}
-
-class _ContactsCard extends StatelessWidget {
-  const _ContactsCard();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 40,
-            child: Icon(
-              Icons.contacts_outlined,
-              size: 28,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Searching for a friend?',
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'Add your phone contacts so you can search for their addresses on Maps.',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurface,
-                    height: 1.2,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Add contacts',
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: const Color(0xFF008080),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
