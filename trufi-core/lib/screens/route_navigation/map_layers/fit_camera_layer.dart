@@ -94,6 +94,8 @@ class FitCameraLayer extends IFitCameraLayer {
 
   @override
   void updatePadding(EdgeInsets padding, {bool recenter = true}) {
+    if (_padding == padding) return;
+
     _padding = padding;
     if (recenter && _fitBounds != null && !outOfFocusNotifier.value) {
       reFitCamera();

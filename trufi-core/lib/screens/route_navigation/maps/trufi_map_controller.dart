@@ -154,7 +154,9 @@ class TrufiMapController {
 
   void mutateLayers() {
     final layers = Map<String, TrufiLayer>.from(layersNotifier.value);
-    layersNotifier.value = layers;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      layersNotifier.value = layers;
+    });
   }
 
   bool addLayer(TrufiLayer layer) {
