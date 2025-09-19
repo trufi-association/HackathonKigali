@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:trufi_core/consts.dart';
@@ -64,8 +65,8 @@ class LocationRepository {
         .getMyDefaultPlaces();
     if (myDefaultPlacesTemp.isEmpty) {
       myDefaultPlaces.value = [
-        DefaultLocationEnum.defaultHome.initLocation,
-        DefaultLocationEnum.defaultWork.initLocation,
+        DefaultLocationEnum.home.initLocation,
+        DefaultLocationEnum.work.initLocation,
       ];
     }
     myPlaces.value = await locationService.getMyPlaces();

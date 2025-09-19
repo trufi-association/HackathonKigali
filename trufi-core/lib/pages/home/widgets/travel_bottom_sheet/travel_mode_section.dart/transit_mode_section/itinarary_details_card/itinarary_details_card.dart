@@ -8,6 +8,7 @@ import 'package:trufi_core/pages/home/widgets/travel_bottom_sheet/travel_mode_se
 import 'package:trufi_core/widgets/base_marker/from_marker.dart';
 import 'package:trufi_core/widgets/base_marker/to_marker.dart';
 import 'package:trufi_core/widgets/buttons/trufi_icon_button.dart';
+import 'package:trufi_core/widgets/fare_ticket/ticket_selection_result.dart';
 import 'package:trufi_core/widgets/utils.dart';
 import 'package:trufi_core/widgets/utils/date_time_utils.dart';
 import 'package:trufi_core/widgets/utils/leg_utils.dart';
@@ -30,6 +31,12 @@ class ItineraryDetailsCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          TextButton(
+            onPressed: () async {
+              TicketSelector.show(context);
+            },
+            child: Text("Buy Ticket"),
+          ),
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -85,11 +92,7 @@ class ItineraryDetailsCard extends StatelessWidget {
               height: 30,
               child: FittedBox(
                 fit: BoxFit.none,
-                child: SizedBox(
-                  width: 30,
-                  height: 30,
-                  child: ToMarker()
-                ),
+                child: SizedBox(width: 30, height: 30, child: ToMarker()),
               ),
             ),
             moveTo: () {

@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:hive/hive.dart';
-import 'package:latlong2/latlong.dart' as latlng;
 import 'package:trufi_core/models/plan_entity.dart';
 
 import 'package:trufi_core/pages/home/repository/local_repository.dart';
+import 'package:trufi_core/screens/route_navigation/maps/trufi_map_controller.dart';
 
 class MapRouteHiveLocalRepository implements MapRouteLocalRepository {
   static const String path = "MapRouteHiveLocalRepository";
@@ -31,46 +31,34 @@ class MapRouteHiveLocalRepository implements MapRouteLocalRepository {
   }
 
   @override
-  Future<void> saveOriginPosition(latlng.LatLng? position) async {
-    if (position == null) {
+  Future<void> saveOriginPosition(TrufiLocation? location) async {
+    if (location == null) {
       await _box.put(_originKey, null);
       return;
     }
-    await _box.put(_originKey, jsonEncode({
-      'lat': position.latitude,
-      'lng': position.longitude,
-    }));
+    await _box.put(_originKey, jsonEncode(location.toJson()));
   }
 
   @override
-  Future<latlng.LatLng?> getOriginPosition() async {
+  Future<TrufiLocation?> getOriginPosition() async {
     final data = _box.get(_originKey);
     if (data == null) return null;
-    final map = jsonDecode(data);
-    final lat = (map['lat'] as num).toDouble();
-    final lng = (map['lng'] as num).toDouble();
-    return latlng.LatLng(lat, lng);
-    }
+    return TrufiLocation.fromJson(jsonDecode(data));
+  }
 
   @override
-  Future<void> saveDestinationPosition(latlng.LatLng? position) async {
-    if (position == null) {
+  Future<void> saveDestinationPosition(TrufiLocation? location) async {
+    if (location == null) {
       await _box.put(_destinationKey, null);
       return;
     }
-    await _box.put(_destinationKey, jsonEncode({
-      'lat': position.latitude,
-      'lng': position.longitude,
-    }));
+    await _box.put(_destinationKey, jsonEncode(location.toJson()));
   }
 
   @override
-  Future<latlng.LatLng?> getDestinationPosition() async {
+  Future<TrufiLocation?> getDestinationPosition() async {
     final data = _box.get(_destinationKey);
     if (data == null) return null;
-    final map = jsonDecode(data);
-    final lat = (map['lat'] as num).toDouble();
-    final lng = (map['lng'] as num).toDouble();
-    return latlng.LatLng(lat, lng);
+    return TrufiLocation.fromJson(jsonDecode(data));
   }
 }

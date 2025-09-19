@@ -4,6 +4,8 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart' as latlng;
+import 'package:trufi_core/localization/app_localization.dart';
+import 'package:trufi_core/repositories/location/models/defaults_location.dart';
 import 'package:trufi_core/screens/route_navigation/maps/image_tool.dart';
 import 'package:trufi_core/screens/route_navigation/map_layers/marker_list.dart';
 
@@ -275,6 +277,9 @@ class TrufiMarker {
   Future<void> generateBytes(BuildContext context) async {
     widgetBytes = await ImageTool.widgetToBytes(this, context);
   }
+
+  TrufiLocation toLocation() =>
+      TrufiLocation(description: '', position: position);
 }
 
 class TrufiLine {
@@ -534,6 +539,23 @@ class TrufiLocation {
     'type': type,
     'address': address ?? '',
   };
+
+  String displayName(AppLocalization localization) {
+    if (description.isEmpty) {
+      return localization.translate(LocalizationKey.selectedOnMap);
+    }
+
+    final detected = DefaultLocationExt.detect(this);
+    if (detected != null) {
+      final base = localization.translate(detected.l10nKey);
+      return isLatLngDefined
+          ? base
+          : localization.translateWithParams(
+              '${LocalizationKey.defaultLocationAdd.key}:$base',
+            );
+    }
+    return [description, if (address?.isNotEmpty ?? false) address].join(', ');
+  }
 
   @override
   bool operator ==(Object other) =>

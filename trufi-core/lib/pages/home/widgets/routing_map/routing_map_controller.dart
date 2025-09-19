@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:latlong2/latlong.dart' as latlng;
 
 import 'package:trufi_core/pages/home/repository/hive_local_repository.dart';
 import 'package:trufi_core/pages/home/service/routing_service/otp_stadtnavi/graphql_plan_data_source.dart';
@@ -9,25 +8,24 @@ import 'package:trufi_core/consts.dart';
 import 'package:trufi_core/models/enums/transport_mode.dart';
 import 'package:trufi_core/models/plan_entity.dart';
 import 'package:trufi_core/pages/home/service/i_plan_repository.dart';
-import 'package:trufi_core/pages/home/widgets/routing_map/trufi_camera_fit.dart';
 import 'package:trufi_core/screens/route_navigation/maps/trufi_map_controller.dart';
 
 abstract class IRoutingMapComponent extends TrufiLayer {
-  IRoutingMapComponent(
-    super.controller) : super(id: layerId, layerLevel: 2){
-    routingMapSelected = RoutingMapSelected(controller, layerLevel: layerLevel);}
+  IRoutingMapComponent(super.controller) : super(id: layerId, layerLevel: 2) {
+    routingMapSelected = RoutingMapSelected(controller, layerLevel: layerLevel);
+  }
 
   static const String layerId = 'routing-map-component';
   late final RoutingMapSelected routingMapSelected;
   PlanItinerary? get selectedItinerary => routingMapSelected.selectedItinerary;
   void changeItinerary(PlanItinerary itinerary);
-  Future<void> addOrigin(latlng.LatLng position);
-  Future<void> addDestination(latlng.LatLng position);
+  Future<void> addOrigin(TrufiLocation location);
+  Future<void> addDestination(TrufiLocation location);
   Future<void> fetchPlan(BuildContext context);
   void selectNextItinerary();
   void cleanOriginAndDestination();
-    TrufiMarker? origin;
-  TrufiMarker? destination;
+  TrufiLocation? origin;
+  TrufiLocation? destination;
   PlanEntity? plan;
 }
 
@@ -94,30 +92,17 @@ class RoutingMapComponent extends IRoutingMapComponent {
     ApiConfig().openTripPlannerUrl,
   );
 
-
-  RoutingMapComponent(super.controller){
+  RoutingMapComponent(super.controller) {
     mapRouteHiveLocal.loadRepository().then((_) async {
-      final savedOrigin = await mapRouteHiveLocal.getOriginPosition();
-      if (savedOrigin != null) {
-        origin = TrufiMarker(
-          id: "origin",
-          position: savedOrigin,
-          widget: fromMarker,
-          size: const Size(20, 20),
-        );
-      }
+      final results = await Future.wait([
+        mapRouteHiveLocal.getOriginPosition(),
+        mapRouteHiveLocal.getDestinationPosition(),
+        mapRouteHiveLocal.getPlan(),
+      ]);
 
-      final savedDestination = await mapRouteHiveLocal.getDestinationPosition();
-      if (savedDestination != null) {
-        destination = TrufiMarker(
-          id: "destination",
-          position: savedDestination,
-          widget: toMarker,
-          alignment: Alignment.topCenter,
-        );
-      }
-
-      plan = await mapRouteHiveLocal.getPlan();
+      origin = results[0] as TrufiLocation?;
+      destination = results[1] as TrufiLocation?;
+      plan = results[2] as PlanEntity?;
       routingMapSelected.changeItinerary(plan?.itineraries?.firstOrNull);
       _rebuildGraphics();
     });
@@ -142,26 +127,16 @@ class RoutingMapComponent extends IRoutingMapComponent {
   }
 
   @override
-  Future<void> addOrigin(latlng.LatLng position) async {
-    origin = TrufiMarker(
-      id: "origin",
-      position: position,
-      widget: fromMarker,
-      size: const Size(20, 20),
-    );
-    mapRouteHiveLocal.saveOriginPosition(position); // NUEVO
+  Future<void> addOrigin(TrufiLocation location) async {
+    origin = location;
+    mapRouteHiveLocal.saveOriginPosition(location); // NUEVO
     _rebuildGraphics();
   }
 
   @override
-  Future<void> addDestination(latlng.LatLng position) async {
-    destination = TrufiMarker(
-      id: "destination",
-      position: position,
-      widget: toMarker,
-      alignment: Alignment.topCenter,
-    );
-    mapRouteHiveLocal.saveDestinationPosition(position); // NUEVO
+  Future<void> addDestination(TrufiLocation location) async {
+    destination = location;
+    mapRouteHiveLocal.saveDestinationPosition(location); // NUEVO
     _rebuildGraphics();
   }
 
@@ -170,20 +145,8 @@ class RoutingMapComponent extends IRoutingMapComponent {
     if (origin == null || destination == null) return;
 
     plan = await service.fetchPlanAdvanced(
-      fromLocation: TrufiLocation(
-        description: "Origin",
-        position: latlng.LatLng(
-          origin!.position.latitude,
-          origin!.position.longitude,
-        ),
-      ),
-      toLocation: TrufiLocation(
-        description: "Destination",
-        position: latlng.LatLng(
-          destination!.position.latitude,
-          destination!.position.longitude,
-        ),
-      ),
+      fromLocation: origin!,
+      toLocation: destination!,
     );
 
     if (plan?.itineraries != null && plan!.itineraries!.isNotEmpty) {
@@ -222,8 +185,20 @@ class RoutingMapComponent extends IRoutingMapComponent {
 
   List<TrufiMarker> _buildMarkers() {
     return [
-      if (origin != null) origin!,
-      if (destination != null) destination!,
+      if (origin != null)
+        TrufiMarker(
+          id: origin!.description,
+          position: origin!.position,
+          widget: fromMarker,
+          size: const Size(20, 20),
+        ),
+      if (destination != null)
+        TrufiMarker(
+          id: destination!.description,
+          position: destination!.position,
+          widget: toMarker,
+          alignment: Alignment.topCenter,
+        ),
       ...?plan?.itineraries?.expand((itinerary) {
         if (routingMapSelected.selectedItinerary == itinerary) return [];
         return itinerary.legs

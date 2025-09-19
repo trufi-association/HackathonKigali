@@ -7,6 +7,7 @@ import 'package:trufi_core/pages/home/widgets/routing_map/routing_map_controller
 import 'package:trufi_core/repositories/location/location_repository.dart';
 import 'package:trufi_core/screens/route_navigation/maps/maplibre_gl.dart';
 import 'package:trufi_core/screens/route_navigation/maps/trufi_map_controller.dart';
+import 'package:trufi_core/widgets/base_marker/to_marker.dart';
 
 class ChooseLocationPage extends StatefulWidget {
   static Future<TrufiLocation?> selectLocation(
@@ -122,14 +123,7 @@ class _ChooseLocationPageState extends State<ChooseLocationPage>
                   children: [
                     Positioned.fill(
                       child: Center(
-                        child: Container(
-                          height: 30,
-                          width: 30,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: theme.colorScheme.primary,
-                          ),
-                        ),
+                        child: ToMarker(height: 40,)
                       ),
                     ),
                     if (loading)

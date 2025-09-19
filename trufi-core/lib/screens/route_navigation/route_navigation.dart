@@ -110,9 +110,13 @@ class _RouteNavigationScreenState extends State<RouteNavigationScreen> {
       },
       (coord) async {
         if (routingMapComponent.origin == null) {
-          routingMapComponent.addOrigin(coord);
+          routingMapComponent.addOrigin(
+            TrufiLocation(description: '', position: coord),
+          );
         } else if (routingMapComponent.destination == null) {
-          routingMapComponent.addDestination(coord);
+          routingMapComponent.addDestination(
+            TrufiLocation(description: '', position: coord),
+          );
           await _fetchPlanWithLoading();
         } else {
           routingMapComponent.cleanOriginAndDestination();
@@ -137,9 +141,9 @@ class _RouteNavigationScreenState extends State<RouteNavigationScreen> {
 
   Future<void> _setLocation(TrufiLocation location) async {
     if (routingMapComponent.origin == null) {
-      routingMapComponent.addOrigin(location.position);
+      routingMapComponent.addOrigin(location);
     } else if (routingMapComponent.destination == null) {
-      routingMapComponent.addDestination(location.position);
+      routingMapComponent.addDestination(location);
       await _fetchPlanWithLoading();
     } else {
       routingMapComponent.cleanOriginAndDestination();
@@ -150,7 +154,7 @@ class _RouteNavigationScreenState extends State<RouteNavigationScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => const _LoadingDialog(message: 'Calculating route...'),
+      builder: (_) => const LoadingDialog(message: 'Calculating route...'),
     );
 
     try {
@@ -178,7 +182,32 @@ class _RouteNavigationScreenState extends State<RouteNavigationScreen> {
           return Stack(
             children: [
               mapRenders[showMapIndex],
-              LocationSearchBar(setLocation: _setLocation),
+              LocationSearchBar(
+                routingMapComponent: routingMapComponent,
+                onSaveFrom: (location) async {
+                  await routingMapComponent.addOrigin(location);
+                  await _fetchPlanWithLoading();
+                },
+                onClearFrom: () {},
+                onSaveTo: (location) async {
+                  await routingMapComponent.addDestination(location);
+                  await _fetchPlanWithLoading();
+                },
+                onClearTo: () {},
+                onFetchPlan: () {},
+                onReset: () {},
+                onSwap: () async {
+                  if (routingMapComponent.destination != null &&
+                      routingMapComponent.origin != null) {
+                    final temp = routingMapComponent.origin;
+                    await routingMapComponent.addOrigin(
+                      routingMapComponent.destination!,
+                    );
+                    await routingMapComponent.addDestination(temp!);
+                    await _fetchPlanWithLoading();
+                  }
+                },
+              ),
               if (selectedMarker?.buildPanel != null)
                 TrufiBottomSheet(child: selectedMarker!.buildPanel!(context)),
               TransitBottomSheet(
@@ -240,9 +269,9 @@ class _RouteNavigationScreenState extends State<RouteNavigationScreen> {
   }
 }
 
-class _LoadingDialog extends StatelessWidget {
+class LoadingDialog extends StatelessWidget {
   final String message;
-  const _LoadingDialog({required this.message});
+  const LoadingDialog({super.key, required this.message});
 
   @override
   Widget build(BuildContext context) {

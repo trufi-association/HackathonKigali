@@ -1,33 +1,50 @@
 import 'package:flutter/material.dart';
+import 'package:trufi_core/localization/app_localization.dart';
 import 'package:trufi_core/repositories/location/location_repository.dart';
 import 'package:trufi_core/screens/route_navigation/maps/trufi_map_controller.dart';
 import 'package:trufi_core/utils/icon_utils/icons.dart';
 import 'package:trufi_core/widgets/maps/choose_location/choose_location.dart';
 
 class FullScreenSearchModal extends StatefulWidget {
-  static Future<TrufiLocation?> onLocationSelected(BuildContext context) async {
+  static Future<TrufiLocation?> onLocationSelected(
+    BuildContext context, {
+    TrufiLocation? location,
+  }) async {
+    final defaultSearch = (location != null)
+        ? location.displayName(AppLocalization.of(context))
+        : '';
     return await Navigator.of(context).push(
       PageRouteBuilder(
         opaque: false,
         transitionDuration: const Duration(milliseconds: 300),
-        pageBuilder: (_, __, ___) => const FullScreenSearchModal(),
+        pageBuilder: (_, __, ___) => FullScreenSearchModal(
+          location: location,
+          defaultSearch: defaultSearch,
+        ),
       ),
     );
   }
 
-  const FullScreenSearchModal({super.key});
+  final TrufiLocation? location;
+  final String defaultSearch;
+  const FullScreenSearchModal({
+    super.key,
+    this.location,
+    required this.defaultSearch,
+  });
 
   @override
   State<FullScreenSearchModal> createState() => _FullScreenSearchModalState();
 }
 
 class _FullScreenSearchModalState extends State<FullScreenSearchModal> {
-  String query = '';
+  late TextEditingController _controller;
   final locationRepository = LocationRepository();
 
   @override
   void initState() {
     super.initState();
+    _controller = TextEditingController(text: widget.defaultSearch);
     locationRepository.searchResult.addListener(_update);
     locationRepository.myDefaultPlaces.addListener(_update);
     locationRepository.myPlaces.addListener(_update);
@@ -35,6 +52,9 @@ class _FullScreenSearchModalState extends State<FullScreenSearchModal> {
     locationRepository.favoritePlaces.addListener(_update);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await locationRepository.initLoad();
+      if (widget.defaultSearch != '') {
+        await locationRepository.fetchLocations(_controller.text.toLowerCase());
+      }
     });
   }
 
@@ -45,6 +65,7 @@ class _FullScreenSearchModalState extends State<FullScreenSearchModal> {
     locationRepository.myPlaces.removeListener(_update);
     locationRepository.historyPlaces.removeListener(_update);
     locationRepository.favoritePlaces.removeListener(_update);
+    _controller.dispose();
     super.dispose();
   }
 
@@ -108,6 +129,7 @@ class _FullScreenSearchModalState extends State<FullScreenSearchModal> {
                       ),
                       Expanded(
                         child: TextField(
+                          controller: _controller,
                           autofocus: true,
                           cursorColor: theme.colorScheme.primary,
                           decoration: InputDecoration(
@@ -119,24 +141,27 @@ class _FullScreenSearchModalState extends State<FullScreenSearchModal> {
                           ),
                           textInputAction: TextInputAction.search,
                           onChanged: (text) {
-                            final t = text.trim();
-                            setState(() => query = t);
-                            // IMPORTANTE: ya tienes debounce en el repo
-                            locationRepository.fetchLocations(t.toLowerCase());
+                            locationRepository.fetchLocations(
+                              _controller.text.toLowerCase(),
+                            );
                           },
                           onSubmitted: (text) {
-                            final t = text.trim();
-                            setState(() => query = t);
-                            locationRepository.fetchLocations(t.toLowerCase());
+                            locationRepository.fetchLocations(
+                              _controller.text.toLowerCase(),
+                            );
                           },
                         ),
                       ),
-                      IconButton(
-                        onPressed: () {},
-                        icon: const Icon(Icons.mic),
-                        color: theme.colorScheme.onSurface,
-                        tooltip: 'Voice search',
-                      ),
+                      if (_controller.text.isNotEmpty)
+                        IconButton(
+                          onPressed: () {
+                            _controller.clear();
+                            setState(() {});
+                          },
+                          icon: const Icon(Icons.highlight_remove),
+                          color: theme.colorScheme.onSurface,
+                          tooltip: 'Clear',
+                        ),
                     ],
                   ),
                 ),
@@ -158,15 +183,40 @@ class _FullScreenSearchModalState extends State<FullScreenSearchModal> {
                 );
               },
             ),
-
             Expanded(
               child: CustomScrollView(
                 slivers: [
-                  if (query.isEmpty)
+                  if (_controller.text.isEmpty)
                     SliverToBoxAdapter(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          _SearchOption(
+                            onTap: () async {},
+                            title: "Your location",
+                            icon: const Icon(Icons.my_location),
+                          ),
+                          Divider(
+                            height: 0.5,
+                            thickness: 0.5,
+                            indent: 54,
+                            color: theme.dividerColor,
+                          ),
+                          _SearchOption(
+                            onTap: () async {
+                              final locationSelected =
+                                  await ChooseLocationPage.selectLocation(
+                                    context,
+                                  );
+                              if (locationSelected != null) {
+                                _setLocation(location: locationSelected);
+                              }
+                            },
+                            title: "Choose on map",
+                            icon: const Icon(Icons.pin_drop),
+                            iconBackgorundColor: Colors.grey.shade300,
+                          ),
+                          divider,
                           SizedBox(
                             height: 56,
                             child: ListView(
@@ -241,34 +291,72 @@ class _FullScreenSearchModalState extends State<FullScreenSearchModal> {
                     ),
                   SliverList.list(
                     children: [
-                      if (query.isEmpty)
+                      if (_controller.text.isEmpty) ...[
                         ...locationRepository.historyPlaces.value.reversed.map(
-                          (location) => PlaceTile2(
+                          (location) => PlaceTile(
                             location: location,
                             onTap: () => _setLocation(location: location),
                           ),
                         ),
-                      if (query.isEmpty)
+                        const _MoreFromHistory(),
                         ...locationRepository.favoritePlaces.value.reversed.map(
-                          (location) => PlaceTile2(
+                          (location) => PlaceTile(
                             location: location,
                             onTap: () => _setLocation(location: location),
                           ),
                         ),
-                      if (query.isNotEmpty)
+                      ],
+                      if (_controller.text.isNotEmpty)
                         ...locationRepository.searchResult.value.map(
-                          (location) => PlaceTile2(
+                          (location) => PlaceTile(
                             location: location,
                             onTap: () => _setLocation(location: location),
                           ),
                         ),
-                      const _MoreFromHistory(),
                     ],
                   ),
                 ],
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SearchOption extends StatelessWidget {
+  final Widget icon;
+  final String title;
+  final VoidCallback onTap;
+  final Color iconBackgorundColor;
+
+  const _SearchOption({
+    required this.icon,
+    required this.title,
+    required this.onTap,
+    this.iconBackgorundColor = const Color(0xFFD9E5EB),
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return ListTile(
+      visualDensity: VisualDensity.compact,
+      horizontalTitleGap: 12,
+      onTap: onTap,
+      minVerticalPadding: 12,
+      leading: CircleAvatar(
+        radius: 15,
+        backgroundColor: iconBackgorundColor,
+        child: SizedBox(width: 18, height: 18, child: FittedBox(child: icon)),
+      ),
+      title: Text(
+        title,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: theme.textTheme.bodyMedium?.copyWith(
+          fontWeight: FontWeight.w500,
         ),
       ),
     );
@@ -294,7 +382,7 @@ class _QuickActionPill extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return InkWell(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(4),
       onTap: onTap,
       child: SizedBox(
         width: 160,
@@ -345,13 +433,13 @@ class _QuickActionPill extends StatelessWidget {
   }
 }
 
-class PlaceTile2 extends StatelessWidget {
+class PlaceTile extends StatelessWidget {
   final TrufiLocation location;
   final VoidCallback onTap;
   final IconData? leadingIcon;
   final Color? leadingColor;
 
-  const PlaceTile2({
+  const PlaceTile({
     super.key,
     required this.location,
     required this.onTap,
@@ -379,7 +467,7 @@ class PlaceTile2 extends StatelessWidget {
               : 20,
           leading: CircleAvatar(
             backgroundColor: theme.colorScheme.surfaceVariant,
-            radius: 18,
+            radius: 15,
             child: leadingIcon != null
                 ? Icon(
                     leadingIcon,
@@ -446,7 +534,7 @@ class PlaceTile2 extends StatelessWidget {
         Divider(
           height: 0.5,
           thickness: 0.5,
-          indent: 60,
+          indent: 54,
           color: theme.dividerColor,
         ),
       ],

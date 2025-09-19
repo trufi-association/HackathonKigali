@@ -2,12 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:trufi_core/localization/app_localization_delegate.dart';
 
-enum LocalizationKey { instructionDistanceMeters, instructionDistanceKm }
+enum LocalizationKey {
+  instructionDistanceMeters,
+  instructionDistanceKm,
+  selectedOnMap,
+  defaultLocationHome,
+  defaultLocationWork,
+  defaultLocationAdd,
+}
 
 extension LocalizationKeyExtension on LocalizationKey {
   static final _valueMap = {
     'instruction.distance.meters': LocalizationKey.instructionDistanceMeters,
     'instruction.distance.km': LocalizationKey.instructionDistanceKm,
+    'selected_on_map': LocalizationKey.selectedOnMap,
+    'default_location_home': LocalizationKey.defaultLocationHome,
+    'default_location_work': LocalizationKey.defaultLocationWork,
+    'default_location_add': LocalizationKey.defaultLocationAdd,
   };
 
   String get key =>
@@ -40,6 +51,10 @@ class AppLocalization {
       final content = <String, dynamic>{
         'instruction.distance.meters': '\$1 m',
         'instruction.distance.km': '\$1 km',
+        'selected_on_map': 'Selected on the map',
+        'default_location_home': 'Home',
+        'default_location_work': 'Work',
+        'default_location_add': 'Set \$1 address',
       };
       _localizedValues = content.map((key, value) {
         final valueString = value.toString().trim();
