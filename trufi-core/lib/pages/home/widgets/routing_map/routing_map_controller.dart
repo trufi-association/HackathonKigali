@@ -18,7 +18,7 @@ abstract class IRoutingMapComponent extends TrufiLayer {
   static const String layerId = 'routing-map-component';
   late final RoutingMapSelected routingMapSelected;
   PlanItinerary? get selectedItinerary => routingMapSelected.selectedItinerary;
-  void changeItinerary(PlanItinerary itinerary);
+  void changeItinerary(PlanItinerary? itinerary);
   Future<void> addOrigin(TrufiLocation location);
   Future<void> addDestination(TrufiLocation location);
   Future<void> fetchPlan(BuildContext context);
@@ -109,7 +109,7 @@ class RoutingMapComponent extends IRoutingMapComponent {
   }
 
   @override
-  void changeItinerary(PlanItinerary itinerary) {
+  void changeItinerary(PlanItinerary? itinerary) {
     routingMapSelected.changeItinerary(itinerary);
     _rebuildGraphics();
   }
@@ -160,9 +160,6 @@ class RoutingMapComponent extends IRoutingMapComponent {
       }
       await Future.wait(tasks);
       await mapRouteHiveLocal.savePlan(plan);
-      routingMapSelected.changeItinerary(plan!.itineraries!.firstOrNull);
-    } else {
-      routingMapSelected.changeItinerary(null);
     }
     _rebuildGraphics();
   }

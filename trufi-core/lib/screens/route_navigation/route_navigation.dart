@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart' as latlng;
+import 'package:trufi_core/models/plan_entity.dart';
 import 'package:trufi_core/pages/home/widgets/routing_map/routing_map_controller.dart';
 import 'package:trufi_core/pages/home/widgets/search_bar/location_search_bar.dart';
 import 'package:trufi_core/pages/home/widgets/travel_bottom_sheet/travel_bottom_sheet.dart';
@@ -94,6 +95,12 @@ class _RouteNavigationScreenState extends State<RouteNavigationScreen> {
   TrufiMarker? selectedMarker;
   late List<TrufiLayer> mapLayerRenders;
   late List<TrufiMapRender> mapRenders;
+
+  PlanItinerary? selectedItinerary;
+  PlanEntity? plan;
+
+  TrufiLocation? origin;
+  TrufiLocation? destination;
   @override
   void initState() {
     super.initState();
@@ -126,6 +133,18 @@ class _RouteNavigationScreenState extends State<RouteNavigationScreen> {
     mapLayerRenders = widget.mapLayerBuilder(mapController);
     routingMapComponent = widget.routingMapComponent(mapController);
     fitCameraLayer = widget.fitCameraLayer(mapController);
+    mapController.layersNotifier.addListener(() {
+      final selectedItinerary = routingMapComponent.selectedItinerary;
+      final plan = routingMapComponent.plan;
+      final origin = routingMapComponent.origin;
+      final destination = routingMapComponent.destination;
+      setState(() {
+        this.selectedItinerary = selectedItinerary;
+        this.plan = plan;
+        this.origin = origin;
+        this.destination = destination;
+      });
+    });
   }
 
   @override
@@ -137,17 +156,6 @@ class _RouteNavigationScreenState extends State<RouteNavigationScreen> {
       layer.dispose();
     }
     super.dispose();
-  }
-
-  Future<void> _setLocation(TrufiLocation location) async {
-    if (routingMapComponent.origin == null) {
-      routingMapComponent.addOrigin(location);
-    } else if (routingMapComponent.destination == null) {
-      routingMapComponent.addDestination(location);
-      await _fetchPlanWithLoading();
-    } else {
-      routingMapComponent.cleanOriginAndDestination();
-    }
   }
 
   Future<void> _fetchPlanWithLoading() async {
@@ -183,7 +191,6 @@ class _RouteNavigationScreenState extends State<RouteNavigationScreen> {
             children: [
               mapRenders[showMapIndex],
               LocationSearchBar(
-                routingMapComponent: routingMapComponent,
                 onSaveFrom: (location) async {
                   await routingMapComponent.addOrigin(location);
                   await _fetchPlanWithLoading();
@@ -207,27 +214,51 @@ class _RouteNavigationScreenState extends State<RouteNavigationScreen> {
                     await _fetchPlanWithLoading();
                   }
                 },
+                origin: origin,
+                destination: destination,
               ),
-              if (selectedMarker?.buildPanel != null)
+              if (plan != null)
+                TrufiBottomSheet(
+                  onHeightChanged: (height) {
+                    final currentHeight = constraints.maxHeight / 2;
+                    fitCameraLayer.updatePadding(
+                      EdgeInsets.only(
+                        bottom: math.min(currentHeight, height),
+                        right: 30,
+                        left: 30,
+                        top: 80,
+                      ),
+                    );
+                  },
+                  child: TransitBottomSheet(
+                    plan: plan!,
+                    selectedItinerary: selectedItinerary,
+                    updateCamera: ({bearing, target, visibleRegion, zoom}) {
+                      return routingMapComponent.controller.updateCamera(
+                        target: target,
+                        zoom: 18,
+                      );
+                    },
+
+                    onClose: () {
+                      routingMapComponent.cleanOriginAndDestination();
+                    },
+                    onSelectItinerary: (itinerary) {
+                      if (itinerary != null) {
+                        routingMapComponent.changeItinerary(itinerary);
+                        final points = itinerary.legs
+                            .expand((leg) => leg.accumulatedPoints)
+                            .toList();
+                        fitCameraLayer.fitBoundsOnCamera(points);
+                      } else {
+                        routingMapComponent.changeItinerary(null);
+                        fitCameraLayer.fitBoundsOnCamera([]);
+                      }
+                    },
+                  ),
+                )
+              else if (selectedMarker?.buildPanel != null)
                 TrufiBottomSheet(child: selectedMarker!.buildPanel!(context)),
-              TransitBottomSheet(
-                routingMapComponent: routingMapComponent,
-                trufiMapController: mapController,
-                onSelectItinerary: (points) {
-                  fitCameraLayer.fitBoundsOnCamera(points);
-                },
-                onHeightChanged: (height) {
-                  final currentHeight = constraints.maxHeight / 2;
-                  fitCameraLayer.updatePadding(
-                    EdgeInsets.only(
-                      bottom: math.min(currentHeight, height),
-                      right: 30,
-                      left: 30,
-                      top: 80,
-                    ),
-                  );
-                },
-              ),
               SafeArea(
                 child: Padding(
                   padding: const EdgeInsets.only(top: 60, right: 8),

@@ -3,8 +3,8 @@ import 'package:latlong2/latlong.dart';
 import 'package:trufi_core/localization/app_localization.dart';
 import 'package:trufi_core/models/enums/transport_mode.dart';
 import 'package:trufi_core/models/plan_entity.dart';
-import 'package:trufi_core/pages/home/widgets/routing_map/routing_map_controller.dart';
 import 'package:trufi_core/pages/home/widgets/travel_bottom_sheet/travel_mode_section.dart/transit_mode_section/itinerary_card/itinerary_path.dart';
+import 'package:trufi_core/screens/route_navigation/maps/trufi_map_controller.dart';
 import 'package:trufi_core/widgets/base_marker/from_marker.dart';
 import 'package:trufi_core/widgets/base_marker/to_marker.dart';
 import 'package:trufi_core/widgets/buttons/trufi_icon_button.dart';
@@ -15,17 +15,24 @@ import 'package:trufi_core/widgets/utils/leg_utils.dart';
 
 class ItineraryDetailsCard extends StatelessWidget {
   final void Function(bool) onRouteDetailsViewChanged;
-  final IRoutingMapComponent routingMapComponent;
   const ItineraryDetailsCard({
     super.key,
     required this.onRouteDetailsViewChanged,
-    required this.routingMapComponent,
+    required this.plan,
+    required this.itinerary,
+    required this.updateCamera,
   });
-
+  final PlanEntity plan;
+  final PlanItinerary itinerary;
+  final bool Function({
+    LatLng? target,
+    double? zoom,
+    double? bearing,
+    LatLngBounds? visibleRegion,
+  })
+  updateCamera;
   @override
   Widget build(BuildContext context) {
-    final plan = routingMapComponent.plan!;
-    final itinerary = routingMapComponent.selectedItinerary!;
     return Container(
       padding: EdgeInsets.only(left: 20, right: 16),
       child: Column(
@@ -56,7 +63,7 @@ class ItineraryDetailsCard extends StatelessWidget {
             text: plan.from?.name ?? '',
             icon: FromMarker(),
             moveTo: () {
-              routingMapComponent.controller.updateCamera(
+             updateCamera(
                 target: LatLng(plan.from!.latitude!, plan.from!.longitude!),
                 zoom: 18,
               );
@@ -68,7 +75,7 @@ class ItineraryDetailsCard extends StatelessWidget {
                 ? TransitDetailsIcon(
                     leg: leg,
                     moveTo: (p0) {
-                      routingMapComponent.controller.updateCamera(
+                      updateCamera(
                         target: p0,
                         zoom: 18,
                       );
@@ -77,7 +84,7 @@ class ItineraryDetailsCard extends StatelessWidget {
                 : WalkDetailsIcon(
                     leg: leg,
                     moveTo: (p0) {
-                      routingMapComponent.controller.updateCamera(
+                      updateCamera(
                         target: p0,
                         zoom: 18,
                       );
@@ -96,7 +103,7 @@ class ItineraryDetailsCard extends StatelessWidget {
               ),
             ),
             moveTo: () {
-              routingMapComponent.controller.updateCamera(
+              updateCamera(
                 target: LatLng(plan.to!.latitude!, plan.to!.longitude!),
                 zoom: 18,
               );

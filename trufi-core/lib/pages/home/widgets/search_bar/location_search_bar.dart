@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:trufi_core/localization/app_localization.dart';
-import 'package:trufi_core/pages/home/widgets/routing_map/routing_map_controller.dart';
 import 'package:trufi_core/pages/home/widgets/search_bar/full_screen_search_modal.dart';
 import 'package:trufi_core/screens/route_navigation/maps/trufi_map_controller.dart';
 import 'package:trufi_core/widgets/base_marker/from_marker.dart';
 import 'package:trufi_core/widgets/base_marker/to_marker.dart';
 
 class LocationSearchBar extends StatelessWidget {
-  final IRoutingMapComponent routingMapComponent;
   final void Function(TrufiLocation) onSaveFrom;
   final void Function() onClearFrom;
   final void Function(TrufiLocation) onSaveTo;
@@ -15,10 +13,11 @@ class LocationSearchBar extends StatelessWidget {
   final void Function() onFetchPlan;
   final void Function() onReset;
   final void Function() onSwap;
+  final TrufiLocation?  origin;
+  final TrufiLocation?  destination;
 
   const LocationSearchBar({
     super.key,
-    required this.routingMapComponent,
     required this.onSaveFrom,
     required this.onClearFrom,
     required this.onSaveTo,
@@ -26,34 +25,32 @@ class LocationSearchBar extends StatelessWidget {
     required this.onFetchPlan,
     required this.onReset,
     required this.onSwap,
+    required this.origin,
+    required this.destination,
   });
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: routingMapComponent.controller.layersNotifier,
-      builder: (context, layers, child) {
-        return SafeArea(
-          child: Material(
-            color: Colors.transparent,
-            child: (routingMapComponent.destination == null)
-                ? _SingleSearchComponent(
-                    onSaveTo: onSaveTo,
-                    onClearTo: onClearTo,
-                  )
-                : _RouteSearchComponent(
-                    routingMapComponent: routingMapComponent,
-                    onSaveFrom: onSaveFrom,
-                    onClearFrom: onClearFrom,
-                    onSaveTo: onSaveTo,
-                    onClearTo: onClearTo,
-                    onFetchPlan: onFetchPlan,
-                    onReset: onReset,
-                    onSwap: onSwap,
-                  ),
-          ),
-        );
-      },
+    return SafeArea(
+      child: Material(
+        color: Colors.transparent,
+        child: (destination == null)
+            ? _SingleSearchComponent(
+                onSaveTo: onSaveTo,
+                onClearTo: onClearTo,
+              )
+            : _RouteSearchComponent(
+                onSaveFrom: onSaveFrom,
+                onClearFrom: onClearFrom,
+                onSaveTo: onSaveTo,
+                onClearTo: onClearTo,
+                onFetchPlan: onFetchPlan,
+                onReset: onReset,
+                onSwap: onSwap,
+                origin: origin,
+                destination: destination,
+              ),
+      ),
     );
   }
 }
@@ -222,7 +219,6 @@ class _SingleSearchComponent extends StatelessWidget {
 }
 
 class _RouteSearchComponent extends StatelessWidget {
-  final IRoutingMapComponent routingMapComponent;
   final void Function(TrufiLocation) onSaveFrom;
   final void Function() onClearFrom;
   final void Function(TrufiLocation) onSaveTo;
@@ -230,8 +226,10 @@ class _RouteSearchComponent extends StatelessWidget {
   final void Function() onFetchPlan;
   final void Function() onReset;
   final void Function() onSwap;
+  
+  final TrufiLocation?  origin;
+  final TrufiLocation?  destination;
   const _RouteSearchComponent({
-    required this.routingMapComponent,
     required this.onSaveFrom,
     required this.onClearFrom,
     required this.onSaveTo,
@@ -239,6 +237,8 @@ class _RouteSearchComponent extends StatelessWidget {
     required this.onFetchPlan,
     required this.onReset,
     required this.onSwap,
+    required this.origin,
+    required this.destination,
   });
 
   @override
@@ -299,13 +299,13 @@ class _RouteSearchComponent extends StatelessWidget {
                             final locationSelected =
                                 await FullScreenSearchModal.onLocationSelected(
                                   context,
-                                  location: routingMapComponent.origin,
+                                  location: origin,
                                 );
                             if (locationSelected != null) {
                               onSaveFrom(locationSelected);
                             }
                           },
-                          location: routingMapComponent.origin,
+                          location: origin,
                           hintText: 'Origin',
                           icon: Container(
                             width: 24,
@@ -318,13 +318,13 @@ class _RouteSearchComponent extends StatelessWidget {
                             final locationSelected =
                                 await FullScreenSearchModal.onLocationSelected(
                                   context,
-                                  location: routingMapComponent.destination,
+                                  location: destination,
                                 );
                             if (locationSelected != null) {
                               onSaveTo(locationSelected);
                             }
                           },
-                          location: routingMapComponent.destination,
+                          location: destination,
                           hintText: 'Where to?',
                           icon: Container(
                             width: 24,

@@ -1,22 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:trufi_core/pages/home/widgets/routing_map/routing_map_controller.dart';
+import 'package:trufi_core/models/plan_entity.dart';
 import 'package:trufi_core/pages/home/widgets/travel_bottom_sheet/travel_mode_section.dart/transit_mode_section/itinerary_card/itinerary_card.dart';
 
-import 'package:latlong2/latlong.dart' as latlng;
+
 class TransitModeSection extends StatelessWidget {
-  final IRoutingMapComponent routingMapComponent;
-  final void Function(bool) onRouteDetailsViewChanged;
-  final void Function(List<latlng.LatLng>) onSelectItinerary;
+  final void Function(PlanItinerary) onSelectItinerary;
+  final PlanEntity plan;
   const TransitModeSection({
     super.key,
-    required this.routingMapComponent,
-    required this.onRouteDetailsViewChanged,
     required this.onSelectItinerary,
+    required this.plan,
   });
 
   @override
   Widget build(BuildContext context) {
-    final itineraries = routingMapComponent.plan?.itineraries ?? [];
+    final itineraries = plan.itineraries ?? [];
     return Column(
       children: [
         Row(children: []),
@@ -26,12 +24,7 @@ class TransitModeSection extends StatelessWidget {
               ItineraryCard(
                 itinerary: itinerary,
                 onTap: () {
-                  routingMapComponent.changeItinerary(itinerary);
-                  final points = itinerary.legs
-                      .expand((leg) => leg.accumulatedPoints )
-                      .toList();
-                  onSelectItinerary.call(points);
-                  onRouteDetailsViewChanged.call(true);
+                  onSelectItinerary(itinerary);
                 },
               ),
               Divider(height: 0),
