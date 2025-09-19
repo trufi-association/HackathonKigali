@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:async/async.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:latlong2/latlong.dart';
@@ -22,38 +23,94 @@ class LocationRepository {
       myDefaultPlaces = ValueNotifier([]),
       historyPlaces = ValueNotifier([]),
       favoritePlaces = ValueNotifier([]),
-      searchResult = ValueNotifier([]),
+      searchResult = ValueNotifier(null),
       isLoading = ValueNotifier(false);
 
   final ValueNotifier<List<TrufiLocation>> myPlaces;
   final ValueNotifier<List<TrufiLocation>> myDefaultPlaces;
   final ValueNotifier<List<TrufiLocation>> historyPlaces;
   final ValueNotifier<List<TrufiLocation>> favoritePlaces;
-  final ValueNotifier<List<TrufiLocation>> searchResult;
+  final ValueNotifier<List<TrufiLocation>?> searchResult;
   final ValueNotifier<bool> isLoading;
 
-  Timer _debounceTimer = Timer(const Duration(milliseconds: 300), () {});
+  CancelableOperation<List<TrufiLocation>>? _fetchLocationOperation;
+  int _lastIssuedToken = 0;
 
   Future<void> fetchLocations(
     String query, {
     String? correlationId,
     int limit = 30,
   }) async {
-    _debounceTimer.cancel();
+    final normalized = query.trim().toLowerCase();
+
+    // If the query is empty, cancel any running operation,
+    // reset state and return early.
+    if (normalized.isEmpty) {
+      await _fetchLocationOperation?.cancel();
+      _fetchLocationOperation = null;
+      searchResult.value = null;
+      isLoading.value = false;
+      return;
+    }
+
+    // Increment the request token.
+    // Only the result of the request with the latest token
+    // will be considered valid (last-write-wins).
+    final myToken = ++_lastIssuedToken;
     isLoading.value = true;
 
-    _debounceTimer = Timer(const Duration(milliseconds: 300), () async {
-      if (query.isNotEmpty) {
-        final results = await locationSearchService.fetchLocations(
-          query,
-          limit: limit,
+    // Cancel any running operation before starting a new one.
+    await _fetchLocationOperation?.cancel();
+    _fetchLocationOperation = null;
+
+    // Wrap the async fetch in a CancelableOperation.
+    // This allows us to cancel/ignore previous requests.
+    _fetchLocationOperation =
+        CancelableOperation<List<TrufiLocation>>.fromFuture(
+          locationSearchService.fetchLocations(query, limit: limit),
+          onCancel: () {
+            // Here you could add real network cancellation if your
+            // HTTP client supports it (e.g. Dio's CancelToken).
+          },
         );
-        searchResult.value = results;
+
+    try {
+      // Wait for the result of the fetch.
+      final result = await _fetchLocationOperation!.value;
+
+      // If this request is no longer the latest (token mismatch),
+      // ignore the result and reset state.
+      if (myToken != _lastIssuedToken) {
+        searchResult.value = null;
         isLoading.value = false;
-      } else {
-        isLoading.value = false;
+        return;
       }
-    });
+
+      // Otherwise, update the searchResult with the fresh data.
+      searchResult.value = result;
+      isLoading.value = false;
+      return;
+    } catch (e) {
+      // In case of error, also respect the token check.
+      // Only update state if this is still the latest request.
+      if (myToken != _lastIssuedToken) {
+        searchResult.value = null;
+        isLoading.value = false;
+        return;
+      }
+
+      // If it is the latest request, set searchResult to empty list
+      // to indicate an error occurred but the search is complete.
+      searchResult.value = <TrufiLocation>[];
+      isLoading.value = false;
+      return;
+    } finally {
+      // Clear the reference if this was the latest request,
+      // so a new fetch can be scheduled safely.
+      if (myToken == _lastIssuedToken) {
+        _fetchLocationOperation = null;
+      }
+    }
   }
 
   Future<TrufiLocation> reverseGeodecoding(LatLng location) =>
@@ -68,12 +125,13 @@ class LocationRepository {
         DefaultLocationEnum.home.initLocation,
         DefaultLocationEnum.work.initLocation,
       ];
+      await locationService.saveMyDefaultPlaces(myDefaultPlaces.value);
+    } else {
+      myDefaultPlaces.value = myDefaultPlacesTemp;
     }
     myPlaces.value = await locationService.getMyPlaces();
     favoritePlaces.value = await locationService.getFavoritePlaces();
     historyPlaces.value = await locationService.getHistoryPlaces();
-    myDefaultPlaces.value = myDefaultPlacesTemp;
-    await locationService.saveMyDefaultPlaces(myDefaultPlacesTemp);
   }
 
   Future<void> insertMyPlace(TrufiLocation location) async {

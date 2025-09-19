@@ -7,7 +7,7 @@ import 'package:trufi_core/repositories/location/interfaces/i_location_service.d
 class HiveLocationService implements ILocationService {
   static const _favoritePlacesKey = 'HiveLocationService_FavoritePlaces';
   static const _historyPlacesKey = 'HiveLocationService_HistoryPlaces';
-  static const _myDefaultPlacesKey = 'HiveLocationService_MyDefaultPlaces';
+  static const _myDefaultPlacesKey = 'HiveLocationService_MyDefaultPlacess2';
   static const _myPlacesKey = 'HiveLocationService_MyPlaces';
   late Box _box;
 

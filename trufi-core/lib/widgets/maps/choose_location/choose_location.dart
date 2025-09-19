@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 import 'package:async/async.dart' as async;
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
@@ -14,18 +15,29 @@ class ChooseLocationPage extends StatefulWidget {
     BuildContext buildContext, {
     LatLng? position,
     bool? isOrigin,
+    bool? hideLocationDetails,
   }) async {
     return await showDialog<TrufiLocation?>(
       context: buildContext,
-      builder: (BuildContext context) =>
-          ChooseLocationPage(position: position, isOrigin: isOrigin ?? false),
+      useSafeArea: false,
+      builder: (BuildContext context) => ChooseLocationPage(
+        position: position,
+        isOrigin: isOrigin ?? false,
+        hideLocationDetails: hideLocationDetails ?? false,
+      ),
     );
   }
 
-  const ChooseLocationPage({super.key, required this.isOrigin, this.position});
+  const ChooseLocationPage({
+    super.key,
+    required this.isOrigin,
+    required this.position,
+    required this.hideLocationDetails,
+  });
 
   final LatLng? position;
   final bool isOrigin;
+  final bool hideLocationDetails;
 
   @override
   State<ChooseLocationPage> createState() => _ChooseLocationPageState();
@@ -33,8 +45,8 @@ class ChooseLocationPage extends StatefulWidget {
 
 class _ChooseLocationPageState extends State<ChooseLocationPage>
     with TickerProviderStateMixin {
+  // --- External dependencies ---
   final locationRepository = LocationRepository();
-
   final mapController = TrufiMapController(
     initialCameraPosition: TrufiCameraPosition(
       target: LatLng(48.5950, 8.8672),
@@ -43,45 +55,28 @@ class _ChooseLocationPageState extends State<ChooseLocationPage>
     ),
   );
 
+  // --- Map and routing ---
   late final RoutingMapComponent routingMapComponent;
-  TrufiMarker? selectedMarker;
-
+  async.CancelableOperation<TrufiLocation>? cancelableOperation;
   LatLng? position;
 
+  // --- State ---
   bool loading = true;
   String? fetchError;
   TrufiLocation? locationData;
+  Timer? timer;
 
   @override
   void initState() {
     super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((duration) {
-      loadData(widget.position ?? LatLng(48.5950, 8.8672));
-    });
     routingMapComponent = RoutingMapComponent(mapController);
 
-    mapController.cameraPositionNotifier.addListener(() {
-      debounce(() {
-        if (mounted) {
-          final center = mapController.cameraPositionNotifier.value.target;
-          if (center != position) {
-            position = center;
-            loadData(center);
-          }
-        }
-      });
-    });
-  }
-
-  Timer? timer;
-
-  void debounce(void Function() onExecute) {
-    timer?.cancel();
-    timer = Timer(const Duration(milliseconds: 200), () {
-      timer?.cancel();
-      timer == null;
-      onExecute();
+    WidgetsBinding.instance.addPostFrameCallback((duration) {
+      // TODO replace static position with center city
+      _loadData(widget.position ?? LatLng(48.5950, 8.8672));
+      mapController.cameraPositionNotifier.addListener(
+        _onCameraChangedDebounced,
+      );
     });
   }
 
@@ -97,129 +92,129 @@ class _ChooseLocationPageState extends State<ChooseLocationPage>
     final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text('Choose Location', style: theme.textTheme.bodyLarge),
+        title: Column(
+          children: [
+            Text(
+              'Choose Location On Map',
+              style: theme.textTheme.bodyLarge?.copyWith(
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            Text(
+              'Pan and zoom to adjust',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w300,
+              ),
+            ),
+          ],
+        ),
       ),
-      body: Stack(
+      body: Column(
         children: [
-          TrufiMapLibreMap(
-            controller: mapController,
-            styleString: 'https://tiles.openfreemap.org/styles/liberty',
-            onMapClick: (mapLatLng) {
-              final nearest = mapController.pickNearestMarkerAt(
-                mapLatLng,
-                hitboxPx: 24.0,
-              );
-              setState(() {
-                selectedMarker = nearest;
-              });
-            },
-            onMapLongClick: (coord) async {},
+          Expanded(
+            child: Stack(
+              children: [
+                TrufiMapLibreMap(
+                  controller: mapController,
+                  styleString: 'https://tiles.openfreemap.org/styles/liberty',
+                ),
+                Positioned.fill(
+                  child: Center(
+                    child: Container(
+                      padding: EdgeInsets.only(bottom: 20),
+                      child: ToMarker(height: 40),
+                    ),
+                  ),
+                ),
+                if (loading && !widget.hideLocationDetails)
+                  const Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: LinearProgressIndicator(),
+                  ),
+              ],
+            ),
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(
-                child: Stack(
-                  children: [
-                    Positioned.fill(
-                      child: Center(
-                        child: ToMarker(height: 40,)
+          Container(
+            color: theme.cardColor,
+            padding: EdgeInsets.all(widget.hideLocationDetails ? 0 : 8),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (!widget.hideLocationDetails) ...[
+                  Text(
+                    locationData != null
+                        ? locationData!.description != ""
+                              ? locationData!.description
+                              : "Unkown Place"
+                        : "Loading",
+                    style: theme.textTheme.bodyLarge?.copyWith(),
+                  ),
+                  Text(
+                    locationData?.address ?? "",
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w300,
+                    ),
+                  ),
+                ],
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () {
+                      if (!mounted) return;
+                      if (locationData != null) {
+                        Navigator.of(context).pop(locationData);
+                      } else if (position != null) {
+                        Navigator.of(context).pop(
+                          TrufiLocation(description: '', position: position!),
+                        );
+                      }
+                    },
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: widget.hideLocationDetails?12:8),
+                      child: Text(
+                        (locationData != null || widget.hideLocationDetails)
+                            ? 'Ok'
+                            : 'Choose Now',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: theme.colorScheme.secondary, fontWeight: FontWeight.w500),
                       ),
                     ),
-                    if (loading)
-                      const Positioned(
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        child: LinearProgressIndicator(),
-                      ),
-                  ],
+                  ),
                 ),
-              ),
-              Container(
-                color: theme.cardColor,
-                padding: const EdgeInsets.all(10),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      locationData != null
-                          ? locationData!.description != ""
-                                ? locationData!.description
-                                : "Unkown Place"
-                          : "Loading",
-                      style: const TextStyle(fontSize: 17),
-                    ),
-                    Text(
-                      locationData?.address ?? "",
-                      style: TextStyle(color: theme.disabledColor),
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        if (loading)
-                          OutlinedButton(
-                            onPressed: () async {
-                              if (position != null) {
-                                Navigator.of(context).pop(
-                                  TrufiLocation(
-                                    description: 'Template Description',
-                                    address: 'Template Address',
-                                    position: position!,
-                                  ),
-                                );
-                              }
-                            },
-                            child: SizedBox(
-                              width: 140,
-                              child: Text(
-                                "Choose Now",
-                                style: TextStyle(
-                                  color: theme.colorScheme.secondary,
-                                ),
-                                textAlign: TextAlign.center,
-                                maxLines: 1,
-                              ),
-                            ),
-                          )
-                        else
-                          OutlinedButton(
-                            onPressed: () async {
-                              if (locationData != null) {
-                                Navigator.of(context).pop(locationData);
-                              }
-                            },
-                            child: SizedBox(
-                              width: 140,
-                              child: Text(
-                                "Confirm",
-                                style: TextStyle(
-                                  color: locationData != null
-                                      ? theme.colorScheme.secondary
-                                      : Colors.grey,
-                                ),
-                                textAlign: TextAlign.center,
-                                maxLines: 1,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
+                SizedBox(height: 14),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  async.CancelableOperation<TrufiLocation>? cancelableOperation;
+  void _onCameraChangedDebounced() {
+    _debounce(() {
+      if (!mounted) return;
+      final center = mapController.cameraPositionNotifier.value.target;
+      if (center != position) {
+        position = center;
+        _loadData(center);
+      }
+    });
+  }
 
-  Future<void> loadData(LatLng location) async {
+  void _debounce(void Function() onExecute) {
+    timer?.cancel();
+    timer = Timer(const Duration(milliseconds: 200), () {
+      timer?.cancel();
+      timer == null;
+      onExecute();
+    });
+  }
+
+  Future<void> _loadData(LatLng location) async {
+    if (widget.hideLocationDetails) return;
     if (!mounted) return;
 
     await Future.delayed(Duration.zero);
@@ -229,6 +224,7 @@ class _ChooseLocationPageState extends State<ChooseLocationPage>
     setState(() {
       fetchError = null;
       loading = true;
+      locationData = null;
     });
     cancelableOperation = async.CancelableOperation.fromFuture(
       _fetchData(location),
@@ -245,7 +241,7 @@ class _ChooseLocationPageState extends State<ChooseLocationPage>
 
   Future<TrufiLocation> _fetchData(LatLng location) async {
     return locationRepository.reverseGeodecoding(location).catchError((error) {
-      return TrufiLocation(description: "", position: location);
+      return TrufiLocation(description: '', position: location);
     });
   }
 }

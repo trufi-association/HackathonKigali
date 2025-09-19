@@ -93,6 +93,7 @@ class _TrufiMapLibreMapState extends State<TrufiMapLibreMap> {
 
   Future<void> _handleCameraIdle() async {
     if (_suppressSync) {
+      // TODO GT why works _suppressSync?
       _suppressSync = false;
       return;
     }

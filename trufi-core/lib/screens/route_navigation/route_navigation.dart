@@ -46,12 +46,12 @@ class RouteNavigationScreen extends StatefulWidget {
         onMapLongClick: onMapLongClick,
         styleString: 'https://tiles.openfreemap.org/styles/liberty',
       ),
-      TrufiFlutterMap(
-        controller: controller,
-        tileUrl: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-        onMapClick: onMapClick,
-        onMapLongClick: onMapLongClick,
-      ),
+      // TrufiFlutterMap(
+      //   controller: controller,
+      //   tileUrl: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+      //   onMapClick: onMapClick,
+      //   onMapLongClick: onMapLongClick,
+      // ),
     ];
   }
 
@@ -258,7 +258,7 @@ class _RouteNavigationScreenState extends State<RouteNavigationScreen> {
                         ),
                       SafeArea(
                         child: Padding(
-                          padding: const EdgeInsets.only(top: 60, right: 8),
+                          padding: const EdgeInsets.only(top: 100, right: 8),
                           child: Align(
                             alignment: Alignment.topRight,
                             child: ValueListenableBuilder<bool>(

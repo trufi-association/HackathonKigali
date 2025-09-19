@@ -65,56 +65,53 @@ class _SingleSearchComponent extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return InkWell(
-      onTap: () async {
-        final locationSelected = await FullScreenSearchModal.onLocationSelected(
-          context,
-        );
-        if (locationSelected != null) {
-          onSaveTo(locationSelected);
-        }
-      },
-      borderRadius: BorderRadius.circular(24),
-      child: Hero(
-        tag: 'search-bar',
-        child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 12),
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          height: 48,
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withAlpha(80),
-                blurRadius: 6,
-                offset: const Offset(0, 2),
-              ),
-            ],
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: theme.colorScheme.outlineVariant),
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 12),
+      height: 48,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(80),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
           ),
-          child: Row(
-            children: [
-              Icon(Icons.search, color: theme.colorScheme.onSurface),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'Search here',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.colorScheme.onSurface,
-                  ),
+        ],
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: theme.colorScheme.outlineVariant),
+      ),
+      child: InkWell(
+        onTap: () async {
+          final locationSelected =
+              await FullScreenSearchModal.onLocationSelected(context);
+          if (locationSelected != null) {
+            onSaveTo(locationSelected);
+          }
+        },
+        borderRadius: BorderRadius.circular(24),
+        child: Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 10, right: 8),
+              child: Icon(Icons.search, color: theme.colorScheme.onSurface),
+            ),
+            Expanded(
+              child: Text(
+                'Search here',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: theme.colorScheme.onSurface,
                 ),
               ),
-              IconButton(
-                icon: const Icon(Icons.menu),
-                color: theme.colorScheme.onSurface,
-                onPressed: () => _showMenuOptions(context),
-                tooltip: 'Menú',
-              ),
-            ],
-          ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.menu),
+              color: theme.colorScheme.onSurface,
+              onPressed: () => _showMenuOptions(context),
+              tooltip: 'Menú',
+            ),
+          ],
         ),
       ),
     );
@@ -292,7 +289,7 @@ class _RouteSearchComponent extends StatelessWidget {
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 12),
-      padding: const EdgeInsets.fromLTRB(14, 4, 4, 4),
+      padding: const EdgeInsets.fromLTRB(14, 0, 0, 0),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         boxShadow: [
@@ -314,7 +311,7 @@ class _RouteSearchComponent extends StatelessWidget {
             children: [
               Divider(
                 height: 2,
-                indent: 32,
+                indent: 28,
                 endIndent: 40,
                 color: theme.colorScheme.outlineVariant,
               ),
@@ -344,7 +341,7 @@ class _RouteSearchComponent extends StatelessWidget {
                             }
                           },
                           location: origin,
-                          hintText: 'Origin',
+                          hintText: 'Choose start location',
                           icon: Container(
                             width: 24,
                             padding: const EdgeInsets.all(3.5),
@@ -363,7 +360,7 @@ class _RouteSearchComponent extends StatelessWidget {
                             }
                           },
                           location: destination,
-                          hintText: 'Where to?',
+                          hintText: 'Choose destination location',
                           icon: Container(
                             width: 24,
                             padding: const EdgeInsets.symmetric(vertical: 8),
@@ -375,21 +372,27 @@ class _RouteSearchComponent extends StatelessWidget {
                   ),
                   Column(
                     children: [
-                      IconButton(
-                        icon: const Icon(Icons.more_vert),
-                        color: theme.colorScheme.onSurface,
-                        visualDensity: VisualDensity.compact,
-                        padding: EdgeInsets.zero,
-                        onPressed: () {},
-                        tooltip: 'Menú',
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 2),
+                        child: IconButton(
+                          icon: const Icon(Icons.more_vert),
+                          color: theme.colorScheme.onSurface,
+                          visualDensity: VisualDensity.compact,
+                          padding: EdgeInsets.zero,
+                          onPressed: () {},
+                          tooltip: 'Menú',
+                        ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.swap_vert),
-                        color: theme.colorScheme.onSurface,
-                        visualDensity: VisualDensity.compact,
-                        padding: EdgeInsets.zero,
-                        onPressed: onSwap,
-                        tooltip: 'Swap',
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 2),
+                        child: IconButton(
+                          icon: const Icon(Icons.swap_vert),
+                          color: theme.colorScheme.onSurface,
+                          visualDensity: VisualDensity.compact,
+                          padding: EdgeInsets.zero,
+                          onPressed: onSwap,
+                          tooltip: 'Swap',
+                        ),
                       ),
                     ],
                   ),
@@ -423,32 +426,34 @@ class _TextFieldUI extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: SizedBox(
-        height: 40,
+        height: 44,
         child: Row(
           children: [
             icon,
-            const SizedBox(width: 8),
+            const SizedBox(width: 4),
             Expanded(
-              child: Container(
-                alignment: Alignment.centerLeft,
-                child: location != null
-                    ? Text(
-                        location!.displayName(AppLocalization.of(context)),
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSurface,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      )
-                    : Text(
-                        hintText,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+              child: Row(
+                children: [
+                  Flexible(
+                    child: Text(
+                      location?.displayName(AppLocalization.of(context)) ??
+                          hintText,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: location != null
+                            ? theme.colorScheme.onSurface
+                            : theme.colorScheme.onSurfaceVariant,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  if (location == null)
+                    Icon(
+                      Icons.keyboard_arrow_right,
+                      size: 20,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                ],
               ),
             ),
           ],

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:trufi_core/localization/app_localization.dart';
 import 'package:trufi_core/repositories/location/location_repository.dart';
@@ -40,11 +42,14 @@ class FullScreenSearchModal extends StatefulWidget {
 class _FullScreenSearchModalState extends State<FullScreenSearchModal> {
   late TextEditingController _controller;
   final locationRepository = LocationRepository();
+  String _currentSearch = '';
+  Timer? _debounce;
 
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController(text: widget.defaultSearch);
+    _currentSearch = widget.defaultSearch;
+    _controller = TextEditingController(text: _currentSearch);
     locationRepository.searchResult.addListener(_update);
     locationRepository.myDefaultPlaces.addListener(_update);
     locationRepository.myPlaces.addListener(_update);
@@ -52,7 +57,7 @@ class _FullScreenSearchModalState extends State<FullScreenSearchModal> {
     locationRepository.favoritePlaces.addListener(_update);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await locationRepository.initLoad();
-      if (widget.defaultSearch != '') {
+      if (_currentSearch != '') {
         await locationRepository.fetchLocations(_controller.text.toLowerCase());
       }
     });
@@ -66,6 +71,7 @@ class _FullScreenSearchModalState extends State<FullScreenSearchModal> {
     locationRepository.historyPlaces.removeListener(_update);
     locationRepository.favoritePlaces.removeListener(_update);
     _controller.dispose();
+    _debounce?.cancel();
     super.dispose();
   }
 
@@ -76,6 +82,16 @@ class _FullScreenSearchModalState extends State<FullScreenSearchModal> {
   Future<void> _setLocation({required TrufiLocation location}) async {
     await locationRepository.insertHistoryPlace(location);
     if (mounted) Navigator.of(context).pop(location);
+  }
+
+  void _onSearchChanged(String query) {
+    if (_debounce?.isActive ?? false) _debounce?.cancel();
+    _debounce = Timer(Duration(milliseconds: 300), () {
+      if (_currentSearch != query) {
+        _currentSearch = query;
+        locationRepository.fetchLocations(query);
+      }
+    });
   }
 
   @override
@@ -93,82 +109,73 @@ class _FullScreenSearchModalState extends State<FullScreenSearchModal> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Hero(
-              tag: 'search-bar',
-              child: Material(
-                color: Colors.transparent,
-                child: Container(
-                  margin: const EdgeInsets.fromLTRB(12, 4, 12, 8),
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surface,
-                    borderRadius: BorderRadius.circular(32),
-                    border: Border.all(color: theme.colorScheme.outlineVariant),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      InkWell(
-                        borderRadius: BorderRadius.circular(24),
-                        onTap: () => Navigator.of(context).pop(),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                          child: Icon(
-                            Icons.arrow_back_ios_new,
-                            color: theme.colorScheme.onSurface,
-                            size: 20,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: TextField(
-                          controller: _controller,
-                          autofocus: true,
-                          cursorColor: theme.colorScheme.primary,
-                          decoration: InputDecoration(
-                            hintText: 'Search here',
-                            hintStyle: theme.textTheme.bodyLarge?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                            ),
-                            border: InputBorder.none,
-                          ),
-                          textInputAction: TextInputAction.search,
-                          onChanged: (text) {
-                            locationRepository.fetchLocations(
-                              _controller.text.toLowerCase(),
-                            );
-                          },
-                          onSubmitted: (text) {
-                            locationRepository.fetchLocations(
-                              _controller.text.toLowerCase(),
-                            );
-                          },
-                        ),
-                      ),
-                      if (_controller.text.isNotEmpty)
-                        IconButton(
-                          onPressed: () {
-                            _controller.clear();
-                            setState(() {});
-                          },
-                          icon: const Icon(Icons.highlight_remove),
+            Material(
+              color: Colors.transparent,
+              child: Container(
+                margin: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+                height: 48,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surface,
+                  borderRadius: BorderRadius.circular(32),
+                  border: Border.all(color: theme.colorScheme.outlineVariant),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    InkWell(
+                      borderRadius: BorderRadius.circular(24),
+                      onTap: () => Navigator.of(context).pop(),
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 10, right: 8),
+                        child: Icon(
+                          Icons.arrow_back_ios_new,
                           color: theme.colorScheme.onSurface,
-                          tooltip: 'Clear',
+                          size: 20,
                         ),
-                    ],
-                  ),
+                      ),
+                    ),
+                    Expanded(
+                      child: TextField(
+                        controller: _controller,
+                        autofocus: true,
+                        cursorColor: theme.colorScheme.primary,
+                        decoration: InputDecoration(
+                          hintText: 'Search here',
+                          hintStyle: theme.textTheme.bodyLarge?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                          border: InputBorder.none,
+                        ),
+                        textInputAction: TextInputAction.search,
+                        onChanged: (text) {
+                          _onSearchChanged(text);
+                        },
+                        onSubmitted: (text) {
+                          _onSearchChanged(text);
+                        },
+                      ),
+                    ),
+                    if (_controller.text.isNotEmpty)
+                      IconButton(
+                        onPressed: () {
+                          _controller.clear();
+                          locationRepository.fetchLocations('');
+                          setState(() {});
+                        },
+                        icon: const Icon(Icons.highlight_remove),
+                        color: theme.colorScheme.onSurface,
+                        tooltip: 'Clear',
+                      ),
+                  ],
                 ),
               ),
             ),
-
-            // Progress controlado por isLoading del repositorio
             ValueListenableBuilder<bool>(
               valueListenable: locationRepository.isLoading,
               builder: (context, loading, _) {
@@ -186,7 +193,7 @@ class _FullScreenSearchModalState extends State<FullScreenSearchModal> {
             Expanded(
               child: CustomScrollView(
                 slivers: [
-                  if (_controller.text.isEmpty)
+                  if (locationRepository.searchResult.value == null)
                     SliverToBoxAdapter(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
@@ -240,12 +247,16 @@ class _FullScreenSearchModalState extends State<FullScreenSearchModal> {
                                         final locationSelected =
                                             await ChooseLocationPage.selectLocation(
                                               context,
+                                              hideLocationDetails: true,
                                             );
                                         if (locationSelected != null) {
                                           await locationRepository
                                               .updateMyDefaultPlace(
                                                 e,
-                                                locationSelected,
+                                                e.copyWith(
+                                                  position:
+                                                      locationSelected.position,
+                                                ),
                                               );
                                         }
                                       }
@@ -291,7 +302,17 @@ class _FullScreenSearchModalState extends State<FullScreenSearchModal> {
                     ),
                   SliverList.list(
                     children: [
-                      if (_controller.text.isEmpty) ...[
+                      if (locationRepository.searchResult.value != null)
+                        if (locationRepository.searchResult.value!.isNotEmpty)
+                          ...locationRepository.searchResult.value!.map(
+                            (location) => PlaceTile(
+                              location: location,
+                              onTap: () => _setLocation(location: location),
+                            ),
+                          )
+                        else
+                          Container()
+                      else ...[
                         ...locationRepository.historyPlaces.value.reversed.map(
                           (location) => PlaceTile(
                             location: location,
@@ -306,13 +327,6 @@ class _FullScreenSearchModalState extends State<FullScreenSearchModal> {
                           ),
                         ),
                       ],
-                      if (_controller.text.isNotEmpty)
-                        ...locationRepository.searchResult.value.map(
-                          (location) => PlaceTile(
-                            location: location,
-                            onTap: () => _setLocation(location: location),
-                          ),
-                        ),
                     ],
                   ),
                 ],
