@@ -109,73 +109,72 @@ class _FullScreenSearchModalState extends State<FullScreenSearchModal> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Material(
-              color: Colors.transparent,
-              child: Container(
-                margin: const EdgeInsets.fromLTRB(12, 0, 12, 8),
-                height: 48,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surface,
-                  borderRadius: BorderRadius.circular(32),
-                  border: Border.all(color: theme.colorScheme.outlineVariant),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    InkWell(
-                      borderRadius: BorderRadius.circular(24),
-                      onTap: () => Navigator.of(context).pop(),
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 10, right: 8),
-                        child: Icon(
-                          Icons.arrow_back_ios_new,
-                          color: theme.colorScheme.onSurface,
-                          size: 20,
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: TextField(
-                        controller: _controller,
-                        autofocus: true,
-                        cursorColor: theme.colorScheme.primary,
-                        decoration: InputDecoration(
-                          hintText: 'Search here',
-                          hintStyle: theme.textTheme.bodyLarge?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                          border: InputBorder.none,
-                        ),
-                        textInputAction: TextInputAction.search,
-                        onChanged: (text) {
-                          _onSearchChanged(text);
-                        },
-                        onSubmitted: (text) {
-                          _onSearchChanged(text);
-                        },
-                      ),
-                    ),
-                    if (_controller.text.isNotEmpty)
-                      IconButton(
-                        onPressed: () {
-                          _controller.clear();
-                          locationRepository.fetchLocations('');
-                          setState(() {});
-                        },
-                        icon: const Icon(Icons.highlight_remove),
+            Container(
+              margin: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+              height: 48,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface,
+                borderRadius: BorderRadius.circular(32),
+                border: Border.all(color: theme.colorScheme.outlineVariant),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  InkWell(
+                    borderRadius: BorderRadius.circular(24),
+                    onTap: () => Navigator.of(context).pop(),
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 10, right: 8),
+                      child: Icon(
+                        Icons.arrow_back_ios_new,
                         color: theme.colorScheme.onSurface,
-                        tooltip: 'Clear',
+                        size: 20,
                       ),
-                  ],
-                ),
+                    ),
+                  ),
+                  Expanded(
+                    child: TextField(
+                      controller: _controller,
+                      autofocus: true,
+                      cursorColor: theme.colorScheme.primary,
+                      decoration: InputDecoration(
+                        hintText: 'Search here',
+                        hintStyle: theme.textTheme.bodyLarge?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                        border: InputBorder.none,
+                      ),
+                      textInputAction: TextInputAction.search,
+                      onChanged: (text) {
+                        _onSearchChanged(text);
+                      },
+                      onSubmitted: (text) {
+                        _onSearchChanged(text);
+                      },
+                    ),
+                  ),
+                  if (_controller.text.isNotEmpty)
+                    IconButton(
+                      onPressed: () {
+                        _controller.clear();
+                        locationRepository.fetchLocations('');
+                        setState(() {});
+                      },
+                      icon: const Icon(Icons.highlight_remove),
+                      color: theme.colorScheme.onSurface,
+                      tooltip: 'Clear',
+                    ),
+                ],
               ),
             ),
+
+
             ValueListenableBuilder<bool>(
               valueListenable: locationRepository.isLoading,
               builder: (context, loading, _) {
@@ -233,7 +232,7 @@ class _FullScreenSearchModalState extends State<FullScreenSearchModal> {
                               scrollDirection: Axis.horizontal,
                               children: [
                                 ...locationRepository.myDefaultPlaces.value.map(
-                                  (e) => _QuickActionPill(
+                                  (e) => QuickActionPill(
                                     icon: typeToIconData(
                                       e.type,
                                       color: theme.colorScheme.onSurface,
@@ -264,7 +263,7 @@ class _FullScreenSearchModalState extends State<FullScreenSearchModal> {
                                   ),
                                 ),
                                 ...locationRepository.myPlaces.value.map(
-                                  (e) => _QuickActionPill(
+                                  (e) => QuickActionPill(
                                     icon: typeToIconData(
                                       e.type,
                                       color: theme.colorScheme.onSurface,
@@ -377,14 +376,14 @@ class _SearchOption extends StatelessWidget {
   }
 }
 
-class _QuickActionPill extends StatelessWidget {
+class QuickActionPill extends StatelessWidget {
   final Widget icon;
   final String title;
   final String subtitle;
   final VoidCallback onTap;
   final Color iconBackgorundColor;
 
-  const _QuickActionPill({
+  const QuickActionPill({
     required this.icon,
     required this.title,
     required this.subtitle,

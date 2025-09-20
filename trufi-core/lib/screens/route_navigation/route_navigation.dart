@@ -2,7 +2,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart' as latlng;
-import 'package:trufi_core/models/plan_entity.dart';
 import 'package:trufi_core/pages/home/widgets/routing_map/routing_map_controller.dart';
 import 'package:trufi_core/pages/home/widgets/search_bar/location_search_bar.dart';
 import 'package:trufi_core/pages/home/widgets/travel_bottom_sheet/travel_bottom_sheet.dart';
@@ -46,12 +45,12 @@ class RouteNavigationScreen extends StatefulWidget {
         onMapLongClick: onMapLongClick,
         styleString: 'https://tiles.openfreemap.org/styles/liberty',
       ),
-      // TrufiFlutterMap(
-      //   controller: controller,
-      //   tileUrl: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-      //   onMapClick: onMapClick,
-      //   onMapLongClick: onMapLongClick,
-      // ),
+      TrufiFlutterMap(
+        controller: controller,
+        tileUrl: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+        onMapClick: onMapClick,
+        onMapLongClick: onMapLongClick,
+      ),
     ];
   }
 
@@ -197,7 +196,10 @@ class _RouteNavigationScreenState extends State<RouteNavigationScreen> {
                           await routingMapComponent.addDestination(location);
                           await _fetchPlanWithLoading();
                         },
-                        onClearTo: () {},
+                        onClearTo: () async {
+                          routingMapComponent.cleanOriginAndDestination();
+                          await _fetchPlanWithLoading();
+                        },
                         onFetchPlan: () {},
                         onReset: () {},
                         onSwap: () async {

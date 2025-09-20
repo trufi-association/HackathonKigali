@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:trufi_core/localization/app_localization.dart';
 import 'package:trufi_core/pages/home/widgets/search_bar/full_screen_search_modal.dart';
+import 'package:trufi_core/pages/home/widgets/search_bar/full_screen_select_location_modal.dart';
+import 'package:trufi_core/pages/home/widgets/search_bar/search_bar_utils.dart';
 import 'package:trufi_core/screens/route_navigation/maps/trufi_map_controller.dart';
 import 'package:trufi_core/widgets/base_marker/from_marker.dart';
 import 'package:trufi_core/widgets/base_marker/to_marker.dart';
+
+class RouteEndpoints {
+  final TrufiLocation origin;
+  final TrufiLocation destination;
+
+  const RouteEndpoints({required this.origin, required this.destination});
+}
 
 class LocationSearchBar extends StatelessWidget {
   final void Function(TrufiLocation) onSaveFrom;
@@ -35,8 +44,29 @@ class LocationSearchBar extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: (destination == null)
-            ? _SingleSearchComponent(onSaveTo: onSaveTo, onClearTo: onClearTo)
-            : _RouteSearchComponent(
+            ? _SingleSearchComponent(
+                onSaveTo: (location) async {
+                  final routeEndpoints =
+                      await FullScreenSelectLocationModal.showRouteEndpointsPicker(
+                        context,
+                        onSaveFrom: onSaveFrom,
+                        onClearFrom: onClearFrom,
+                        onSaveTo: onSaveTo,
+                        onClearTo: onClearTo,
+                        onFetchPlan: onFetchPlan,
+                        onReset: onReset,
+                        onSwap: onSwap,
+                        origin: origin,
+                        destination: location,
+                      );
+                  if (routeEndpoints != null) {
+                    onSaveFrom(routeEndpoints.origin);
+                    onSaveTo(routeEndpoints.destination);
+                  }
+                },
+                onClearTo: onClearTo,
+              )
+            : RouteSearchComponent(
                 onSaveFrom: onSaveFrom,
                 onClearFrom: onClearFrom,
                 onSaveTo: onSaveTo,
@@ -247,7 +277,7 @@ class _SingleSearchComponent extends StatelessWidget {
   }
 }
 
-class _RouteSearchComponent extends StatelessWidget {
+class RouteSearchComponent extends StatelessWidget {
   final void Function(TrufiLocation) onSaveFrom;
   final void Function() onClearFrom;
   final void Function(TrufiLocation) onSaveTo;
@@ -259,7 +289,8 @@ class _RouteSearchComponent extends StatelessWidget {
   final TrufiLocation? origin;
   final TrufiLocation? destination;
 
-  const _RouteSearchComponent({
+  const RouteSearchComponent({
+    super.key,
     required this.onSaveFrom,
     required this.onClearFrom,
     required this.onSaveTo,
@@ -274,18 +305,6 @@ class _RouteSearchComponent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
-    final dot = Padding(
-      padding: const EdgeInsets.symmetric(vertical: 1),
-      child: Container(
-        width: 2.5,
-        height: 2.5,
-        decoration: BoxDecoration(
-          color: theme.colorScheme.onSurfaceVariant,
-          shape: BoxShape.circle,
-        ),
-      ),
-    );
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 12),
@@ -316,12 +335,8 @@ class _RouteSearchComponent extends StatelessWidget {
                 color: theme.colorScheme.outlineVariant,
               ),
               Positioned(
-                child: SizedBox(
-                  width: 24,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [dot, dot, dot],
-                  ),
+                child: SearchBarUtils.getDots(
+                  theme.colorScheme.onSurfaceVariant,
                 ),
               ),
               Row(
@@ -379,7 +394,7 @@ class _RouteSearchComponent extends StatelessWidget {
                           color: theme.colorScheme.onSurface,
                           visualDensity: VisualDensity.compact,
                           padding: EdgeInsets.zero,
-                          onPressed: () {},
+                          onPressed: onClearTo,
                           tooltip: 'Menú',
                         ),
                       ),
