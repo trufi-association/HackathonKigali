@@ -8,6 +8,12 @@ import 'package:trufi_core/widgets/maps/choose_location/choose_location.dart';
 class SavedPlacesPage extends StatefulWidget {
   static const String route = '/Places';
 
+  static Future<void> navigateToSavedPlaces(BuildContext context) async {
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (context) => const SavedPlacesPage()));
+  }
+
   const SavedPlacesPage({super.key});
 
   @override
@@ -18,7 +24,7 @@ class _SavedPlacesPageState extends State<SavedPlacesPage> {
   final locationRepository = LocationRepository();
   @override
   void initState() {
-    locationRepository.searchResult.addListener(update);
+    locationRepository.myPlaces.addListener(update);
     locationRepository.myDefaultPlaces.addListener(update);
     WidgetsBinding.instance.addPostFrameCallback((duration) async {
       await locationRepository.initLoad();
@@ -28,7 +34,7 @@ class _SavedPlacesPageState extends State<SavedPlacesPage> {
 
   @override
   void dispose() {
-    locationRepository.searchResult.removeListener(update);
+    locationRepository.myPlaces.removeListener(update);
     locationRepository.myDefaultPlaces.removeListener(update);
     super.dispose();
   }

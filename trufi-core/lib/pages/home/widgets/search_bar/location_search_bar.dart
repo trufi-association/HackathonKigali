@@ -3,6 +3,7 @@ import 'package:trufi_core/localization/app_localization.dart';
 import 'package:trufi_core/pages/home/widgets/search_bar/full_screen_search_modal.dart';
 import 'package:trufi_core/pages/home/widgets/search_bar/full_screen_select_location_modal.dart';
 import 'package:trufi_core/pages/home/widgets/search_bar/search_bar_utils.dart';
+import 'package:trufi_core/pages/saved_places/saved_places.dart';
 import 'package:trufi_core/screens/route_navigation/maps/trufi_map_controller.dart';
 import 'package:trufi_core/widgets/base_marker/from_marker.dart';
 import 'package:trufi_core/widgets/base_marker/to_marker.dart';
@@ -243,7 +244,9 @@ class _SingleSearchComponent extends StatelessWidget {
                     color: theme.colorScheme.onSurface,
                   ),
                 ),
-                onTap: () => Navigator.pop(context),
+                onTap: () async {
+                  await SavedPlacesPage.navigateToSavedPlaces(context);
+                },
               ),
               ListTile(
                 leading: Icon(
